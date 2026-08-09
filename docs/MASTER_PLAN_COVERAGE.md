@@ -11,7 +11,7 @@ Fecha de auditoria: 8 de agosto de 2026.
 | 2. Datos reales y calidad | Infraestructura local preparada | contratos, catalogo, batch, DLQ y conectores | Licencias, adaptadores autorizados e historial real |
 | 3. Impact Graph y calibracion | Baseline local implementado | grafo temporal, entity resolution, calibracion y backtesting | Eventos historicos y validacion experta |
 | 4. Action OS | Implementada localmente | playbooks, planes, aprobacion, outcomes, recovery y action library | Ticketing, mensajeria y acciones reales |
-| 5. Produccion enterprise | Preparada/documentada | RBAC, contrato de entorno, SQL Supabase 001-004, RLS, snapshots, backups y handoff | GitHub actualizado, RLS real con dos organizaciones, SSO/MFA, secretos y observabilidad |
+| 5. Produccion enterprise | Preparada/documentada | RBAC, contrato de entorno, SQL Supabase 001-005, RLS, snapshots, backups y handoff | GitHub actualizado, RLS real con dos organizaciones, SSO/MFA, secretos y observabilidad |
 | 6. Piloto | Preparacion local | pilot kit, readiness y scorecard | Cliente, datos reales, baseline y medicion de valor |
 | 7. Escala y defensa | Roadmap local | roadmap, red cooperativa seed y evidencia regulatoria | Red real, marketplace, certificaciones y unit economics |
 
@@ -31,8 +31,10 @@ Fecha de auditoria: 8 de agosto de 2026.
 - Seguridad local, contrato de entorno y bloqueo de acciones externas.
 - Ingesta batch, fixtures historicas y gates de contratos de conectores.
 - Paquete de piloto, scorecard operativo y Enterprise Readiness.
-- Esquema Supabase 001-004 con tablas normalizadas, RLS y politicas de lectura
+- Esquema Supabase 001-005 con tablas normalizadas, RLS y politicas de lectura
   y escritura acotadas por tenant y rol.
+- Control plane normalizado para notificaciones, webhooks, entregas y jobs en
+  `docs/supabase/005_control_plane_extensions.sql`.
 - Adaptador de snapshots Supabase con timeout, fallback y escritura en cola.
 - CI preparado para Node 20/22 con permisos de solo lectura.
 - OpenAPI completo: 137 rutas documentadas, sin faltantes ni duplicados.
@@ -55,7 +57,7 @@ Fecha de auditoria: 8 de agosto de 2026.
 - `npm.cmd run verify`: PASS completo, incluyendo smoke, rendimiento,
   artefacto standalone, exportacion PDF, auditoria portable, reproducibilidad,
   instalacion limpia, esquema Supabase, Plan Maestro, release gate y OpenAPI.
-- Supabase schema audit: 19 tablas, RLS, helper de tenant, helper de rol,
+- Supabase schema audit: 23 tablas, RLS, helper de tenant, helper de rol,
   politicas de lectura y politicas de escritura con verificacion de alcance.
 - Acciones externas deshabilitadas por defecto.
 - Toda recomendacion material conserva evidencia y puede abstenerse.
