@@ -10,7 +10,7 @@ const INTERVIEW_SECTIONS = [
 ];
 const EVIDENCE_TYPES = ['general', 'economic_value', 'success_criteria', 'data_access', 'adoption'];
 
-export function buildPilotReadiness({ runtime, catalog, sourceHealth, modelGovernance, actionLibrary, tenancy, pilotFeedback = [], historicalFixtures = [] }) {
+export function buildPilotReadiness({ runtime, catalog, sourceHealth, modelGovernance, actionLibrary, tenancy, pilotFeedback = [], historicalFixtures = [], measurementPlan = null }) {
   const feedback = Array.isArray(pilotFeedback) ? pilotFeedback : [];
   const interviewCount = feedback.filter((item) => item.stage === 'interview').length;
   const urgentInterviewCount = feedback.filter((item) => item.stage === 'interview' && Number(item.urgencyScore) >= 4).length;
@@ -21,6 +21,9 @@ export function buildPilotReadiness({ runtime, catalog, sourceHealth, modelGover
   const verifiedHistoricalCount = (Array.isArray(historicalFixtures) ? historicalFixtures : []).filter((item) => getCalibrationEligibility(item).eligible).length;
   const observedSources = Array.isArray(sourceHealth?.sources) ? sourceHealth.sources : [];
   const productiveSourceCount = observedSources.filter((item) => !isIllustrativeSource(item)).length;
+  const measurementMetrics = Array.isArray(measurementPlan?.metrics) ? measurementPlan.metrics : [];
+  const requiredMeasurementIds = ['time_to_explain_minutes', 'time_to_decision_minutes', 'evidence_completeness_pct', 'action_documentation_pct'];
+  const configuredMeasurementIds = new Set(measurementMetrics.filter((item) => Number.isFinite(Number(item.baseline)) && Number.isFinite(Number(item.target))).map((item) => item.id));
   const checks = [
     { id: 'runtime', label: 'Runtime local reproducible', pass: Boolean(runtime?.ready), evidence: runtime?.ready ? 'runtime readiness pass' : 'configuracion local incompleta' },
     { id: 'data_quality', label: 'Datos no materiales sin gate', pass: Boolean(catalog?.ready), evidence: catalog?.ready ? 'catalogo listo' : 'licencia/cobertura/frescura requieren revision' },
@@ -35,10 +38,11 @@ export function buildPilotReadiness({ runtime, catalog, sourceHealth, modelGover
     { id: 'economic_value', label: 'Valor economico documentado', pass: economicEvidenceCount > 0, evidence: economicEvidenceCount ? `${economicEvidenceCount} evidencias de valor economico` : 'requiere costo evitado, tiempo recuperable o criterio de pago documentado' },
     { id: 'success_criteria', label: 'Criterio de exito medible', pass: successCriteriaCount > 0, evidence: successCriteriaCount ? `${successCriteriaCount} criterios de exito documentados` : 'requiere baseline y umbral de go/no-go documentados' },
     { id: 'historical_validation', label: 'Validacion historica', pass: verifiedHistoricalCount >= 3, evidence: `${verifiedHistoricalCount}/3 eventos historicos autorizados con procedencia` },
+    { id: 'measurement_plan', label: 'Plan de medicion del piloto', pass: requiredMeasurementIds.every((id) => configuredMeasurementIds.has(id)), evidence: `${requiredMeasurementIds.filter((id) => configuredMeasurementIds.has(id)).length}/${requiredMeasurementIds.length} metricas con baseline y objetivo` },
   ];
   const technicalReady = checks.slice(0, 6).every((check) => check.pass);
   const customerReady = technicalReady && checks.slice(6).every((check) => check.pass);
-  return { scope: 'local-pilot-preparation', status: customerReady ? 'customer_ready_for_gate_review' : technicalReady ? 'ready_for_customer_validation' : 'not_ready', technicalReady, customerReady, evidenceCounts: { interviews: interviewCount, urgentInterviews: urgentInterviewCount, dataAccessEvidence: dataAccessEvidenceCount, customerReviews: customerReviewCount, economicEvidence: economicEvidenceCount, successCriteria: successCriteriaCount, verifiedHistoricalEvents: verifiedHistoricalCount }, checks, nextGate: customerReady ? 'aprobar go/no-go del piloto y documentar baseline' : 'entrevistas estructuradas + urgencia + acceso a datos + valor economico + criterio de exito + datos autorizados', disclaimer: 'Este readiness prepara un piloto; no prueba valor comercial, precision de mercado ni cumplimiento legal.' };
+  return { scope: 'local-pilot-preparation', status: customerReady ? 'customer_ready_for_gate_review' : technicalReady ? 'ready_for_customer_validation' : 'not_ready', technicalReady, customerReady, evidenceCounts: { interviews: interviewCount, urgentInterviews: urgentInterviewCount, dataAccessEvidence: dataAccessEvidenceCount, customerReviews: customerReviewCount, economicEvidence: economicEvidenceCount, successCriteria: successCriteriaCount, verifiedHistoricalEvents: verifiedHistoricalCount }, checks, nextGate: customerReady ? 'aprobar go/no-go del piloto y documentar baseline' : 'entrevistas estructuradas + urgencia + acceso a datos + valor economico + criterio de exito + plan de medicion + datos autorizados', disclaimer: 'Este readiness prepara un piloto; no prueba valor comercial, precision de mercado ni cumplimiento legal.' };
 }
 
 export function buildPilotNextActions(readiness = {}) {
@@ -56,6 +60,7 @@ export function buildPilotNextActions(readiness = {}) {
     economic_value: 'Documentar costo evitado, tiempo recuperable o criterio de pago del caso de uso.',
     success_criteria: 'Registrar baseline, metrica y umbral de go/no-go del piloto.',
     historical_validation: 'Cargar al menos tres eventos historicos licenciados, completos y con procedencia.',
+    measurement_plan: 'Completar baseline y objetivo para las cuatro métricas requeridas del plan de medición.',
   };
   const pending = (Array.isArray(readiness.checks) ? readiness.checks : [])
     .filter((check) => !check.pass)

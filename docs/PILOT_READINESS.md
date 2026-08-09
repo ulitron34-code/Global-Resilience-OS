@@ -31,6 +31,10 @@ Las exportaciones incluyen además una huella `sha256` con canonicalización
 `sorted-json-v1`; sirve para detectar modificaciones posteriores del paquete,
 pero no sustituye firma criptográfica gestionada ni validación legal.
 
+El gate general de `customerReady` también exige que las cuatro métricas
+requeridas tengan baseline y objetivo configurados; el resultado observado se
+evalúa después, durante la revisión de go/no-go.
+
 ## Ledger de valor
 
 El plan de medición evita que el piloto se evalúe por cantidad de alertas. Las

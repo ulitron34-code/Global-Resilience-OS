@@ -9,6 +9,12 @@ const technicalInputs = {
   modelGovernance: [{ decision: 'abstain_for_production' }],
   actionLibrary: { ready: true },
   tenancy: { organizationId: 'org-test' },
+  measurementPlan: { metrics: [
+    { id: 'time_to_explain_minutes', baseline: 120, target: 60 },
+    { id: 'time_to_decision_minutes', baseline: 90, target: 45 },
+    { id: 'evidence_completeness_pct', baseline: 40, target: 90 },
+    { id: 'action_documentation_pct', baseline: 20, target: 80 },
+  ] },
 };
 
 const interviewEvidence = [1, 2, 3, 4, 5].map((index) => ({ stage: 'interview', role: `Role ${index}`, summary: `Decision critica documentada ${index}`, urgencyScore: index <= 2 ? 5 : 3 }));
@@ -143,4 +149,11 @@ test('pilot next actions provide a go/no-go sequence when all gates pass', () =>
   const actions = buildPilotNextActions({ checks: [{ id: 'runtime', label: 'Runtime', pass: true }] });
   assert.equal(actions.length, 3);
   assert.match(actions[0], /go\/no-go/);
+});
+
+test('pilot readiness exposes an explicit measurement-plan gate', () => {
+  const result = buildPilotReadiness({ ...technicalInputs, measurementPlan: { metrics: [] } });
+  const gate = result.checks.find((check) => check.id === 'measurement_plan');
+  assert.equal(gate.pass, false);
+  assert.match(gate.evidence, /0\/4/);
 });

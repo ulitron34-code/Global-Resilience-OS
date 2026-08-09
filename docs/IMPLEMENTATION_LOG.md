@@ -486,7 +486,14 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
   métricas separadas.
 - La UI conserva `—` cuando no hay evidencia y muestra la nota del scorecard;
   el auditor de contrato UI verifica estas claves.
-La suite vigente queda en 89 pruebas backend PASS.
+La suite vigente queda en 90 pruebas backend PASS.
+
+## Bloque: integración del plan de medición al readiness (2026-08-09)
+
+- `customerReady` ahora exige baseline y objetivo para las cuatro métricas
+  requeridas del plan de medición.
+- Readiness, UI y paquete exportable comparten el mismo bloqueo y siguiente
+  acción cuando falta la configuración.
 ## Bloque: integridad y redacción del preview cooperativo (2026-08-09)
 
 - El preview cooperativo usa la misma huella SHA-256 verificable que los

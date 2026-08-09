@@ -643,7 +643,7 @@ app.get('/api/models/governance/:id', (req, res) => { const model = listModels()
 app.get('/api/pilots/readiness', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => {
   const organizationId = req.user?.organizationId || DEFAULT_ORGANIZATION_ID;
   const modelGovernance = listModels().map((model) => { const calibration = getCalibrationOverview(model.id, organizationId); return buildModelGovernance(model, getModelValidationReport(), calibration, benchmarkCalibration(calibration)); });
-  res.json(buildPilotReadiness({ runtime: getRuntimeReadiness(), catalog: getDataCatalogReadinessForOrganization(organizationId), sourceHealth: getSourceHealthOverview(Date.now(), organizationId), modelGovernance, actionLibrary: getActionLibraryReadiness(), tenancy: { organizationId }, pilotFeedback: listPilotFeedback(organizationId), historicalFixtures: getCalibrationOverview(undefined, organizationId).fixtures || [] }));
+  res.json(buildPilotReadiness({ runtime: getRuntimeReadiness(), catalog: getDataCatalogReadinessForOrganization(organizationId), sourceHealth: getSourceHealthOverview(Date.now(), organizationId), modelGovernance, actionLibrary: getActionLibraryReadiness(), tenancy: { organizationId }, measurementPlan: getPilotMeasurementPlan(organizationId), pilotFeedback: listPilotFeedback(organizationId), historicalFixtures: getCalibrationOverview(undefined, organizationId).fixtures || [] }));
 });
 app.get('/api/pilots/interview-guide', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(getPilotInterviewGuide()));
 app.get('/api/pilots/metrics', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => { const organizationId = req.user?.organizationId || DEFAULT_ORGANIZATION_ID; return res.json(buildPilotMetrics({ cases: listCases({ limit: 200, organizationId }), actionPlans: listActionPlans({ limit: 200, organizationId }), sourceHealth: getSourceHealthOverview(Date.now(), organizationId), notifications: listNotifications(false, organizationId) })); });
@@ -657,7 +657,7 @@ app.use('/api/pilots/package', authIfConfigured, roleIfConfigured('admin', 'risk
   const catalog = getDataCatalogReadinessForOrganization(organizationId);
   const sourceHealth = getSourceHealthOverview(Date.now(), organizationId);
   const actionLibrary = getActionLibraryReadiness();
-  const readiness = buildPilotReadiness({ runtime, catalog, sourceHealth, modelGovernance, actionLibrary, tenancy: { organizationId }, pilotFeedback: listPilotFeedback(organizationId), historicalFixtures: getCalibrationOverview(undefined, organizationId).fixtures || [] });
+  const readiness = buildPilotReadiness({ runtime, catalog, sourceHealth, modelGovernance, actionLibrary, tenancy: { organizationId }, measurementPlan: getPilotMeasurementPlan(organizationId), pilotFeedback: listPilotFeedback(organizationId), historicalFixtures: getCalibrationOverview(undefined, organizationId).fixtures || [] });
   const cases = listCases({ limit: 200, organizationId });
   const actionPlans = listActionPlans({ limit: 200, organizationId });
   const metrics = buildPilotMetrics({ cases, actionPlans, sourceHealth, notifications: listNotifications(false, organizationId) });
@@ -672,7 +672,7 @@ app.get('/api/pilots/package', authIfConfigured, roleIfConfigured('admin', 'risk
   const catalog = getDataCatalogReadinessForOrganization(organizationId);
   const sourceHealth = getSourceHealthOverview(Date.now(), organizationId);
   const actionLibrary = getActionLibraryReadiness();
-  const readiness = buildPilotReadiness({ runtime, catalog, sourceHealth, modelGovernance, actionLibrary, tenancy: { organizationId }, pilotFeedback: listPilotFeedback(organizationId), historicalFixtures: getCalibrationOverview(undefined, organizationId).fixtures || [] });
+  const readiness = buildPilotReadiness({ runtime, catalog, sourceHealth, modelGovernance, actionLibrary, tenancy: { organizationId }, measurementPlan: getPilotMeasurementPlan(organizationId), pilotFeedback: listPilotFeedback(organizationId), historicalFixtures: getCalibrationOverview(undefined, organizationId).fixtures || [] });
   const cases = listCases({ limit: 200, organizationId });
   const actionPlans = listActionPlans({ limit: 200, organizationId });
   const metrics = buildPilotMetrics({ cases, actionPlans, sourceHealth, notifications: listNotifications(false, organizationId) });
