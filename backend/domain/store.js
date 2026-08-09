@@ -48,8 +48,8 @@ const notifications = normalizeTenantCollection(restored.notifications || [
   { id: 'NOT-0001', type: 'critical_alert', title: 'SMW-5 requiere atención', message: 'Existe una alerta crítica abierta en Suez / Mar Rojo.', read: false, createdAt: now },
 ]);
 const comments = restored.comments || [];
-const webhooks = restored.webhooks || [];
-const webhookDeliveries = restored.webhookDeliveries || [];
+const webhooks = (restored.webhooks || []).map((item) => ({ ...item, organizationId: item.organizationId || DEFAULT_ORGANIZATION_ID }));
+const webhookDeliveries = (restored.webhookDeliveries || []).map((item) => ({ ...item, organizationId: item.organizationId || DEFAULT_ORGANIZATION_ID }));
 const jobRuns = restored.jobRuns || [];
 
 if (getRemotePersistenceStatus().enabled && getRemotePersistenceStatus().state === 'empty') persistState(state, auditLog, notifications, comments, webhooks, webhookDeliveries, jobRuns);
@@ -412,20 +412,20 @@ function signWebhookDelivery(webhook, deliveryId, eventType, payload, timestamp)
   const signature = createHmac('sha256', ensureWebhookSecret(webhook)).update(`${timestamp}.${body}`).digest('hex');
   return { signature: `sha256=${signature}`, bodySha256: createHash('sha256').update(body).digest('hex') };
 }
-export function listWebhooks() { return clone(webhooks.map(publicWebhook)); }
-export function createWebhook(input, owner = 'admin') {
+export function listWebhooks(organizationId = DEFAULT_ORGANIZATION_ID) { return clone(webhooks.filter((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId).map(publicWebhook)); }
+export function createWebhook(input, owner = 'admin', organizationId = DEFAULT_ORGANIZATION_ID) {
   if (typeof input.url !== 'string' || !/^https?:\/\//.test(input.url)) throw new Error('url debe ser HTTP o HTTPS');
   if (input.url.length > 500) throw new Error('url demasiado larga');
   const supportedEvents = ['alert.created', 'case.updated'];
   const requestedEvents = Array.isArray(input.events) && input.events.length ? input.events : supportedEvents;
   if (requestedEvents.some((event) => !supportedEvents.includes(event))) throw new Error('evento webhook no soportado');
-  const item = { id: `WH-${String(webhooks.length + 1).padStart(4, '0')}`, url: input.url, events: requestedEvents, active: input.active !== false, owner, secret: typeof input.secret === 'string' && input.secret.length >= 16 ? input.secret : createWebhookSecret(), createdAt: new Date().toISOString() };
+  const item = { id: `WH-${String(webhooks.length + 1).padStart(4, '0')}`, organizationId, url: input.url, events: requestedEvents, active: input.active !== false, owner, secret: typeof input.secret === 'string' && input.secret.length >= 16 ? input.secret : createWebhookSecret(), createdAt: new Date().toISOString() };
   webhooks.unshift(item);
   persistState(state, auditLog, notifications, comments, webhooks, webhookDeliveries, jobRuns);
   return publicWebhook(item);
 }
-export function rotateWebhookSecret(webhookId, actor = 'admin') {
-  const webhook = webhooks.find((candidate) => candidate.id === webhookId);
+export function rotateWebhookSecret(webhookId, actor = 'admin', organizationId = DEFAULT_ORGANIZATION_ID) {
+  const webhook = webhooks.find((candidate) => candidate.id === webhookId && (candidate.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId);
   if (!webhook) return null;
   const secret = createWebhookSecret();
   webhook.secret = secret;
@@ -434,9 +434,9 @@ export function rotateWebhookSecret(webhookId, actor = 'admin') {
   persistState(state, auditLog, notifications, comments, webhooks, webhookDeliveries, jobRuns);
   return { webhook: publicWebhook(webhook), secret, rotatedAt };
 }
-export function listWebhookDeliveries(webhookId) { return clone(webhookDeliveries.filter((item) => !webhookId || item.webhookId === webhookId)); }
-export function retryWebhookDelivery(webhookId, deliveryId) {
-  const item = webhookDeliveries.find((candidate) => candidate.id === deliveryId && candidate.webhookId === webhookId);
+export function listWebhookDeliveries(webhookId, organizationId = DEFAULT_ORGANIZATION_ID) { return clone(webhookDeliveries.filter((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId && (!webhookId || item.webhookId === webhookId))); }
+export function retryWebhookDelivery(webhookId, deliveryId, organizationId = DEFAULT_ORGANIZATION_ID) {
+  const item = webhookDeliveries.find((candidate) => candidate.id === deliveryId && candidate.webhookId === webhookId && (candidate.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId);
   if (!item) return null;
   item.attempt += 1;
   item.status = 'queued_local';
@@ -445,8 +445,8 @@ export function retryWebhookDelivery(webhookId, deliveryId) {
   persistState(state, auditLog, notifications, comments, webhooks, webhookDeliveries, jobRuns);
   return clone(item);
 }
-export function processLocalWebhookDeliveries(limit = 20) {
-  const pending = webhookDeliveries.filter((item) => item.status === 'queued_local').slice(0, Math.min(Math.max(Number(limit) || 20, 1), 100));
+export function processLocalWebhookDeliveries(limit = 20, organizationId = DEFAULT_ORGANIZATION_ID) {
+  const pending = webhookDeliveries.filter((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId && item.status === 'queued_local').slice(0, Math.min(Math.max(Number(limit) || 20, 1), 100));
   const processedAt = new Date().toISOString();
   for (const item of pending) {
     item.status = 'simulated_success';
@@ -458,9 +458,9 @@ export function processLocalWebhookDeliveries(limit = 20) {
   if (pending.length) persistState(state, auditLog, notifications, comments, webhooks, webhookDeliveries, jobRuns);
   return { processed: pending.length, processedAt, deliveries: clone(pending) };
 }
-export async function processWebhookDeliveries({ limit = 20, dryRun = true, timeoutMs = 3000 } = {}) {
-  if (dryRun) return processLocalWebhookDeliveries(limit);
-  const pending = webhookDeliveries.filter((item) => item.status === 'queued_local' && (!item.nextAttemptAt || Date.parse(item.nextAttemptAt) <= Date.now())).slice(0, Math.min(Math.max(Number(limit) || 20, 1), 100));
+export async function processWebhookDeliveries({ limit = 20, dryRun = true, timeoutMs = 3000, organizationId = DEFAULT_ORGANIZATION_ID } = {}) {
+  if (dryRun) return processLocalWebhookDeliveries(limit, organizationId);
+  const pending = webhookDeliveries.filter((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId && item.status === 'queued_local' && (!item.nextAttemptAt || Date.parse(item.nextAttemptAt) <= Date.now())).slice(0, Math.min(Math.max(Number(limit) || 20, 1), 100));
   const processedAt = new Date().toISOString();
   const results = [];
   for (const item of pending) {
@@ -487,12 +487,12 @@ export async function processWebhookDeliveries({ limit = 20, dryRun = true, time
   if (pending.length) persistState(state, auditLog, notifications, comments, webhooks, webhookDeliveries, jobRuns);
   return { processed: pending.length, delivered: results.filter((item) => item.status === 'delivered').length, processedAt, dryRun: false, deliveries: results };
 }
-export function dispatchWebhook(eventType, payload) {
-  for (const webhook of webhooks.filter((item) => item.active && item.events.includes(eventType))) {
+export function dispatchWebhook(eventType, payload, organizationId = payload?.organizationId || DEFAULT_ORGANIZATION_ID) {
+  for (const webhook of webhooks.filter((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId && item.active && item.events.includes(eventType))) {
     const deliveryId = `DEL-${String(webhookDeliveries.length + 1).padStart(4, '0')}`;
     const createdAt = new Date().toISOString();
     const signed = signWebhookDelivery(webhook, deliveryId, eventType, payload, createdAt);
-    webhookDeliveries.unshift({ id: deliveryId, webhookId: webhook.id, eventType, status: 'queued_local', attempt: 0, payload, createdAt, nextAttemptAt: createdAt, signature: signed.signature, bodySha256: signed.bodySha256, signatureVersion: 'v1', headers: { 'x-resilience-signature': signed.signature, 'x-resilience-timestamp': createdAt, 'x-resilience-event': eventType, 'x-resilience-delivery-id': deliveryId } });
+    webhookDeliveries.unshift({ id: deliveryId, webhookId: webhook.id, organizationId, eventType, status: 'queued_local', attempt: 0, payload, createdAt, nextAttemptAt: createdAt, signature: signed.signature, bodySha256: signed.bodySha256, signatureVersion: 'v1', headers: { 'x-resilience-signature': signed.signature, 'x-resilience-timestamp': createdAt, 'x-resilience-event': eventType, 'x-resilience-delivery-id': deliveryId } });
   }
   persistState(state, auditLog, notifications, comments, webhooks, webhookDeliveries, jobRuns);
 }

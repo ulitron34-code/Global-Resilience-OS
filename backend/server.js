@@ -654,25 +654,25 @@ app.patch('/api/notifications/:id/read', authIfConfigured, roleIfConfigured('adm
   if (!item) return res.status(404).json({ error: 'Notificación no encontrada' });
   res.json(item);
 });
-app.get('/api/webhooks', authIfConfigured, roleIfConfigured('admin'), (req, res) => res.json(listWebhooks()));
+app.get('/api/webhooks', authIfConfigured, roleIfConfigured('admin'), (req, res) => res.json(listWebhooks(req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
 app.post('/api/webhooks', authIfConfigured, roleIfConfigured('admin'), (req, res) => {
-  try { res.status(201).json(createWebhook(req.body || {}, req.user?.email || 'admin')); }
+  try { res.status(201).json(createWebhook(req.body || {}, req.user?.email || 'admin', req.user?.organizationId || DEFAULT_ORGANIZATION_ID)); }
   catch (error) { res.status(400).json({ error: error.message }); }
 });
 app.post('/api/webhooks/:id/rotate-secret', authIfConfigured, roleIfConfigured('admin'), (req, res) => {
-  const result = rotateWebhookSecret(req.params.id, req.user?.email || 'admin');
+  const result = rotateWebhookSecret(req.params.id, req.user?.email || 'admin', req.user?.organizationId || DEFAULT_ORGANIZATION_ID);
   if (!result) return res.status(404).json({ error: 'Webhook no encontrado' });
   res.status(200).json(result);
 });
-app.get('/api/webhooks/:id/deliveries', authIfConfigured, roleIfConfigured('admin'), (req, res) => res.json(listWebhookDeliveries(req.params.id)));
+app.get('/api/webhooks/:id/deliveries', authIfConfigured, roleIfConfigured('admin'), (req, res) => res.json(listWebhookDeliveries(req.params.id, req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
 app.post('/api/webhooks/:id/deliveries/:deliveryId/retry', authIfConfigured, roleIfConfigured('admin'), (req, res) => {
-  const item = retryWebhookDelivery(req.params.id, req.params.deliveryId);
+  const item = retryWebhookDelivery(req.params.id, req.params.deliveryId, req.user?.organizationId || DEFAULT_ORGANIZATION_ID);
   if (!item) return res.status(404).json({ error: 'Entrega no encontrada' });
   res.status(202).json(item);
 });
-app.post('/api/webhooks/deliveries/process-local', authIfConfigured, roleIfConfigured('admin'), (req, res) => res.status(200).json(processLocalWebhookDeliveries(req.body?.limit)));
+app.post('/api/webhooks/deliveries/process-local', authIfConfigured, roleIfConfigured('admin'), (req, res) => res.status(200).json(processLocalWebhookDeliveries(req.body?.limit, req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
 app.post('/api/webhooks/deliveries/process', authIfConfigured, roleIfConfigured('admin'), async (req, res) => {
-  try { res.status(200).json(await processWebhookDeliveries({ limit: req.body?.limit, dryRun: req.body?.dryRun !== false, timeoutMs: req.body?.timeoutMs })); }
+  try { res.status(200).json(await processWebhookDeliveries({ limit: req.body?.limit, dryRun: req.body?.dryRun !== false, timeoutMs: req.body?.timeoutMs, organizationId: req.user?.organizationId || DEFAULT_ORGANIZATION_ID })); }
   catch (error) { res.status(500).json({ error: error.message, requestId: req.requestId }); }
 });
 app.get('/api/jobs', (req, res) => res.json(listJobRuns()));
