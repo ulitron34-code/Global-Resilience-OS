@@ -340,3 +340,6 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
 - El resumen general de calibracion tambien expone el conteo de fixtures
   ilustrativas excluidas, manteniendo consistencia entre overview, benchmark y
   backtesting.
+- Pilot feedback ahora admite `evidenceType` estructurado; el readiness exige
+  evidencia de valor economico y criterio de exito medible antes de marcar
+  `customerReady`. La interfaz incluye un ledger dedicado para capturarlos.

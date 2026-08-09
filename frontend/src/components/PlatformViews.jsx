@@ -203,6 +203,7 @@ export function OperationsView() {
     <SourceHealthPanel />
     <SourceHealthSweepPanel />
     <PilotReadinessPanel />
+    <StructuredPilotEvidencePanel />
     <PilotPackagePanel />
     <EnterpriseReadinessPanel />
     <IncidentResponsePanel />
@@ -380,11 +381,18 @@ function SourceHealthSweepPanel() {
   </div>;
 }
 
+function StructuredPilotEvidencePanel() {
+  const [draft, setDraft] = useState({ stage: 'pilot_review', role: '', summary: '', evidence: '', evidenceType: 'economic_value' });
+  const [message, setMessage] = useState('');
+  const submit = async (event) => { event.preventDefault(); setMessage(''); try { await recordPilotFeedback(draft); setDraft((current) => ({ ...current, summary: '', evidence: '' })); setMessage('Evidencia estructurada registrada.'); } catch (error) { setMessage(error.message); } };
+  return <section className="bg-panel border border-line rounded-lg p-4"><div className="font-mono text-[10px] uppercase tracking-widest text-signal">Pilot evidence ledger</div><h2 className="font-display text-lg font-semibold text-ink mt-1">Evidencia que abre el gate</h2><p className="text-xs text-ink-muted mt-2">Registra por separado valor economico y criterio de exito; el sistema no los infiere desde texto libre.</p><form onSubmit={submit} className="grid grid-cols-1 md:grid-cols-5 gap-2 mt-3"><select className="control" value={draft.evidenceType} onChange={(event) => setDraft({ ...draft, evidenceType: event.target.value })}><option value="economic_value">Valor economico</option><option value="success_criteria">Criterio de exito</option><option value="general">Evidencia general</option><option value="data_access">Acceso a datos</option><option value="adoption">Adopcion</option></select><input className="control" required value={draft.role} onChange={(event) => setDraft({ ...draft, role: event.target.value })} placeholder="Rol / sponsor" /><input className="control" required value={draft.summary} onChange={(event) => setDraft({ ...draft, summary: event.target.value })} placeholder="Hallazgo" /><input className="control" required value={draft.evidence} onChange={(event) => setDraft({ ...draft, evidence: event.target.value })} placeholder="Evidencia verificable" /><button className="border border-signal/40 text-signal rounded px-3 py-2 text-xs">Registrar evidencia</button></form>{message && <div role="status" className="text-xs text-signal mt-2">{message}</div>}</section>;
+}
+
 function PilotReadinessPanel() {
   const [readiness, setReadiness] = useState({ status: 'loading', checks: [] });
   const [metrics, setMetrics] = useState({ metrics: {}, missingEvidence: [] });
   const [feedback, setFeedback] = useState([]);
-  const [draft, setDraft] = useState({ stage: 'interview', role: '', summary: '', evidence: '', urgencyScore: '3' });
+  const [draft, setDraft] = useState({ stage: 'interview', role: '', summary: '', evidence: '', evidenceType: 'general', urgencyScore: '3' });
   const [message, setMessage] = useState('');
   const refresh = () => Promise.all([getPilotReadiness(), getPilotMetrics(), getPilotFeedback()]).then(([nextReadiness, nextMetrics, nextFeedback]) => { setReadiness(nextReadiness); setMetrics(nextMetrics); setFeedback(nextFeedback); });
   useEffect(() => { refresh(); }, []);
