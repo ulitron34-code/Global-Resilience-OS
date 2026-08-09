@@ -53,5 +53,8 @@ test('decision share API applies a dedicated per-token rate limit', async () => 
   }
   assert.ok(limited, 'the public share must be rate limited before the global API limit');
   assert.equal(limited.headers.get('retry-after'), '60');
+  assert.equal(limited.headers.get('x-ratelimit-limit'), '60');
+  assert.equal(limited.headers.get('x-ratelimit-remaining'), '0');
+  assert.ok(limited.headers.get('x-ratelimit-reset'));
   assert.equal((await limited.json()).retryAfterSeconds, 60);
 });

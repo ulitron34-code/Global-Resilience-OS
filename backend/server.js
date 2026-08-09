@@ -189,6 +189,11 @@ app.use((req, res, next) => {
   if (now - current.startedAt > 60_000) { current.startedAt = now; current.count = 0; }
   current.count += 1;
   requestCounts.set(key, current);
+  const remaining = Math.max(0, GLOBAL_RATE_LIMIT - current.count);
+  res.set('x-ratelimit-limit', String(GLOBAL_RATE_LIMIT));
+  res.set('x-ratelimit-remaining', String(remaining));
+  res.set('x-ratelimit-reset', String(Math.ceil((current.startedAt + 60_000) / 1000)));
+  if (current.count > GLOBAL_RATE_LIMIT) res.set('retry-after', '60');
   if (current.count > GLOBAL_RATE_LIMIT) return res.status(429).json({ error: 'Límite de solicitudes excedido', retryAfterSeconds: 60 });
   next();
 });
@@ -479,6 +484,10 @@ function shareRateLimit(req, res, next) {
   if (now - current.startedAt > SHARE_RATE_WINDOW_MS) { current.startedAt = now; current.count = 0; }
   current.count += 1;
   shareRequestCounts.set(key, current);
+  const remaining = Math.max(0, SHARE_RATE_LIMIT - current.count);
+  res.set('x-ratelimit-limit', String(SHARE_RATE_LIMIT));
+  res.set('x-ratelimit-remaining', String(remaining));
+  res.set('x-ratelimit-reset', String(Math.ceil((current.startedAt + SHARE_RATE_WINDOW_MS) / 1000)));
   if (shareRequestCounts.size > 5000) {
     for (const [entryKey, entry] of shareRequestCounts) {
       if (now - entry.startedAt > SHARE_RATE_WINDOW_MS) shareRequestCounts.delete(entryKey);
