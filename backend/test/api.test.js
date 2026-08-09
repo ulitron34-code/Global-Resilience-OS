@@ -416,6 +416,18 @@ describe('Global Resilience OS API', () => {
       const tenantBPlans = await fetch(`${baseUrl}/api/action-plans`, { headers: { authorization: `Bearer ${tenantB.token}` } });
       assert.equal(tenantBPlans.status, 200);
       assert.equal((await tenantBPlans.json()).some((plan) => plan.id === tenantPlanBody.id), false);
+      const tenantAAlerts = await fetch(`${baseUrl}/api/alerts`, { headers: { authorization: `Bearer ${tenantA.token}` } });
+      assert.equal(tenantAAlerts.status, 200);
+      assert.equal((await tenantAAlerts.json()).some((alert) => alert.id === 'INC-0827'), false);
+      const tenantBDefaultCase = await fetch(`${baseUrl}/api/cases/RS-0827`, { headers: { authorization: `Bearer ${tenantB.token}` } });
+      assert.equal(tenantBDefaultCase.status, 404);
+
+      const tenantScenario = await fetch(`${baseUrl}/api/scenarios`, { method: 'POST', headers: { authorization: `Bearer ${tenantA.token}`, 'content-type': 'application/json' }, body: JSON.stringify({ name: 'Tenant A scenario', lossIfWaitUsd: 1000, mitigationCostUsd: 100, protectedValueUsd: 800, confidence: 0.8, horizonHours: 24 }) });
+      assert.equal(tenantScenario.status, 201);
+      const tenantScenarioBody = await tenantScenario.json();
+      const tenantBScenarios = await fetch(`${baseUrl}/api/scenarios`, { headers: { authorization: `Bearer ${tenantB.token}` } });
+      assert.equal(tenantBScenarios.status, 200);
+      assert.equal((await tenantBScenarios.json()).some((scenario) => scenario.id === tenantScenarioBody.id), false);
 
       const tenantIncident = await fetch(`${baseUrl}/api/incidents`, { method: 'POST', headers: { authorization: `Bearer ${tenantA.token}`, 'content-type': 'application/json' }, body: JSON.stringify({ title: 'Tenant A incident', severity: 'sev2', summary: 'Incident isolated for tenant testing' }) });
       assert.equal(tenantIncident.status, 201);

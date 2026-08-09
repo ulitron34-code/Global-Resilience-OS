@@ -9,6 +9,10 @@ import { listDataCatalog, validateSourceIntake } from './dataCatalog.js';
 const now = new Date().toISOString();
 const DEFAULT_ORGANIZATION_ID = 'nashadi-demo';
 
+function normalizeTenantCollection(items = []) {
+  return items.map((item) => ({ ...item, organizationId: item.organizationId || DEFAULT_ORGANIZATION_ID }));
+}
+
 const seed = {
   alerts: [
     { id: 'INC-0827', severity: 'critical', title: 'SMW-5 · degradación anómala', location: 'Suez / Mar Rojo', impactUsd: 2400000, status: 'open', createdAt: now, sourceIds: ['cables-demo', 'ais-demo'] },
@@ -38,7 +42,7 @@ const initialAuditLog = [
   { id: 'AUD-0001', entityType: 'case', entityId: 'RS-0827', action: 'case_opened', actor: 'system', message: 'Umbral de impacto mayor a $2M activado.', createdAt: now },
 ];
 const restored = await restoreState(structuredClone(seed));
-const state = { alerts: restored.alerts, cases: restored.cases, scenarios: restored.scenarios, sources: restored.sources, deadLetters: restored.deadLetters || [], calibrationFixtures: restored.calibrationFixtures || [], pilotFeedback: restored.pilotFeedback || [], incidents: restored.incidents || [], sourceIntakeReviews: restored.sourceIntakeReviews || [], decisionShares: restored.decisionShares || [] };
+const state = { alerts: normalizeTenantCollection(restored.alerts), cases: normalizeTenantCollection(restored.cases), scenarios: normalizeTenantCollection(restored.scenarios), sources: normalizeTenantCollection(restored.sources), deadLetters: normalizeTenantCollection(restored.deadLetters || []), calibrationFixtures: normalizeTenantCollection(restored.calibrationFixtures || []), pilotFeedback: normalizeTenantCollection(restored.pilotFeedback || []), incidents: normalizeTenantCollection(restored.incidents || []), sourceIntakeReviews: normalizeTenantCollection(restored.sourceIntakeReviews || []), decisionShares: normalizeTenantCollection(restored.decisionShares || []) };
 const auditLog = restored.auditLog || initialAuditLog;
 const notifications = restored.notifications || [
   { id: 'NOT-0001', type: 'critical_alert', title: 'SMW-5 requiere atención', message: 'Existe una alerta crítica abierta en Suez / Mar Rojo.', read: false, createdAt: now },
@@ -107,20 +111,22 @@ function decorateCase(item, referenceTime = Date.now()) {
 }
 
 function filterAlerts(filters = {}) {
-  return state.alerts.filter((item) => (!filters.status || item.status === filters.status) && (!filters.severity || item.severity === filters.severity) && (!filters.region || item.location.toLowerCase().includes(String(filters.region).toLowerCase())) && (!filters.vertical || itemVertical(item) === filters.vertical) && (!filters.q || `${item.id} ${item.title} ${item.location}`.toLowerCase().includes(String(filters.q).toLowerCase())));
+  const organizationId = filters.organizationId || DEFAULT_ORGANIZATION_ID;
+  return state.alerts.filter((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId && (!filters.status || item.status === filters.status) && (!filters.severity || item.severity === filters.severity) && (!filters.region || item.location.toLowerCase().includes(String(filters.region).toLowerCase())) && (!filters.vertical || itemVertical(item) === filters.vertical) && (!filters.q || `${item.id} ${item.title} ${item.location}`.toLowerCase().includes(String(filters.q).toLowerCase())));
 }
 
 function filterCases(filters = {}) {
-  return state.cases.filter((item) => (!filters.vertical || itemVertical(item) === filters.vertical) && (!filters.status || item.status === filters.status) && (!filters.priority || item.priority === filters.priority) && (!filters.owner || item.owner.toLowerCase().includes(String(filters.owner).toLowerCase())) && (!filters.q || `${item.id} ${item.title} ${item.owner} ${item.priority}`.toLowerCase().includes(String(filters.q).toLowerCase())));
+  const organizationId = filters.organizationId || DEFAULT_ORGANIZATION_ID;
+  return state.cases.filter((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId && (!filters.vertical || itemVertical(item) === filters.vertical) && (!filters.status || item.status === filters.status) && (!filters.priority || item.priority === filters.priority) && (!filters.owner || item.owner.toLowerCase().includes(String(filters.owner).toLowerCase())) && (!filters.q || `${item.id} ${item.title} ${item.owner} ${item.priority}`.toLowerCase().includes(String(filters.q).toLowerCase())));
 }
 
 export function listAlerts(filters = {}) {
   return clone(page(filterAlerts(filters).map(decorateAlertEvidence), filters));
 }
 export function countAlerts(filters = {}) { return filterAlerts(filters).length; }
-export function getAlert(id) { return clone(decorateAlertEvidence(state.alerts.find((item) => item.id === id) ?? null)); }
-export function updateAlert(id, patch, actor = 'operator') {
-  const item = state.alerts.find((candidate) => candidate.id === id);
+export function getAlert(id, organizationId = DEFAULT_ORGANIZATION_ID) { return clone(decorateAlertEvidence(state.alerts.find((item) => item.id === id && (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId) ?? null)); }
+export function updateAlert(id, patch, actor = 'operator', organizationId = DEFAULT_ORGANIZATION_ID) {
+  const item = state.alerts.find((candidate) => candidate.id === id && (candidate.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId);
   if (!item) return null;
   const allowedStatuses = ['open', 'acknowledged', 'in_progress', 'resolved', 'suppressed'];
   const changes = {};
@@ -149,10 +155,10 @@ export function listCases(filters = {}) {
   return clone(page(items, filters));
 }
 export function countCases(filters = {}) { return filterCases(filters).length; }
-export function getCase(id) { return clone(decorateCase(state.cases.find((item) => item.id === id) ?? null)); }
-export function listScenarios() { return clone(state.scenarios.map(decorateScenarioEvidence)); }
-export function compareScenarios(ids = []) {
-  const selected = state.scenarios.filter((item) => ids.includes(item.id));
+export function getCase(id, organizationId = DEFAULT_ORGANIZATION_ID) { return clone(decorateCase(state.cases.find((item) => item.id === id && (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId) ?? null)); }
+export function listScenarios(organizationId = DEFAULT_ORGANIZATION_ID) { return clone(state.scenarios.filter((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId).map(decorateScenarioEvidence)); }
+export function compareScenarios(ids = [], organizationId = DEFAULT_ORGANIZATION_ID) {
+  const selected = state.scenarios.filter((item) => ids.includes(item.id) && (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId);
   if (selected.length < 2) throw new Error('Se requieren al menos dos escenarios');
   const decorated = selected.map(decorateScenarioEvidence);
   const baseline = decorated[0];
@@ -301,8 +307,8 @@ export function recordCalibrationFixtures(input, actor = 'operator') {
   persistState(state, auditLog, notifications, comments, webhooks, webhookDeliveries, jobRuns);
   return { recorded: incoming.length, overview: getCalibrationOverview(modelId) };
 }
-export function getDecisionPackage(caseId) {
-  const caseItem = state.cases.find((item) => item.id === caseId);
+export function getDecisionPackage(caseId, organizationId = DEFAULT_ORGANIZATION_ID) {
+  const caseItem = state.cases.find((item) => item.id === caseId && (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId);
   if (!caseItem) return null;
   const alert = state.alerts.find((item) => item.id === caseItem.alertId) || null;
   const sourceIds = new Set(alert?.sourceIds || []);
@@ -331,22 +337,22 @@ function normalizeShareExpiry(input) {
   const hours = Number.isFinite(requested) ? requested : 72;
   return Math.min(Math.max(Math.round(hours), 1), 720);
 }
-export function listDecisionShares(caseId) {
-  return clone(state.decisionShares.filter((item) => !caseId || item.caseId === caseId).map(publicDecisionShare));
+export function listDecisionShares(caseId, organizationId = DEFAULT_ORGANIZATION_ID) {
+  return clone(state.decisionShares.filter((item) => (!caseId || item.caseId === caseId) && (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId).map(publicDecisionShare));
 }
-export function createDecisionShare(caseId, input = {}, actor = 'operator') {
-  if (!state.cases.some((item) => item.id === caseId)) return null;
+export function createDecisionShare(caseId, input = {}, actor = 'operator', organizationId = DEFAULT_ORGANIZATION_ID) {
+  if (!state.cases.some((item) => item.id === caseId && (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId)) return null;
   const token = randomBytes(32).toString('base64url');
   const createdAt = new Date().toISOString();
   const expiresAt = new Date(Date.now() + normalizeShareExpiry(input) * 60 * 60 * 1000).toISOString();
-  const share = { id: `SH-${randomBytes(5).toString('hex').toUpperCase()}`, caseId, tokenHash: createHash('sha256').update(token).digest('hex'), audience: String(input.audience || 'decision_reviewer').trim().slice(0, 120), status: 'active', createdBy: actor, createdAt, expiresAt, revokedAt: null, revokedBy: null, accessCount: 0, lastAccessedAt: null };
+  const share = { id: `SH-${randomBytes(5).toString('hex').toUpperCase()}`, organizationId, caseId, tokenHash: createHash('sha256').update(token).digest('hex'), audience: String(input.audience || 'decision_reviewer').trim().slice(0, 120), status: 'active', createdBy: actor, createdAt, expiresAt, revokedAt: null, revokedBy: null, accessCount: 0, lastAccessedAt: null };
   state.decisionShares.unshift(share);
   auditLog.unshift({ id: `AUD-${String(auditLog.length + 1).padStart(4, '0')}`, entityType: 'decision_share', entityId: share.id, action: 'decision_share_created', actor, message: `Enlace de decisión creado para ${caseId}; expira ${expiresAt}.`, createdAt });
   persistState(state, auditLog, notifications, comments, webhooks, webhookDeliveries, jobRuns);
   return { share: publicDecisionShare(share), token, path: `/share/${token}`, apiPath: `/api/shares/${token}`, disclaimer: 'El token se muestra una sola vez; guárdalo de forma segura.' };
 }
-export function revokeDecisionShare(caseId, shareId, actor = 'operator') {
-  const share = state.decisionShares.find((item) => item.id === shareId && item.caseId === caseId);
+export function revokeDecisionShare(caseId, shareId, actor = 'operator', organizationId = DEFAULT_ORGANIZATION_ID) {
+  const share = state.decisionShares.find((item) => item.id === shareId && item.caseId === caseId && (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId);
   if (!share) return null;
   if (share.status !== 'revoked') {
     share.status = 'revoked';
@@ -751,14 +757,15 @@ export function runDemoIngestionJob(actor = 'scheduler') {
   return clone(job);
 }
 
-export function createCaseFromAlert(alertId, actor = 'system') {
-  const alert = state.alerts.find((item) => item.id === alertId);
+export function createCaseFromAlert(alertId, actor = 'system', organizationId = DEFAULT_ORGANIZATION_ID) {
+  const alert = state.alerts.find((item) => item.id === alertId && (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId);
   if (!alert) return null;
-  const existing = state.cases.find((item) => item.alertId === alertId);
+  const existing = state.cases.find((item) => item.alertId === alertId && (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId);
   if (existing) return { case: clone(existing), created: false };
 
   const caseItem = {
     id: `RS-${String(state.cases.length + 1).padStart(4, '0')}`,
+    organizationId,
     alertId,
     title: alert.title,
     owner: 'Risk Desk',
@@ -776,12 +783,12 @@ export function createCaseFromAlert(alertId, actor = 'system') {
   return { case: clone(caseItem), created: true };
 }
 
-export function createScenario(input, actor = 'operator') {
+export function createScenario(input, actor = 'operator', organizationId = DEFAULT_ORGANIZATION_ID) {
   const required = ['name', 'lossIfWaitUsd', 'mitigationCostUsd', 'protectedValueUsd', 'confidence', 'horizonHours'];
   if (required.some((field) => input[field] === undefined)) throw new Error('Faltan campos requeridos del escenario');
   if (Number(input.lossIfWaitUsd) < 0 || Number(input.mitigationCostUsd) < 0 || Number(input.protectedValueUsd) < 0) throw new Error('Los valores económicos no pueden ser negativos');
   if (Number(input.confidence) < 0 || Number(input.confidence) > 1) throw new Error('confidence debe estar entre 0 y 1');
-  const scenario = { id: `SC-${String(state.scenarios.length + 1).padStart(4, '0')}`, name: String(input.name).trim(), status: input.status || 'draft', lossIfWaitUsd: Number(input.lossIfWaitUsd), mitigationCostUsd: Number(input.mitigationCostUsd), protectedValueUsd: Number(input.protectedValueUsd), confidence: Number(input.confidence), horizonHours: Number(input.horizonHours), assumptions: Array.isArray(input.assumptions) ? input.assumptions : [], evidenceClass: Array.isArray(input.sourceIds) && input.sourceIds.length ? 'inferred' : 'assumed', evidence: buildEvidence({ evidenceClass: Array.isArray(input.sourceIds) && input.sourceIds.length ? 'inferred' : 'assumed', sourceIds: input.sourceIds || [], modelId: input.modelId || 'impact-cascade', modelVersion: input.modelVersion || '0.5.0', assumptions: Array.isArray(input.assumptions) ? input.assumptions : [], inferred: ['scenario_economics'] }), createdAt: new Date().toISOString(), createdBy: actor };
+  const scenario = { id: `SC-${String(state.scenarios.length + 1).padStart(4, '0')}`, organizationId, name: String(input.name).trim(), status: input.status || 'draft', lossIfWaitUsd: Number(input.lossIfWaitUsd), mitigationCostUsd: Number(input.mitigationCostUsd), protectedValueUsd: Number(input.protectedValueUsd), confidence: Number(input.confidence), horizonHours: Number(input.horizonHours), assumptions: Array.isArray(input.assumptions) ? input.assumptions : [], evidenceClass: Array.isArray(input.sourceIds) && input.sourceIds.length ? 'inferred' : 'assumed', evidence: buildEvidence({ evidenceClass: Array.isArray(input.sourceIds) && input.sourceIds.length ? 'inferred' : 'assumed', sourceIds: input.sourceIds || [], modelId: input.modelId || 'impact-cascade', modelVersion: input.modelVersion || '0.5.0', assumptions: Array.isArray(input.assumptions) ? input.assumptions : [], inferred: ['scenario_economics'] }), createdAt: new Date().toISOString(), createdBy: actor };
   state.scenarios.unshift(scenario);
   auditLog.unshift({ id: `AUD-${String(auditLog.length + 1).padStart(4, '0')}`, entityType: 'scenario', entityId: scenario.id, action: 'scenario_created', actor, message: `Escenario ${scenario.name} creado.`, createdAt: new Date().toISOString() });
   persistState(state, auditLog, notifications, comments, webhooks, webhookDeliveries);
@@ -802,8 +809,8 @@ export function getOverviewMetrics(filters = {}) {
   };
 }
 
-export function updateCase(id, patch, actor = 'operator') {
-  const item = state.cases.find((candidate) => candidate.id === id);
+export function updateCase(id, patch, actor = 'operator', organizationId = DEFAULT_ORGANIZATION_ID) {
+  const item = state.cases.find((candidate) => candidate.id === id && (candidate.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId);
   if (!item) return null;
 
   const allowedFields = ['owner', 'status', 'humanValidation'];
