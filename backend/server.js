@@ -437,7 +437,7 @@ app.patch('/api/alerts/:id', authIfConfigured, roleIfConfigured('admin', 'risk_a
 });
 app.post('/api/ingest/events', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => {
   try {
-    const result = ingestEvent(req.body || {}, req.user?.email || 'connector');
+    const result = ingestEvent(req.body || {}, req.user?.email || 'connector', req.user?.organizationId || DEFAULT_ORGANIZATION_ID);
     res.status(result.created ? 201 : 200).json(result);
   } catch (error) {
     recordDeadLetter(req.body || {}, error, req.user?.email || 'connector', req.user?.organizationId || DEFAULT_ORGANIZATION_ID);
@@ -631,7 +631,7 @@ app.post('/api/ingest/batch', authIfConfigured, roleIfConfigured('admin', 'risk_
   try {
     const validation = validateBatchInput(req.body || {}, listSources(), { production: process.env.APP_MODE === 'production' });
     if (validation.mode === 'dry_run' || !validation.readyToCommit) return res.status(validation.mode === 'dry_run' ? 200 : 422).json(validation);
-    const results = validation.items.map((item) => { try { const result = ingestEvent(item.event, req.user?.email || 'connector'); return { index: item.index, externalId: item.externalId, status: result.created ? 'created' : 'duplicate', alertId: result.alert.id }; } catch (error) { return { index: item.index, externalId: item.externalId, status: 'error', error: error.message }; } });
+    const results = validation.items.map((item) => { try { const result = ingestEvent(item.event, req.user?.email || 'connector', req.user?.organizationId || DEFAULT_ORGANIZATION_ID); return { index: item.index, externalId: item.externalId, status: result.created ? 'created' : 'duplicate', alertId: result.alert.id }; } catch (error) { return { index: item.index, externalId: item.externalId, status: 'error', error: error.message }; } });
     res.status(201).json({ ...validation, results, counts: { ...validation.counts, created: results.filter((item) => item.status === 'created').length, duplicates: results.filter((item) => item.status === 'duplicate').length, errors: results.filter((item) => item.status === 'error').length } });
   } catch (error) { res.status(400).json({ error: error.message }); }
 });
@@ -642,12 +642,12 @@ app.post('/api/models/calibration/fixtures', authIfConfigured, roleIfConfigured(
 app.get('/api/models/backtest', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(buildBacktestReport(getCalibrationOverview(req.query.modelId, req.user?.organizationId || DEFAULT_ORGANIZATION_ID).fixtures, { modelId: req.query.modelId || 'all' })));
 app.post('/api/models/sensitivity', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => { try { res.json(buildSensitivityAnalysis(req.body || {})); } catch (error) { res.status(400).json({ error: error.message }); } });
 app.post('/api/models/uncertainty', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => { try { res.json(buildUncertaintyReport(req.body || {})); } catch (error) { res.status(400).json({ error: error.message }); } });
-app.get('/api/notifications', (req, res) => res.json(listNotifications(req.query.unread === 'true')));
+app.get('/api/notifications', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(listNotifications(req.query.unread === 'true', req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
 app.get('/api/notifications/policy/readiness', (req, res) => res.json(getNotificationPolicyReadiness()));
 app.post('/api/notifications/policy/preview', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(buildNotificationPolicy(req.body || {})));
-app.post('/api/notifications/read-all', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(markAllNotificationsRead()));
-app.patch('/api/notifications/:id/read', (req, res) => {
-  const item = markNotificationRead(req.params.id);
+app.post('/api/notifications/read-all', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(markAllNotificationsRead(req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
+app.patch('/api/notifications/:id/read', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => {
+  const item = markNotificationRead(req.params.id, req.user?.organizationId || DEFAULT_ORGANIZATION_ID);
   if (!item) return res.status(404).json({ error: 'Notificación no encontrada' });
   res.json(item);
 });

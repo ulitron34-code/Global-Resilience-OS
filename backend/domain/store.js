@@ -44,9 +44,9 @@ const initialAuditLog = [
 const restored = await restoreState(structuredClone(seed));
 const state = { alerts: normalizeTenantCollection(restored.alerts), cases: normalizeTenantCollection(restored.cases), scenarios: normalizeTenantCollection(restored.scenarios), sources: normalizeTenantCollection(restored.sources), deadLetters: normalizeTenantCollection(restored.deadLetters || []), calibrationFixtures: normalizeTenantCollection(restored.calibrationFixtures || []), pilotFeedback: normalizeTenantCollection(restored.pilotFeedback || []), incidents: normalizeTenantCollection(restored.incidents || []), sourceIntakeReviews: normalizeTenantCollection(restored.sourceIntakeReviews || []), decisionShares: normalizeTenantCollection(restored.decisionShares || []) };
 const auditLog = restored.auditLog || initialAuditLog;
-const notifications = restored.notifications || [
+const notifications = normalizeTenantCollection(restored.notifications || [
   { id: 'NOT-0001', type: 'critical_alert', title: 'SMW-5 requiere atención', message: 'Existe una alerta crítica abierta en Suez / Mar Rojo.', read: false, createdAt: now },
-];
+]);
 const comments = restored.comments || [];
 const webhooks = restored.webhooks || [];
 const webhookDeliveries = restored.webhookDeliveries || [];
@@ -496,10 +496,10 @@ export function dispatchWebhook(eventType, payload) {
   }
   persistState(state, auditLog, notifications, comments, webhooks, webhookDeliveries, jobRuns);
 }
-export function listNotifications(unreadOnly = false) { return clone(notifications.filter((item) => !unreadOnly || !item.read)); }
-export function markNotificationRead(id) { const item = notifications.find((candidate) => candidate.id === id); if (!item) return null; item.read = true; persistState(state, auditLog, notifications, comments, webhooks, webhookDeliveries, jobRuns); return clone(item); }
-export function markAllNotificationsRead() {
-  const changed = notifications.filter((item) => !item.read);
+export function listNotifications(unreadOnly = false, organizationId = DEFAULT_ORGANIZATION_ID) { return clone(notifications.filter((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId && (!unreadOnly || !item.read))); }
+export function markNotificationRead(id, organizationId = DEFAULT_ORGANIZATION_ID) { const item = notifications.find((candidate) => candidate.id === id && (candidate.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId); if (!item) return null; item.read = true; persistState(state, auditLog, notifications, comments, webhooks, webhookDeliveries, jobRuns); return clone(item); }
+export function markAllNotificationsRead(organizationId = DEFAULT_ORGANIZATION_ID) {
+  const changed = notifications.filter((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId && !item.read);
   changed.forEach((item) => { item.read = true; });
   if (changed.length) persistState(state, auditLog, notifications, comments, webhooks, webhookDeliveries, jobRuns);
   return { updated: changed.length };
@@ -522,7 +522,7 @@ export function retryDeadLetter(id, overridePayload, actor = 'operator', organiz
   item.updatedAt = new Date().toISOString();
   const payload = overridePayload && typeof overridePayload === 'object' ? overridePayload : item.payload;
   try {
-    const result = ingestEvent(payload, actor);
+    const result = ingestEvent(payload, actor, organizationId);
     item.status = 'resolved';
     item.error = null;
     item.result = { created: result.created, alertId: result.alert.id };
@@ -535,7 +535,7 @@ export function retryDeadLetter(id, overridePayload, actor = 'operator', organiz
   return clone(item);
 }
 
-export function ingestEvent(input, actor = 'connector') {
+export function ingestEvent(input, actor = 'connector', organizationId = DEFAULT_ORGANIZATION_ID) {
   input = validateEventEnvelope(input);
   const required = ['externalId', 'sourceId', 'eventType', 'title', 'severity', 'impactUsd'];
   if (required.some((field) => input[field] === undefined)) throw new Error('Faltan campos requeridos del evento');
@@ -548,11 +548,12 @@ export function ingestEvent(input, actor = 'connector') {
   const impactUsd = Number(input.impactUsd);
   if (!Number.isFinite(impactUsd) || impactUsd < 0) throw new Error('impactUsd debe ser un número no negativo');
 
-  const existing = state.alerts.find((item) => item.payload?.externalId === input.externalId);
+  const existing = state.alerts.find((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId && item.payload?.externalId === input.externalId);
   if (existing) return { alert: clone(existing), created: false };
 
   const alert = {
     id: `INC-${String(Date.now()).slice(-6)}`,
+    organizationId,
     vertical: input.vertical || 'Oil & Gas',
     severity: input.severity,
     title: String(input.title).trim(),
@@ -569,6 +570,7 @@ export function ingestEvent(input, actor = 'connector') {
   source.lastEventAt = alert.createdAt;
   auditLog.unshift({ id: `AUD-${String(auditLog.length + 1).padStart(4, '0')}`, entityType: 'alert', entityId: alert.id, action: 'event_ingested', actor, message: `Evento ${input.externalId} ingerido desde ${source.name}.`, createdAt: alert.createdAt });
   notifications.unshift({ id: `NOT-${String(notifications.length + 1).padStart(4, '0')}`, type: 'new_alert', title: alert.title, message: `${alert.location} · ${alert.impactUsd} USD de exposición.`, read: false, createdAt: alert.createdAt });
+  notifications[0].organizationId = organizationId;
   dispatchWebhook('alert.created', alert);
   persistState(state, auditLog, notifications, comments, webhooks, webhookDeliveries, jobRuns);
   return { alert: clone(alert), created: true };
