@@ -2,6 +2,7 @@ import { Activity, WifiOff, Wifi } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import SessionControl from './SessionControl';
 import NotificationCenter from './NotificationCenter';
+import { isBackendRequired } from '../api/client';
 
 export default function Header() {
   const backendStatus = useAppStore((s) => s.backendStatus);
@@ -39,7 +40,7 @@ export default function Header() {
 function StatusPill({ status }) {
   const config = {
     online: { icon: Wifi, label: 'Mini-backend conectado', color: 'text-signal', bg: 'bg-signal/10', border: 'border-signal/30' },
-    offline: { icon: WifiOff, label: 'Modo local (standalone)', color: 'text-alert', bg: 'bg-alert/10', border: 'border-alert/30' },
+    offline: { icon: WifiOff, label: isBackendRequired() ? 'Backend no disponible' : 'Modo local (standalone)', color: 'text-alert', bg: 'bg-alert/10', border: 'border-alert/30' },
     unknown: { icon: Activity, label: 'Verificando...', color: 'text-ink-muted', bg: 'bg-raised', border: 'border-line' },
   }[status] || {};
 

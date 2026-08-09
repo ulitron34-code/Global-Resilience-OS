@@ -7,8 +7,28 @@ import { VERTICALS } from '../data/verticals';
 // el navegador) — así la demo funciona igual de bien standalone (sin
 // backend corriendo, ej. abierta desde un build estático en una laptop
 // sin internet) que conectada a un backend real.
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
+const CONFIGURED_BACKEND_URL = String(import.meta.env.VITE_BACKEND_URL || '').trim();
+const BACKEND_URL = CONFIGURED_BACKEND_URL || 'http://localhost:4000';
+const BACKEND_REQUIRED = String(import.meta.env.VITE_BACKEND_REQUIRED || 'false').toLowerCase() === 'true';
 const BACKEND_TIMEOUT_MS = 1200;
+
+export function isBackendRequired() {
+  return BACKEND_REQUIRED;
+}
+
+export function getBackendUrl() {
+  return BACKEND_URL;
+}
+
+function localFallback(value, error) {
+  if (BACKEND_REQUIRED) {
+    const failure = new Error('El backend es obligatorio y no esta disponible.');
+    failure.cause = error;
+    failure.code = 'BACKEND_REQUIRED';
+    throw failure;
+  }
+  return value;
+}
 
 async function fetchWithTimeout(url, options = {}, timeout = BACKEND_TIMEOUT_MS) {
   const controller = new AbortController();
@@ -19,7 +39,12 @@ async function fetchWithTimeout(url, options = {}, timeout = BACKEND_TIMEOUT_MS)
     if (token) headers.Authorization = `Bearer ${token}`;
     const res = await fetch(url, { ...options, headers, signal: controller.signal });
     clearTimeout(id);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (!res.ok) {
+      const error = new Error(`HTTP ${res.status}`);
+      error.status = res.status;
+      error.requestId = res.headers.get('x-request-id') || null;
+      throw error;
+    }
     return await res.json();
   } catch (err) {
     clearTimeout(id);
@@ -96,11 +121,11 @@ export async function simulateRupture(cableId, severity, durationHours) {
     });
     setBackendStatus('online');
     return { ...data, source: 'backend' };
-  } catch {
+  } catch (error) {
     setBackendStatus('offline');
     // Fallback: mismo cálculo, ejecutado localmente en el navegador
     const data = computeImpact(cableId, severity, durationHours);
-    return { ...data, source: 'local' };
+    return { ...localFallback(data, error), source: 'local' };
   }
 }
 
@@ -109,9 +134,9 @@ export async function getCables() {
     const data = await fetchWithTimeout(`${BACKEND_URL}/api/cables`);
     setBackendStatus('online');
     return data;
-  } catch {
+  } catch (error) {
     setBackendStatus('offline');
-    return CABLES.map(({ vertical_weights: _verticalWeights, ...c }) => c);
+    return localFallback(CABLES.map(({ vertical_weights: _verticalWeights, ...c }) => c), error);
   }
 }
 
@@ -120,9 +145,9 @@ export async function getVerticals() {
     const data = await fetchWithTimeout(`${BACKEND_URL}/api/verticals`);
     setBackendStatus('online');
     return data;
-  } catch {
+  } catch (error) {
     setBackendStatus('offline');
-    return VERTICALS;
+    return localFallback(VERTICALS, error);
   }
 }
 
@@ -132,9 +157,9 @@ export async function getCases(filters = {}) {
     const data = await fetchWithTimeout(`${BACKEND_URL}/api/cases${query.toString() ? `?${query}` : ''}`);
     setBackendStatus('online');
     return data;
-  } catch {
+  } catch (error) {
     setBackendStatus('offline');
-    return [];
+    return localFallback([], error);
   }
 }
 
@@ -153,9 +178,9 @@ export async function getLatestBrief() {
     const data = await fetchWithTimeout(`${BACKEND_URL}/api/briefs/latest`);
     setBackendStatus('online');
     return data;
-  } catch {
+  } catch (error) {
     setBackendStatus('offline');
-    return null;
+    return localFallback(null, error);
   }
 }
 
@@ -165,9 +190,9 @@ export async function getAlerts(filters = {}) {
     const data = await fetchWithTimeout(`${BACKEND_URL}/api/alerts${query.toString() ? `?${query}` : ''}`);
     setBackendStatus('online');
     return data;
-  } catch {
+  } catch (error) {
     setBackendStatus('offline');
-    return [];
+    return localFallback([], error);
   }
 }
 
