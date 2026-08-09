@@ -27,6 +27,7 @@ import { buildAssistiveSuggestion } from './domain/assistiveAgent.js';
 import { buildPilotMetrics, buildPilotNextActions, buildPilotReadiness, getPilotInterviewGuide, normalizePilotFeedback } from './domain/pilotKit.js';
 import { pilotPackageToMarkdown } from './domain/pilotPackage.js';
 import { decisionPackageToMarkdown } from './domain/decisionPackageMarkdown.js';
+import { summarizeActionPlanEvidence } from './domain/decisionPackageEvidence.js';
 import { getIncidentRunbook } from './domain/incidentOps.js';
 import { buildSecurityPosture } from './domain/securityPosture.js';
 import { validateBatchInput } from './domain/batchIngestion.js';
@@ -499,12 +500,16 @@ app.get('/api/cases/:id/decision-package', authIfConfigured, roleIfConfigured('a
   const item = getDecisionPackage(req.params.id, req.user?.organizationId || DEFAULT_ORGANIZATION_ID);
   if (!item) return res.status(404).json({ error: 'Caso no encontrado' });
   const organizationId = req.user?.organizationId || DEFAULT_ORGANIZATION_ID;
-  const enriched = { ...item, actionPlans: listActionPlans({ organizationId, caseId: req.params.id }), recoveryProfile: buildRecoveryProfile({ cableId: 'seamewe3', severity: 'total', horizons: [24, 168, 720] }), regulatoryEvidenceMap: buildRegulatoryEvidenceMap({ scope: req.params.id, evidence: [] }), packageCapabilities: ['case', 'alert', 'sources', 'models', 'scenarios', 'audit', 'comments', 'action_plans', 'recovery_counterfactual', 'regulatory_evidence'] };
+  const actionPlans = listActionPlans({ organizationId, caseId: req.params.id });
+  const enriched = { ...item, actionPlans, actionPlanEvidenceSummary: summarizeActionPlanEvidence(actionPlans), recoveryProfile: buildRecoveryProfile({ cableId: 'seamewe3', severity: 'total', horizons: [24, 168, 720] }), regulatoryEvidenceMap: buildRegulatoryEvidenceMap({ scope: req.params.id, evidence: [] }), packageCapabilities: ['case', 'alert', 'sources', 'models', 'scenarios', 'audit', 'comments', 'action_plans', 'recovery_counterfactual', 'regulatory_evidence'] };
   if (req.query.format === 'markdown' || req.query.format === 'md') {
     const caseItem = enriched.case || {};
     const alert = enriched.alert || {};
     const chain = enriched.evidenceChain || {};
     const lines = [`# Paquete de decisión — ${caseItem.id || req.params.id}`, '', `- **Título:** ${caseItem.title || 'Sin título'}`, `- **Estado:** ${caseItem.status || 'no disponible'}`, `- **Prioridad:** ${caseItem.priority || 'no disponible'}`, `- **Responsable:** ${caseItem.owner || 'sin asignar'}`, `- **Alerta asociada:** ${alert.id || 'no disponible'}`, '', '## Decisión y evidencia', '', `- Fuentes observadas: ${(chain.observedSourceIds || []).join(', ') || 'ninguna'}`, `- Modelos inferidos: ${(chain.inferredModelIds || []).join(', ') || 'ninguno'}`, `- Escenarios asumidos: ${chain.assumedScenarioCount ?? 0}`, `- Planes de acción: ${(enriched.actionPlans || []).length}`, '', '## Limitaciones', '', 'Este paquete es un artefacto local para revisión humana. No acredita cumplimiento, no valida causalidad de mercado y no ejecuta acciones externas.', '', `Generado: ${new Date().toISOString()}`];
+    const actionEvidence = enriched.actionPlanEvidenceSummary;
+    const limitationIndex = lines.findIndex((line) => line === '## Limitaciones');
+    if (limitationIndex >= 0) lines.splice(limitationIndex, 0, `- Planes aptos para gate productivo: ${actionEvidence.productionEligible}`, `- Planes enlazados a fuente ilustrativa: ${actionEvidence.illustrativeLinked}`, `- Planes sin fuente enlazada: ${actionEvidence.missingSource}`, '');
     return res.type('text/markdown').set('Content-Disposition', `attachment; filename="decision-package-${req.params.id}.md"`).send(lines.join('\n'));
   }
   res.type('application/json').set('Content-Disposition', `attachment; filename="decision-package-${req.params.id}.json"`).send(JSON.stringify(enriched, null, 2));

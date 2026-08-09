@@ -5,6 +5,8 @@ La exportacion local de un caso conserva ahora una vista integrada de:
 - caso y alerta original;
 - fuentes, modelos, escenarios, comentarios y auditoria;
 - planes de accion de la organizacion activa;
+- resumen de elegibilidad productiva de los planes, separando fuentes productivas,
+  fuentes ilustrativas y planes sin fuente enlazada;
 - perfil contrafactual de recuperacion;
 - mapa de evidencia regulatoria;
 - cadena de evidencia con fuentes observadas, modelos inferidos y escenarios asumidos;

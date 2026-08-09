@@ -357,7 +357,8 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
   las fuentes ilustrativas se reportan aparte para no degradar ni inflar la
   lectura operativa.
 - La auditoria de cobertura y el estado actual fueron sincronizados con la
-  evidencia vigente de 68 pruebas backend pasando.
+  evidencia vigente de 74 pruebas backend pasando, incluyendo los casos de
+  evidencia de decision enlazada a fuentes ilustrativas y productivas.
 - La elegibilidad de calibracion, benchmark, backtesting y scorecard reutiliza
   la misma clasificacion de fuentes ilustrativas, incluyendo `sourceId`,
   cobertura y clase declarada; se eliminaron filtros duplicados por sufijo.
@@ -370,3 +371,6 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
 - La evidencia de planes distingue enlaces ilustrativos de enlaces productivos y
   expone `productionEligible`/`productionDecision` sin confundir trazabilidad
   local con aptitud para recomendaciones materiales.
+- El paquete de decision JSON ahora resume elegibilidad productiva de los planes
+  por caso, manteniendo los borradores locales y haciendo visible cualquier
+  fuente ilustrativa o ausencia de procedencia.

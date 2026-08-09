@@ -569,6 +569,8 @@ describe('Global Resilience OS API', () => {
     assert.equal(packageBody.case.id, 'RS-0827');
     assert.ok(Array.isArray(packageBody.modelRegistry));
     assert.ok(packageBody.evidenceChain);
+    assert.ok(packageBody.actionPlanEvidenceSummary.total >= 1);
+    assert.equal(packageBody.actionPlanEvidenceSummary.productionEligible, 0);
     assert.ok(Array.isArray(packageBody.evidenceChain.observedSourceIds));
     assert.ok(Number.isInteger(packageBody.evidenceChain.assumedScenarioCount));
     const markdownPackage = await fetch(`${baseUrl}/api/cases/RS-0827/decision-package?format=markdown`);
@@ -578,7 +580,9 @@ describe('Global Resilience OS API', () => {
     assert.equal(pilotMarkdown.headers.get('content-type'), 'text/markdown; charset=utf-8');
     assert.match(await pilotMarkdown.text(), /Paquete de preparaci/);
     assert.equal(markdownPackage.headers.get('content-type'), 'text/markdown; charset=utf-8');
-    assert.match(await markdownPackage.text(), /Paquete de decisión/);
+    const markdownBody = await markdownPackage.text();
+    assert.match(markdownBody, /Paquete de decisión/);
+    assert.match(markdownBody, /Planes aptos para gate productivo: 0/);
     const missingPackage = await fetch(`${baseUrl}/api/cases/RS-4040/decision-package`);
     assert.equal(missingPackage.status, 404);
     const invalidUpdate = await patchCase('RS-0827', { status: 'unknown' });
