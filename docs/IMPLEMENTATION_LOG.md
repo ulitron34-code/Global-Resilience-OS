@@ -210,6 +210,8 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
   históricos/licenciados.
 - La API protegida valida que el índice quede acotado entre 0 y 95% y conserve
   su clasificación de evidencia.
+- La vista de recuperación ahora muestra el índice por horizonte junto con la
+  exposición residual, el valor evitado y la opción contrafactual seleccionada.
 
 - Una revisiÃ³n `approved_local` puede crear una fuente tenant-scoped en estado
   `pending_external` mediante `POST /api/data-catalog/intake-reviews/:id/register-local`.
