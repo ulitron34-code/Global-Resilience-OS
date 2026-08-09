@@ -39,7 +39,7 @@ Fecha de auditoria: 8 de agosto de 2026.
 - Proyección determinista del control plane para backfill normalizado, con
   validación de tenant, claves foráneas y ausencia de secretos planos.
 - CI preparado para Node 20/22 con permisos de solo lectura.
-- OpenAPI completo: 137 rutas documentadas, sin faltantes ni duplicados.
+- OpenAPI completo: 138 rutas documentadas, sin faltantes ni duplicados.
 
 ## Pendientes que no deben simularse localmente
 
@@ -54,7 +54,7 @@ Fecha de auditoria: 8 de agosto de 2026.
 
 ## Gates de aceptacion local
 
-- Backend: 52 pruebas pasando.
+- Backend: 54 pruebas pasando.
 - Frontend: lint y build de produccion pasando.
 - `npm.cmd run verify`: PASS completo, incluyendo smoke, rendimiento,
   artefacto standalone, exportacion PDF, auditoria portable, reproducibilidad,
