@@ -368,6 +368,24 @@ describe('Global Resilience OS API', () => {
       const users = await fetch(`${baseUrl}/api/auth/users`, { headers: { authorization: `Bearer ${admin.token}` } });
       assert.equal(users.status, 200);
       assert.ok((await users.json()).every((user) => !user.passwordHash));
+
+      const loginTenant = async (email) => {
+        const response = await fetch(`${baseUrl}/api/auth/login`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email, password: 'demo123' }) });
+        assert.equal(response.status, 200);
+        return response.json();
+      };
+      const tenantA = await loginTenant('tenant-a@resilience.local');
+      const tenantB = await loginTenant('tenant-b@resilience.local');
+      assert.equal(tenantA.user.organizationId, 'tenant-a-demo');
+      assert.equal(tenantB.user.organizationId, 'tenant-b-demo');
+      const tenantPlan = await fetch(`${baseUrl}/api/action-plans`, { method: 'POST', headers: { authorization: `Bearer ${tenantA.token}`, 'content-type': 'application/json' }, body: JSON.stringify({ playbookId: 'port-congestion', caseId: 'TENANT-A-API', confidence: 0.8 }) });
+      assert.equal(tenantPlan.status, 201);
+      const tenantPlanBody = await tenantPlan.json();
+      const crossTenantRead = await fetch(`${baseUrl}/api/action-plans/${tenantPlanBody.id}`, { headers: { authorization: `Bearer ${tenantB.token}` } });
+      assert.equal(crossTenantRead.status, 404);
+      const tenantBPlans = await fetch(`${baseUrl}/api/action-plans`, { headers: { authorization: `Bearer ${tenantB.token}` } });
+      assert.equal(tenantBPlans.status, 200);
+      assert.equal((await tenantBPlans.json()).some((plan) => plan.id === tenantPlanBody.id), false);
     } finally {
       if (previous === undefined) delete process.env.AUTH_REQUIRED;
       else process.env.AUTH_REQUIRED = previous;

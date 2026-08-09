@@ -7,10 +7,12 @@ const USERS = [
   createUser('admin@resilience.local', 'demo123', 'admin', 'Platform Admin'),
   createUser('analyst@resilience.local', 'demo123', 'risk_analyst', 'Risk Analyst'),
   createUser('viewer@resilience.local', 'demo123', 'viewer', 'Read Only Viewer'),
+  createUser('tenant-a@resilience.local', 'demo123', 'risk_analyst', 'Tenant A Analyst', 'tenant-a-demo'),
+  createUser('tenant-b@resilience.local', 'demo123', 'risk_analyst', 'Tenant B Analyst', 'tenant-b-demo'),
 ];
 
-function createUser(email, password, role, name) {
-  return { id: email.split('@')[0], email, name, role, organizationId: 'nashadi-demo', passwordHash: hashPassword(password) };
+function createUser(email, password, role, name, organizationId = 'nashadi-demo') {
+  return { id: email.split('@')[0], email, name, role, organizationId, passwordHash: hashPassword(password) };
 }
 
 function hashPassword(password, salt = randomBytes(16).toString('hex')) {

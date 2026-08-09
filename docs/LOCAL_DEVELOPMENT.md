@@ -47,6 +47,8 @@ El backend arranca en `http://localhost:4000` y el frontend en `http://localhost
 | admin@resilience.local | demo123 | admin |
 | analyst@resilience.local | demo123 | risk_analyst |
 | viewer@resilience.local | demo123 | viewer |
+| tenant-a@resilience.local | demo123 | risk_analyst (`tenant-a-demo`) |
+| tenant-b@resilience.local | demo123 | risk_analyst (`tenant-b-demo`) |
 
 Son credenciales de demostración. Deben sustituirse antes de cualquier despliegue.
 
