@@ -710,20 +710,21 @@ export function getAuditIntegrity() {
 }
 
 export function getSlaOverview(filters = {}) {
-  const cases = state.cases.filter((item) => !filters.vertical || itemVertical(item) === filters.vertical).map((item) => decorateCase(item));
+  const organizationId = filters.organizationId || DEFAULT_ORGANIZATION_ID;
+  const cases = state.cases.filter((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId && (!filters.vertical || itemVertical(item) === filters.vertical)).map((item) => decorateCase(item));
   const counts = { on_track: 0, at_risk: 0, overdue: 0, closed: 0, unknown: 0 };
   cases.forEach((item) => { counts[item.sla.status] = (counts[item.sla.status] || 0) + 1; });
   return { checkedAt: new Date().toISOString(), counts, cases: clone(cases), ready: counts.overdue === 0 };
 }
 
-export function runSlaSweep(actor = 'scheduler') {
-  const overview = getSlaOverview();
+export function runSlaSweep(actor = 'scheduler', organizationId = DEFAULT_ORGANIZATION_ID) {
+  const overview = getSlaOverview({ organizationId });
   const actionable = overview.cases.filter((item) => ['at_risk', 'overdue'].includes(item.sla.status));
   const created = [];
   for (const item of actionable) {
-    const exists = notifications.some((notification) => notification.type === 'sla_warning' && notification.caseId === item.id && !notification.read);
+    const exists = notifications.some((notification) => (notification.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId && notification.type === 'sla_warning' && notification.caseId === item.id && !notification.read);
     if (exists) continue;
-    const notification = { id: `NOT-${String(notifications.length + 1).padStart(4, '0')}`, type: 'sla_warning', caseId: item.id, title: item.sla.status === 'overdue' ? `SLA vencido: ${item.id}` : `SLA en riesgo: ${item.id}`, message: item.sla.status === 'overdue' ? 'El caso requiere escalamiento inmediato.' : `Quedan aproximadamente ${item.sla.remainingMinutes} minutos.`, read: false, createdAt: new Date().toISOString() };
+    const notification = { id: `NOT-${String(notifications.length + 1).padStart(4, '0')}`, organizationId, type: 'sla_warning', caseId: item.id, title: item.sla.status === 'overdue' ? `SLA vencido: ${item.id}` : `SLA en riesgo: ${item.id}`, message: item.sla.status === 'overdue' ? 'El caso requiere escalamiento inmediato.' : `Quedan aproximadamente ${item.sla.remainingMinutes} minutos.`, read: false, createdAt: new Date().toISOString() };
     notifications.unshift(notification);
     auditLog.unshift({ id: `AUD-${String(auditLog.length + 1).padStart(4, '0')}`, entityType: 'case', entityId: item.id, action: 'sla_sweep_flagged', actor, message: `Caso marcado como ${item.sla.status}.`, createdAt: notification.createdAt });
     created.push(notification);
@@ -732,14 +733,14 @@ export function runSlaSweep(actor = 'scheduler') {
   return { checkedAt: overview.checkedAt, evaluated: overview.cases.length, flagged: actionable.length, notificationsCreated: created.length, notifications: clone(created), counts: overview.counts };
 }
 
-export function runSourceHealthSweep(actor = 'scheduler') {
+export function runSourceHealthSweep(actor = 'scheduler', organizationId = DEFAULT_ORGANIZATION_ID) {
   const overview = getSourceHealthOverview();
   const actionable = overview.sources.filter((item) => ['stale', 'degraded', 'error'].includes(item.health));
   const created = [];
   for (const source of actionable) {
-    const exists = notifications.some((notification) => notification.type === 'source_health' && notification.sourceId === source.id && !notification.read);
+    const exists = notifications.some((notification) => (notification.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId && notification.type === 'source_health' && notification.sourceId === source.id && !notification.read);
     if (exists) continue;
-    const notification = { id: `NOT-${String(notifications.length + 1).padStart(4, '0')}`, type: 'source_health', sourceId: source.id, title: `Salud de fuente: ${source.name}`, message: `La fuente esta ${source.health}; revisar freshness, latencia y licencia antes de recomendar.`, read: false, createdAt: new Date().toISOString() };
+    const notification = { id: `NOT-${String(notifications.length + 1).padStart(4, '0')}`, organizationId, type: 'source_health', sourceId: source.id, title: `Salud de fuente: ${source.name}`, message: `La fuente esta ${source.health}; revisar freshness, latencia y licencia antes de recomendar.`, read: false, createdAt: new Date().toISOString() };
     notifications.unshift(notification);
     auditLog.unshift({ id: `AUD-${String(auditLog.length + 1).padStart(4, '0')}`, entityType: 'source', entityId: source.id, action: 'source_health_sweep_flagged', actor, message: `Fuente marcada como ${source.health}.`, createdAt: notification.createdAt });
     created.push(notification);
@@ -748,16 +749,16 @@ export function runSourceHealthSweep(actor = 'scheduler') {
   return { checkedAt: overview.checkedAt, evaluated: overview.sources.length, flagged: actionable.length, notificationsCreated: created.length, notifications: clone(created), counts: overview.counts, ready: overview.ready };
 }
 
-export function listJobRuns() { return clone(jobRuns); }
-export function runDemoIngestionJob(actor = 'scheduler') {
-  const job = { id: `JOB-${String(jobRuns.length + 1).padStart(4, '0')}`, type: 'demo_ingestion', status: 'running', startedAt: new Date().toISOString(), eventsReceived: 0, alertsCreated: 0 };
+export function listJobRuns(organizationId = DEFAULT_ORGANIZATION_ID) { return clone(jobRuns.filter((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId)); }
+export function runDemoIngestionJob(actor = 'scheduler', organizationId = DEFAULT_ORGANIZATION_ID) {
+  const job = { id: `JOB-${String(jobRuns.length + 1).padStart(4, '0')}`, organizationId, type: 'demo_ingestion', status: 'running', startedAt: new Date().toISOString(), eventsReceived: 0, alertsCreated: 0 };
   jobRuns.unshift(job);
   const events = [
     { externalId: `job-${job.id}-ais`, sourceId: 'ais-demo', eventType: 'ais_gap', title: 'AIS gap detectado por job', severity: 'medium', impactUsd: 180000, location: 'Estrecho de Ormuz' },
     { externalId: `job-${job.id}-port`, sourceId: 'ports-demo', eventType: 'port_delay', title: 'Congestión portuaria detectada por job', severity: 'high', impactUsd: 420000, location: 'Fujairah · UAE' },
   ];
   for (const event of events) {
-    const result = ingestEvent(event, actor);
+    const result = ingestEvent(event, actor, organizationId);
     job.eventsReceived += 1;
     if (result.created) job.alertsCreated += 1;
   }

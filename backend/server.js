@@ -675,10 +675,10 @@ app.post('/api/webhooks/deliveries/process', authIfConfigured, roleIfConfigured(
   try { res.status(200).json(await processWebhookDeliveries({ limit: req.body?.limit, dryRun: req.body?.dryRun !== false, timeoutMs: req.body?.timeoutMs, organizationId: req.user?.organizationId || DEFAULT_ORGANIZATION_ID })); }
   catch (error) { res.status(500).json({ error: error.message, requestId: req.requestId }); }
 });
-app.get('/api/jobs', (req, res) => res.json(listJobRuns()));
-app.post('/api/jobs/demo-ingest', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => res.status(201).json(runDemoIngestionJob(req.user?.email || 'scheduler')));
-app.post('/api/jobs/sla-sweep', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => res.status(201).json(runSlaSweep(req.user?.email || 'scheduler')));
-app.post('/api/jobs/source-health-sweep', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => res.status(201).json(runSourceHealthSweep(req.user?.email || 'scheduler')));
+app.get('/api/jobs', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(listJobRuns(req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
+app.post('/api/jobs/demo-ingest', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => res.status(201).json(runDemoIngestionJob(req.user?.email || 'scheduler', req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
+app.post('/api/jobs/sla-sweep', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => res.status(201).json(runSlaSweep(req.user?.email || 'scheduler', req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
+app.post('/api/jobs/source-health-sweep', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => res.status(201).json(runSourceHealthSweep(req.user?.email || 'scheduler', req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
 app.get('/api/metrics/overview', (req, res) => res.json(getOverviewMetrics({ vertical: req.query.vertical })));
  app.get('/api/metrics/scorecard', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => { const organizationId = req.user?.organizationId || DEFAULT_ORGANIZATION_ID; return res.json(buildOperationalScorecard({ alerts: listAlerts({ limit: 200, organizationId }), cases: listCases({ limit: 200, organizationId }), actionPlans: listActionPlans({ limit: 200, organizationId }), sources: listSources(), deadLetters: listDeadLetters(undefined, organizationId), incidents: listIncidents({ organizationId }), calibrationFixtures: getCalibrationOverview(undefined, organizationId).fixtures || [] })); });
 app.get('/api/briefs/latest', (req, res) => res.json(getLatestBrief({ audience: req.query.audience })));
