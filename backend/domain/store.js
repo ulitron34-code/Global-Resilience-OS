@@ -197,9 +197,9 @@ export function updateSourceIntakeReview(id, input = {}, actor = 'operator', org
   persistState(state, auditLog, notifications, comments, webhooks, webhookDeliveries, jobRuns);
   return clone(item);
 }
-export function listPilotFeedback() { return clone(state.pilotFeedback); }
-export function recordPilotFeedback(input, actor = 'operator') {
-  const item = { id: `PFB-${randomBytes(4).toString('hex').toUpperCase()}`, ...input, createdAt: new Date().toISOString(), createdBy: actor };
+export function listPilotFeedback(organizationId = DEFAULT_ORGANIZATION_ID) { return clone(state.pilotFeedback.filter((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId)); }
+export function recordPilotFeedback(input, actor = 'operator', organizationId = DEFAULT_ORGANIZATION_ID) {
+  const item = { id: `PFB-${randomBytes(4).toString('hex').toUpperCase()}`, organizationId, ...input, createdAt: new Date().toISOString(), createdBy: actor };
   state.pilotFeedback.unshift(item);
   auditLog.unshift({ id: `AUD-${String(auditLog.length + 1).padStart(4, '0')}`, entityType: 'pilot_feedback', entityId: item.id, action: 'pilot_feedback_recorded', actor, message: `Feedback de piloto registrado en etapa ${item.stage}.`, createdAt: item.createdAt });
   persistState(state, auditLog, notifications, comments, webhooks, webhookDeliveries, jobRuns);
@@ -271,8 +271,8 @@ export function getModelValidationReport() {
   }
   return { scope: 'local-platform', generatedAt: new Date().toISOString(), ready: tests.every((test) => test.status === 'pass'), calibrationStatus: 'not_calibrated_with_historical_data', historicalFixtures: 0, tests, disclaimer: 'Los tests verifican invariantes del motor local; no sustituyen calibración con eventos históricos y datos licenciados.' };
 }
-export function getCalibrationOverview(modelId) {
-  const fixtures = state.calibrationFixtures.filter((fixture) => !modelId || fixture.modelId === modelId);
+export function getCalibrationOverview(modelId, organizationId = DEFAULT_ORGANIZATION_ID) {
+  const fixtures = state.calibrationFixtures.filter((fixture) => (fixture.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId && (!modelId || fixture.modelId === modelId));
   const eligibleFixtures = fixtures.filter((fixture) => fixture.evidenceStatus === 'complete');
   const errors = eligibleFixtures.map((fixture) => fixture.predictedImpactUsd - fixture.observedImpactUsd);
   const absoluteErrors = errors.map((value) => Math.abs(value));
@@ -280,7 +280,7 @@ export function getCalibrationOverview(modelId) {
   const sum = (values) => values.reduce((total, value) => total + value, 0);
   return { scope: 'local-platform', modelId: modelId || 'all', fixtureCount: fixtures.length, completeFixtureCount: eligibleFixtures.length, incompleteFixtureCount: fixtures.length - eligibleFixtures.length, historicalFixtures: eligibleFixtures.length, status: eligibleFixtures.length >= 3 ? 'ready_for_review' : 'insufficient_sample', metrics: { maeUsd: absoluteErrors.length ? sum(absoluteErrors) / absoluteErrors.length : null, mape: percentageErrors.length ? sum(percentageErrors) / percentageErrors.length : null, biasUsd: errors.length ? sum(errors) / errors.length : null }, fixtures: clone(fixtures), disclaimer: 'Las métricas sólo usan fixtures completos con activo, duración, rutas alternativas, resultado, fuente y procedencia; una muestra local no constituye validación de mercado.' };
 }
-export function recordCalibrationFixtures(input, actor = 'operator') {
+export function recordCalibrationFixtures(input, actor = 'operator', organizationId = DEFAULT_ORGANIZATION_ID) {
   const modelId = String(input?.modelId || 'impact-cascade');
   if (!listModels().some((model) => model.id === modelId)) throw new Error('Modelo desconocido');
   if (!Array.isArray(input?.fixtures) || input.fixtures.length < 1 || input.fixtures.length > 500) throw new Error('fixtures debe contener entre 1 y 500 registros');
@@ -300,7 +300,7 @@ export function recordCalibrationFixtures(input, actor = 'operator') {
     if (!Number.isFinite(eventDate) || !Number.isFinite(observedImpactUsd) || observedImpactUsd < 0 || !Number.isFinite(predictedImpactUsd) || predictedImpactUsd < 0) throw new Error(`Valores inválidos en fixture ${id}`);
     if (!sourceId || !provenance) throw new Error(`Fixture ${id} requiere sourceId y provenance`);
     const missingEvidence = [!assetId && 'assetId', !(Number.isFinite(durationHours) && durationHours >= 0) && 'durationHours', !alternateRoutes.length && 'alternateRoutes', !recoveryOutcome && 'recoveryOutcome'].filter(Boolean);
-    return { id, modelId, eventDate: new Date(eventDate).toISOString(), observedImpactUsd, predictedImpactUsd, sourceId: sourceId.slice(0, 160), provenance: provenance.slice(0, 300), assetId: assetId || null, durationHours: Number.isFinite(durationHours) && durationHours >= 0 ? durationHours : null, alternateRoutes, recoveryOutcome: recoveryOutcome || null, evidenceStatus: missingEvidence.length ? 'incomplete' : 'complete', missingEvidence, createdAt: new Date().toISOString(), createdBy: actor };
+    return { id, organizationId, modelId, eventDate: new Date(eventDate).toISOString(), observedImpactUsd, predictedImpactUsd, sourceId: sourceId.slice(0, 160), provenance: provenance.slice(0, 300), assetId: assetId || null, durationHours: Number.isFinite(durationHours) && durationHours >= 0 ? durationHours : null, alternateRoutes, recoveryOutcome: recoveryOutcome || null, evidenceStatus: missingEvidence.length ? 'incomplete' : 'complete', missingEvidence, createdAt: new Date().toISOString(), createdBy: actor };
   });
   state.calibrationFixtures.unshift(...incoming);
   auditLog.unshift({ id: `AUD-${String(auditLog.length + 1).padStart(4, '0')}`, entityType: 'model', entityId: modelId, action: 'calibration_fixtures_recorded', actor, message: `${incoming.length} fixtures de calibración registrados.`, createdAt: new Date().toISOString() });
@@ -505,17 +505,17 @@ export function markAllNotificationsRead() {
   return { updated: changed.length };
 }
 
-export function recordDeadLetter(input, error, actor = 'connector') {
-  const item = { id: `DLQ-${String(state.deadLetters.length + 1).padStart(4, '0')}`, status: 'queued', attempts: 0, payload: clone(input || {}), error: String(error?.message || error || 'Error de ingesta'), actor, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+export function recordDeadLetter(input, error, actor = 'connector', organizationId = DEFAULT_ORGANIZATION_ID) {
+  const item = { id: `DLQ-${String(state.deadLetters.length + 1).padStart(4, '0')}`, organizationId, status: 'queued', attempts: 0, payload: clone(input || {}), error: String(error?.message || error || 'Error de ingesta'), actor, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
   state.deadLetters.unshift(item);
   persistState(state, auditLog, notifications, comments, webhooks, webhookDeliveries, jobRuns);
   return clone(item);
 }
 
-export function listDeadLetters(status) { return clone(state.deadLetters.filter((item) => !status || item.status === status)); }
+export function listDeadLetters(status, organizationId = DEFAULT_ORGANIZATION_ID) { return clone(state.deadLetters.filter((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId && (!status || item.status === status))); }
 
-export function retryDeadLetter(id, overridePayload, actor = 'operator') {
-  const item = state.deadLetters.find((candidate) => candidate.id === id);
+export function retryDeadLetter(id, overridePayload, actor = 'operator', organizationId = DEFAULT_ORGANIZATION_ID) {
+  const item = state.deadLetters.find((candidate) => candidate.id === id && (candidate.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId);
   if (!item) return null;
   item.attempts += 1;
   item.status = 'processing';

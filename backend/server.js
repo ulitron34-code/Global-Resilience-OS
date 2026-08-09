@@ -440,13 +440,13 @@ app.post('/api/ingest/events', authIfConfigured, roleIfConfigured('admin', 'risk
     const result = ingestEvent(req.body || {}, req.user?.email || 'connector');
     res.status(result.created ? 201 : 200).json(result);
   } catch (error) {
-    recordDeadLetter(req.body || {}, error, req.user?.email || 'connector');
+    recordDeadLetter(req.body || {}, error, req.user?.email || 'connector', req.user?.organizationId || DEFAULT_ORGANIZATION_ID);
     res.status(400).json({ error: error.message });
   }
 });
-app.get('/api/ingest/dead-letters', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => res.json(listDeadLetters(req.query.status)));
+app.get('/api/ingest/dead-letters', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => res.json(listDeadLetters(req.query.status, req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
 app.post('/api/ingest/dead-letters/:id/retry', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => {
-  const item = retryDeadLetter(req.params.id, req.body?.payload, req.user?.email || 'operator');
+  const item = retryDeadLetter(req.params.id, req.body?.payload, req.user?.email || 'operator', req.user?.organizationId || DEFAULT_ORGANIZATION_ID);
   if (!item) return res.status(404).json({ error: 'Dead letter no encontrada' });
   res.status(item.status === 'resolved' ? 200 : 202).json(item);
 });
@@ -582,8 +582,8 @@ app.get('/api/sources/:id', (req, res) => {
 });
 app.get('/api/models', (req, res) => res.json(listModels()));
 app.get('/api/models/validation', (req, res) => res.json(getModelValidationReport()));
-app.get('/api/models/calibration', (req, res) => res.json(getCalibrationOverview(req.query.modelId)));
-app.get('/api/models/calibration/benchmark', (req, res) => res.json(benchmarkCalibration(getCalibrationOverview(req.query.modelId))));
+app.get('/api/models/calibration', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(getCalibrationOverview(req.query.modelId, req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
+app.get('/api/models/calibration/benchmark', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(benchmarkCalibration(getCalibrationOverview(req.query.modelId, req.user?.organizationId || DEFAULT_ORGANIZATION_ID))));
 app.get('/api/models/governance', (req, res) => { const validation = getModelValidationReport(); res.json(listModels().map((model) => { const calibration = getCalibrationOverview(model.id); return buildModelGovernance(model, validation, calibration, benchmarkCalibration(calibration)); })); });
 app.get('/api/models/governance/:id', (req, res) => { const model = listModels().find((item) => item.id === req.params.id); if (!model) return res.status(404).json({ error: 'Modelo no encontrado' }); const validation = getModelValidationReport(); const calibration = getCalibrationOverview(model.id); res.json(buildModelGovernance(model, validation, calibration, benchmarkCalibration(calibration))); });
 app.get('/api/pilots/readiness', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => {
@@ -620,8 +620,8 @@ app.get('/api/pilots/package', authIfConfigured, roleIfConfigured('admin', 'risk
   const scorecard = buildOperationalScorecard({ alerts: listAlerts({ limit: 200 }), cases, actionPlans, sources: listSources(), deadLetters: listDeadLetters(), incidents: listIncidents({ organizationId: req.user?.organizationId || DEFAULT_ORGANIZATION_ID }), calibrationFixtures: getCalibrationOverview().fixtures || [] });
   res.json({ schemaVersion: '1.0.0-local', generatedAt: new Date().toISOString(), readiness, interviewGuide: getPilotInterviewGuide(), metrics, scorecard, feedback: listPilotFeedback(), nextActions: ['Realizar cinco entrevistas estructuradas', 'Autorizar fuentes y registrar licencias', 'Cargar 3-5 eventos históricos verificables', 'Definir baseline y criterio go/no-go'], disclaimer: 'Paquete local de preparación; no demuestra valor comercial ni sustituye validación con cliente.' });
 });
-app.get('/api/pilots/feedback', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(listPilotFeedback()));
-app.post('/api/pilots/feedback', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => { try { res.status(201).json(recordPilotFeedback(normalizePilotFeedback(req.body || {}), req.user?.email || 'operator')); } catch (error) { res.status(400).json({ error: error.message }); } });
+app.get('/api/pilots/feedback', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(listPilotFeedback(req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
+app.post('/api/pilots/feedback', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => { try { res.status(201).json(recordPilotFeedback(normalizePilotFeedback(req.body || {}), req.user?.email || 'operator', req.user?.organizationId || DEFAULT_ORGANIZATION_ID)); } catch (error) { res.status(400).json({ error: error.message }); } });
 app.get('/api/incidents/runbook', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(getIncidentRunbook()));
 app.get('/api/incidents', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(listIncidents({ ...req.query, organizationId: req.user?.organizationId || DEFAULT_ORGANIZATION_ID })));
 app.post('/api/incidents', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => { try { res.status(201).json(createIncident(req.body || {}, req.user?.email || 'operator', req.user?.organizationId || DEFAULT_ORGANIZATION_ID)); } catch (error) { res.status(400).json({ error: error.message }); } });
@@ -636,10 +636,10 @@ app.post('/api/ingest/batch', authIfConfigured, roleIfConfigured('admin', 'risk_
   } catch (error) { res.status(400).json({ error: error.message }); }
 });
 app.post('/api/models/calibration/fixtures', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => {
-  try { res.status(201).json(recordCalibrationFixtures(req.body || {}, req.user?.email || 'operator')); }
+  try { res.status(201).json(recordCalibrationFixtures(req.body || {}, req.user?.email || 'operator', req.user?.organizationId || DEFAULT_ORGANIZATION_ID)); }
   catch (error) { res.status(400).json({ error: error.message }); }
 });
-app.get('/api/models/backtest', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(buildBacktestReport(getCalibrationOverview(req.query.modelId).fixtures, { modelId: req.query.modelId || 'all' })));
+app.get('/api/models/backtest', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(buildBacktestReport(getCalibrationOverview(req.query.modelId, req.user?.organizationId || DEFAULT_ORGANIZATION_ID).fixtures, { modelId: req.query.modelId || 'all' })));
 app.post('/api/models/sensitivity', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => { try { res.json(buildSensitivityAnalysis(req.body || {})); } catch (error) { res.status(400).json({ error: error.message }); } });
 app.post('/api/models/uncertainty', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => { try { res.json(buildUncertaintyReport(req.body || {})); } catch (error) { res.status(400).json({ error: error.message }); } });
 app.get('/api/notifications', (req, res) => res.json(listNotifications(req.query.unread === 'true')));

@@ -429,6 +429,12 @@ describe('Global Resilience OS API', () => {
       assert.equal(tenantBScenarios.status, 200);
       assert.equal((await tenantBScenarios.json()).some((scenario) => scenario.id === tenantScenarioBody.id), false);
 
+      const tenantFixture = await fetch(`${baseUrl}/api/models/calibration/fixtures`, { method: 'POST', headers: { authorization: `Bearer ${tenantA.token}`, 'content-type': 'application/json' }, body: JSON.stringify({ modelId: 'impact-cascade', fixtures: [{ id: `tenant-a-fixture-${Date.now()}`, eventDate: '2025-01-01T00:00:00.000Z', observedImpactUsd: 1000, predictedImpactUsd: 900, sourceId: 'licensed-source-a', provenance: 'tenant-a-license' }] }) });
+      assert.equal(tenantFixture.status, 201);
+      const tenantBCalibration = await fetch(`${baseUrl}/api/models/calibration?modelId=impact-cascade`, { headers: { authorization: `Bearer ${tenantB.token}` } });
+      assert.equal(tenantBCalibration.status, 200);
+      assert.equal((await tenantBCalibration.json()).fixtures.some((fixture) => fixture.organizationId === 'tenant-a-demo'), false);
+
       const tenantIncident = await fetch(`${baseUrl}/api/incidents`, { method: 'POST', headers: { authorization: `Bearer ${tenantA.token}`, 'content-type': 'application/json' }, body: JSON.stringify({ title: 'Tenant A incident', severity: 'sev2', summary: 'Incident isolated for tenant testing' }) });
       assert.equal(tenantIncident.status, 201);
       const tenantIncidentBody = await tenantIncident.json();
