@@ -49,7 +49,7 @@ Fecha de auditoría: 8 de agosto de 2026.
 
 ## Gates de aceptación local
 
-- Backend: 48 pruebas pasando.
+- Backend: 49 pruebas pasando.
 - Frontend: lint y build de producción pasando directamente.
 - Smoke local, plan audit, Supabase schema audit, portable audit y OpenAPI:
   `PASS`.
