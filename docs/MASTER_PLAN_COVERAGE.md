@@ -74,10 +74,10 @@ Fecha de auditoria: 8 de agosto de 2026.
 
 ## Gates de aceptacion local
 
-- Backend: 31 pruebas pasando.
+- Backend: 42 pruebas pasando.
 - Frontend: lint y build de produccion pasando.
 - Smoke local: PASS.
-- OpenAPI: JSON valido y rutas nuevas documentadas.
+- OpenAPI: JSON valido; 133 rutas documentadas, sin faltantes ni duplicados.
 - Source health sweep: endpoint, smoke test y panel Operations verificados.
 - Pilot readiness: gates técnicos, guía de entrevistas, métricas locales y evidencia faltante.
 - Incident response: runbook, registro, triage, timeline y smoke test verificados.

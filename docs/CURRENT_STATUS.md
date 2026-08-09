@@ -16,6 +16,10 @@ incidentes, seguridad, cadena de evidencia, scorecard, paquete de piloto y Enter
 - Acciones externas desactivadas por defecto y conectores en `dry_run_only`.
 - Punto de entrada raíz con `npm test`, `npm run lint`, `npm run build`, `npm run verify` y `npm run verify:install`.
 - Auditoría de instalación limpia con lockfiles aceptados por `npm ci --dry-run` en backend y frontend.
+- Última evidencia local: 42 pruebas, lint, build, smoke, rendimiento, auditoría
+  portable, esquema, plan maestro, release gate y paridad OpenAPI: todo PASS.
+- Incluye Decision Room compartible en solo lectura y blueprint de staging para
+  Render; ambos quedan sujetos a la configuración externa antes de producción.
 
 ## Lo que sigue fuera de la USB
 

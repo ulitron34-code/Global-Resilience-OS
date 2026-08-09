@@ -23,7 +23,8 @@
 
 ## Gate de seguridad
 
-- [ ] `APP_MODE=production` bloquea login demo.
+- [x] `APP_MODE=production` bloquea login demo y listado de usuarios demo;
+  evidencia: `backend/test/productionSecurity.test.js`.
 - [ ] `AUTH_REQUIRED=true`, `AUTH_SECRET` fuerte y `CORS_ORIGIN` explícito.
 - [ ] `DATA_MODE` no es `illustrative` en producción.
 - [ ] `ALLOW_EXTERNAL_ACTIONS=false` durante el primer despliegue.

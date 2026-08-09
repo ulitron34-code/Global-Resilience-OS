@@ -91,6 +91,13 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
 - `AUTH_SECRET` y `CORS_ORIGIN` se dejan como valores externos no versionados;
   el almacenamiento efímero se marca explícitamente como temporal.
 
+## Bloque: production security gate (2026-08-09)
+
+- Se añadió una prueba dedicada que demuestra que `APP_MODE=production` no
+  permite login ni listado de usuarios demo.
+- El release checklist ahora enlaza la evidencia ejecutable en lugar de dejar
+  el gate como afirmación manual.
+
 ## Bloque: Decision sharing local (2026-08-09)
 
 - Se añadieron enlaces temporales de solo lectura para paquetes de decisión.

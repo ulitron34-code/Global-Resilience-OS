@@ -4,53 +4,47 @@ Fecha de corte: 2026-08-08
 
 ## Resultado
 
-La base local de Global Resilience OS queda implementada y verificable para continuar con el despliegue. El producto ya cubre ingestión individual y batch, correlación temporal, simulación, impacto económico, Action OS con aprobación humana, gobernanza de modelos, incertidumbre, backtesting, sensibilidad, fuentes, SLA, DLQ, webhooks, notificaciones, pilotos, incidentes, seguridad, auditoría y recuperación portable.
+La base local de Global Resilience OS queda implementada y verificable para continuar con el despliegue. El producto cubre ingesta individual y batch, correlación temporal, simulación, impacto económico, Action OS con aprobación humana, gobernanza de modelos, incertidumbre, backtesting, sensibilidad, fuentes, SLA, DLQ, webhooks, notificaciones, pilotos, incidentes, seguridad, auditoría, recuperación portable, enlaces temporales de decisión y una vista pública de solo lectura.
 
 ## Evidencia ejecutada
 
-- Backend: `npm.cmd test` — 31 pruebas correctas.
+- Backend: `npm.cmd test` — 42 pruebas correctas.
 - Frontend: `npm.cmd run lint` y `npm.cmd run build` — correctos.
 - Smoke end-to-end local: `LOCAL SMOKE TEST: PASS`.
-- OpenAPI local: JSON válido.
-- Release gate: PASS.
-- Rendimiento local: 60 solicitudes concurrentes, 0 errores, p95 76.83 ms.
+- Release evidence: `npm.cmd run verify` — PASS.
+- Rendimiento local: 60 solicitudes, 0 errores, p95 87.67 ms.
 - Auditoría portable: 0 hallazgos.
 - Dependencias de producción backend/frontend: 0 vulnerabilidades reportadas.
-- Orquestador `node scripts/local-release-evidence.js`: PASS; en Windows reporta explícitamente la verificación de artefacto para el build por la limitación de subprocesos de esbuild.
 - Reproducibilidad: manifests, lockfiles, `.env.example`, exclusiones y entrypoints: PASS.
-- Instalación limpia: backend y frontend aceptan `npm ci --dry-run`; estado runtime permanece ignorado.
+- Instalación limpia: backend y frontend aceptan `npm ci --dry-run`.
 - Auditoría ejecutable del Plan Maestro: fases 0–7 y salvaguardas locales: PASS.
-- OpenAPI: 124 rutas Express con 124 operaciones documentadas, sin faltantes ni duplicados.
+- OpenAPI: 133 rutas Express con 133 operaciones documentadas, sin faltantes ni duplicados.
 - Paquete de piloto exportable disponible en `GET /api/pilots/package` y en Operations.
-- Enterprise Readiness disponible en `GET /api/readiness/enterprise`; marca el entorno local listo para pasar a gates externos, sin declarar listos los componentes que requieren cuentas o datos reales.
-- Se corrigió la lectura del gate de acciones externas en la postura de seguridad; ahora coincide con `runtime.readiness` y el smoke test lo verifica.
+- Enterprise Readiness disponible en `GET /api/readiness/enterprise`.
+- Decision Room disponible en `/share/<token>`, con expiración, revocación, hash de token y auditoría de accesos.
+- Blueprint de Render disponible en `render.yaml`, con autenticación obligatoria y acciones externas deshabilitadas.
+- `APP_MODE=production` bloquea el login y el listado de usuarios demo; el gate está cubierto por prueba automatizada.
 
 ## Pendientes externos deliberados
 
-Estos puntos no se ejecutan todavía porque requieren credenciales, cuentas o decisiones de infraestructura:
+Estos puntos requieren credenciales, cuentas, datos reales o validación humana:
 
-1. Crear o conectar el repositorio GitHub y configurar secretos.
-2. Crear el proyecto Supabase, ejecutar el esquema, activar RLS y cargar variables de entorno.
-3. Configurar Vercel, variables de entorno y dominio.
+1. Publicar y verificar los últimos commits en GitHub y configurar CI/secrets.
+2. Crear el proyecto Supabase, ejecutar el esquema, probar RLS con dos organizaciones y cargar variables.
+3. Configurar Render/Vercel, variables de entorno, dominio y staging real.
 4. Sustituir conectores dry-run por proveedores reales y validar contratos en sandbox.
-5. Configurar observabilidad externa, correo/webhooks productivos y políticas de retención.
-6. Ejecutar piloto con organizaciones reales y aprobar umbrales de negocio.
+5. Configurar observabilidad externa, correo/webhooks productivos y retención.
+6. Ejecutar backtesting con eventos históricos y analistas expertos.
+7. Ejecutar piloto con organizaciones reales y medir valor.
+8. Completar revisión legal, DPA, certificaciones y claims comerciales.
 
 ## Orden recomendado de cierre
 
 1. GitHub y CI.
 2. Supabase y migraciones/RLS.
-3. Vercel y preview deployment.
+3. Render/Vercel y preview deployment.
 4. Conectores externos en sandbox.
 5. Piloto controlado y evidencia de aceptación.
 6. Producción con revisión de seguridad y continuidad.
 
-La interfaz local incluye ahora una consola de ingesta batch con modos `dry_run` y `commit`; la confirmación de commit sigue protegida por el rol de usuario y por idempotencia del backend.
-
-También incluye el `Operational Scorecard` (`GET /api/metrics/scorecard`), que consolida producto, modelos y negocio y deja explícitamente en `null` los tiempos que requieren datos de piloto.
-
-El contrato de configuración (`GET /api/runtime/config-contract`) verifica de forma segura las diferencias entre demo, staging y producción antes del handoff.
-
-Operations incorpora `Reiniciar demo local`: limpia el estado operativo local con
-confirmación y autorización administrativa, y la ruta queda bloqueada cuando
-`APP_MODE=production`.
+El estado local PASS no equivale a producción enterprise ni a cumplimiento regulatorio. Cada pendiente externo debe cerrarse con evidencia verificable antes de comercializar la plataforma.
