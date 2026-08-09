@@ -120,3 +120,6 @@ El grafo y los planes actuales son locales y demo. No ejecutan acciones externas
 Los webhooks locales generan un secreto HMAC de 256 bits. El secreto se entrega únicamente al crear o rotar (`POST /api/webhooks/:id/rotate-secret`), nunca en listados ni snapshots; cada entrega incluye firma, timestamp, delivery id, versión de firma y hash SHA-256 del cuerpo.
 
 Con `AUTH_REQUIRED=true`, las mutaciones exigen `Authorization: Bearer <token>` y roles `admin` o `risk_analyst`; registrar webhooks exige `admin`. El backend asigna `x-request-id`, expone `x-api-version`, aplica headers HTTP de seguridad, restringe CORS si se configura `CORS_ORIGIN`, aplica un límite básico por IP y devuelve errores con `requestId`. La persistencia local está en `backend/storage/state.json` y debe sustituirse por Supabase antes de producción.
+El scorecard también expone `timeToDetectionMinutes` y
+`timeToExplanationMinutes` cuando existen timestamps explícitos y comparables;
+sin esa evidencia ambos valores permanecen en `null`.

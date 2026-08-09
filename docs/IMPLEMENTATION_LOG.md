@@ -451,3 +451,9 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
   conservaron únicamente como historial.
 - El paquete de decisión ahora calcula escenarios, auditoría y comentarios con
   aislamiento por organización; se eliminó el conteo global de escenarios.
+## Bloque: visualización de latencias en el scorecard (2026-08-09)
+
+- El panel operativo ahora muestra detección, explicación y decisión como tres
+  métricas separadas.
+- La UI conserva `—` cuando no hay evidencia y muestra la nota del scorecard;
+  el auditor de contrato UI verifica estas claves.

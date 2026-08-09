@@ -11,3 +11,6 @@ que la vista de Pilot Readiness conserva la conexión mínima con el pilot kit:
 
 Es una auditoría estructural, no reemplaza una prueba visual en navegador ni
 una entrevista real con un cliente.
+El mismo auditor verifica que `OperationalScorecardPanel` muestra las tres
+latencias del scorecard (`timeToDetectionMinutes`,
+`timeToExplanationMinutes` y `timeToDecisionMinutes`) y su nota de evidencia.

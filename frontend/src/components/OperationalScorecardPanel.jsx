@@ -19,5 +19,14 @@ export default function OperationalScorecardPanel() {
     <p className="text-xs text-ink-muted mt-2">Muestra qué métricas tienen evidencia local y cuáles permanecen pendientes del piloto.</p>
     <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-2 mt-3"><Metric label="Alertas" value={product.alerts?.total || 0} /><Metric label="Cobertura" value={coverage === null ? '—' : `${Math.round((coverage || 0) * 100)}%`} /><Metric label="Casos" value={product.cases?.total || 0} /><Metric label="Cierre" value={closure === null ? '—' : `${Math.round((closure || 0) * 100)}%`} /><Metric label="Acciones" value={product.actions?.completed || 0} /><Metric label="Fuentes OK" value={sourceReadiness === null ? '—' : `${Math.round((sourceReadiness || 0) * 100)}%`} /><Metric label="DLQ" value={product.deadLetters?.unresolved || 0} /><Metric label="Incidentes" value={product.incidents?.open || 0} /></div>
     <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-3 text-xs"><div className="border border-line rounded p-3 text-ink-muted">Error modelo local: <span className="text-ink">{scorecard.models?.meanAbsoluteErrorUsd === null ? 'sin fixtures suficientes' : formatUsd(scorecard.models.meanAbsoluteErrorUsd)}</span></div><div className="border border-line rounded p-3 text-ink-muted">Pérdida evitada documentada: <span className="text-ink">{formatUsd(scorecard.business?.avoidedLossDocumentedUsd || 0)}</span></div><div className="border border-line rounded p-3 text-ink-muted">Tiempo a decisión: <span className="text-ink">{formatMinutes(timing.timeToDecisionMinutes)}</span><span className="block text-[10px] text-ink-dim mt-1">{timing.decisionsObserved || 0} aprobaciones observadas; detección y explicación requieren timestamps externos.</span></div></div>
+    <div className="mt-3 border border-line rounded p-3">
+      <div className="font-mono text-[9px] uppercase tracking-widest text-ink-dim">Latencia con evidencia</div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2">
+        <Metric label="Tiempo a detección" value={formatMinutes(timing.timeToDetectionMinutes)} />
+        <Metric label="Tiempo a explicación" value={formatMinutes(timing.timeToExplanationMinutes)} />
+        <Metric label="Tiempo a decisión" value={formatMinutes(timing.timeToDecisionMinutes)} />
+      </div>
+      <p className="text-[10px] text-ink-dim mt-2">{timing.note || 'Sólo se muestran intervalos con timestamps comparables.'}</p>
+    </div>
   </div>;
 }
