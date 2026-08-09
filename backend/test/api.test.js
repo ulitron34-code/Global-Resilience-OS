@@ -500,6 +500,9 @@ describe('Global Resilience OS API', () => {
       const registeredQualityCheck = tenantAQualityGateBody.checks.find((check) => check.id === intakeCandidate.id);
       assert.equal(registeredQualityCheck.status, 'abstain');
       assert.ok(registeredQualityCheck.blocking.includes('freshness'));
+      const tenantACatalogReadiness = await fetch(`${baseUrl}/api/data-catalog/readiness`, { headers: { authorization: `Bearer ${tenantA.token}` } });
+      const tenantACatalogReadinessBody = await tenantACatalogReadiness.json();
+      assert.equal(tenantACatalogReadinessBody.checks.find((check) => check.id === intakeCandidate.id).licenseStatus, 'active');
       const tenantBNotifications = await fetch(`${baseUrl}/api/notifications`, { headers: { authorization: `Bearer ${tenantB.token}` } });
       assert.equal(tenantBNotifications.status, 200);
       assert.equal((await tenantBNotifications.json()).some((notification) => notification.title === 'Tenant A signal'), false);

@@ -4,7 +4,7 @@ import { computeImpact } from '../engine/impactEngine.js';
 import { validateEventEnvelope } from './eventContract.js';
 import { canTransitionIncident, normalizeIncidentInput, validateIncidentPatch } from './incidentOps.js';
 import { buildEvidence } from './evidenceClassification.js';
-import { listDataCatalog, validateSourceIntake } from './dataCatalog.js';
+import { getDataCatalogReadiness, listDataCatalog, validateSourceIntake } from './dataCatalog.js';
 import { buildControlPlaneProjection, validateControlPlaneProjection } from './controlPlaneProjection.js';
 
 const now = new Date().toISOString();
@@ -178,6 +178,10 @@ export function listDataCatalogForOrganization(organizationId = DEFAULT_ORGANIZA
     if (!catalog.has(source.id)) catalog.set(source.id, { id: source.id, name: source.name, domain: source.domain || null, coverage: source.coverage || null, sourceClass: source.kind || 'external_feed_placeholder', licenseStatus: source.licenseStatus || 'verification_required', refreshSlaHours: source.refreshSlaHours ?? null, requiredFor: source.requiredFor || [], license: source.license || null });
   }
   return clone([...catalog.values()]);
+}
+
+export function getDataCatalogReadinessForOrganization(organizationId = DEFAULT_ORGANIZATION_ID) {
+  return getDataCatalogReadiness(listDataCatalogForOrganization(organizationId));
 }
 export function listSourceIntakeReviews(filters = {}) {
   const organizationId = filters.organizationId || DEFAULT_ORGANIZATION_ID;

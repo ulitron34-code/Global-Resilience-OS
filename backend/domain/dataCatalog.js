@@ -24,8 +24,8 @@ export function getMissingLicenseFields(item = {}) {
 
 function clone(value) { return structuredClone(value); }
 export function listDataCatalog() { return clone(CATALOG); }
-export function getDataCatalogReadiness() {
-  const checks = CATALOG.map((item) => ({ id: item.id, label: item.name, status: item.licenseStatus === 'active' && hasCompleteLicenseMetadata(item) ? 'pass' : 'pending', licenseStatus: item.licenseStatus, metadataComplete: hasCompleteLicenseMetadata(item), missingLicenseFields: getMissingLicenseFields(item), requiredFor: item.requiredFor }));
+export function getDataCatalogReadiness(catalog = CATALOG) {
+  const checks = catalog.map((item) => ({ id: item.id, label: item.name, status: item.licenseStatus === 'active' && hasCompleteLicenseMetadata(item) ? 'pass' : 'pending', licenseStatus: item.licenseStatus, metadataComplete: hasCompleteLicenseMetadata(item), missingLicenseFields: getMissingLicenseFields(item), requiredFor: item.requiredFor }));
   return { ready: checks.every((item) => item.status === 'pass'), scope: 'local-platform', generatedAt: new Date().toISOString(), checks, disclaimer: 'La catalogación documenta dependencias y estado de licencia; no concede derechos de uso ni valida exactitud de mercado.' };
 }
 

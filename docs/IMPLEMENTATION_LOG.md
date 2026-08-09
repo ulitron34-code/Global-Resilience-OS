@@ -236,6 +236,16 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
 - La prueba protegida verifica que el registro recién creado aparezca en el
   gate del tenant correcto y conserve el bloqueo de frescura.
 
+## Bloque: readiness de catálogo tenant-scoped (2026-08-09)
+
+- Enterprise readiness, pilot readiness y el paquete de piloto usan ahora la
+  misma vista de catálogo combinada por organización.
+- `/api/data-catalog/readiness` resuelve el tenant cuando existe autenticación;
+  en modo local conserva el tenant demo por defecto.
+- Las fuentes intake pueden conservar sus metadatos contractuales en readiness,
+  pero siguen pendientes hasta conexión/frescura y no se mezclan con el catálogo
+  de otra organización.
+
 ## Bloque: Executive Brief sin score fijo no calibrado (2026-08-09)
 
 - Executive Brief deja de pintar un `72/100` fijo en el frontend.

@@ -9,7 +9,7 @@ import { buildImpactGraph, getImpactPaths } from './domain/impactGraph.js';
 import { buildActionPlan, getPlaybook, listPlaybooks } from './domain/playbooks.js';
 import { DEFAULT_ORGANIZATION_ID, createActionPlan, getActionPlan, getActionPlanOutcomeMetrics, getActionPlanTimingMetrics, getAnonymousSectorBenchmark, listActionPlans, recordActionPlanOutcome, resetActionPlans, updateActionPlan } from './domain/actionPlanStore.js';
 import { resolveEntity } from './domain/entityResolution.js';
-import { listDataCatalog, getDataCatalogReadiness, validateSourceIntake } from './domain/dataCatalog.js';
+import { listDataCatalog, validateSourceIntake } from './domain/dataCatalog.js';
 import { getRuntimeReadiness } from './config/runtimeConfig.js';
 import { checkSupabaseConnection, getSupabaseReadiness } from './config/supabase.js';
 import { getEnvironmentContract } from './config/environmentContract.js';
@@ -104,6 +104,7 @@ import {
   updateSourceIntakeReview,
   registerSourceFromIntakeReview,
   listDataCatalogForOrganization,
+  getDataCatalogReadinessForOrganization,
   listIncidents,
   createIncident,
   updateIncident,
@@ -323,10 +324,10 @@ app.get('/api/readiness/enterprise', authIfConfigured, roleIfConfigured('admin',
   const runtime = getOperationalRuntimeReadiness();
   const schemaVerified = process.env.LOCAL_SCHEMA_AUDIT_VERIFIED === 'true';
   const releaseVerified = process.env.LOCAL_RELEASE_GATE_VERIFIED === 'true';
-  res.json(buildEnterpriseReadiness({ runtime, environmentContract: getEnvironmentContract(), security: buildSecurityPosture({ runtime, audit: getAuditIntegrity(), tenancy: { organizationId }, snapshot: getLocalSnapshot(organizationId) }), catalog: getDataCatalogReadiness(), modelGovernance, actionLibrary: getActionLibraryReadiness(), schemaAudit: schemaVerified, releaseGate: releaseVerified }));
+  res.json(buildEnterpriseReadiness({ runtime, environmentContract: getEnvironmentContract(), security: buildSecurityPosture({ runtime, audit: getAuditIntegrity(), tenancy: { organizationId }, snapshot: getLocalSnapshot(organizationId) }), catalog: getDataCatalogReadinessForOrganization(organizationId), modelGovernance, actionLibrary: getActionLibraryReadiness(), schemaAudit: schemaVerified, releaseGate: releaseVerified }));
 });
 app.get('/api/data-catalog', (req, res) => res.json(listDataCatalog()));
-app.get('/api/data-catalog/readiness', (req, res) => res.json(getDataCatalogReadiness()));
+app.get('/api/data-catalog/readiness', authIfConfigured, (req, res) => res.json(getDataCatalogReadinessForOrganization(req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
 app.post('/api/data-catalog/intake-preview', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => { try { res.json(validateSourceIntake(req.body || {})); } catch (error) { res.status(400).json({ error: error.message }); } });
 app.get('/api/data-catalog/intake-reviews', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(listSourceIntakeReviews({ ...req.query, organizationId: req.user?.organizationId || DEFAULT_ORGANIZATION_ID })));
 app.post('/api/data-catalog/intake-reviews', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => { try { res.status(201).json(createSourceIntakeReview(req.body || {}, req.user?.email || 'operator', req.user?.organizationId || DEFAULT_ORGANIZATION_ID)); } catch (error) { res.status(400).json({ error: error.message }); } });
@@ -604,7 +605,7 @@ app.get('/api/models/governance/:id', (req, res) => { const model = listModels()
 app.get('/api/pilots/readiness', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => {
   const organizationId = req.user?.organizationId || DEFAULT_ORGANIZATION_ID;
   const modelGovernance = listModels().map((model) => { const calibration = getCalibrationOverview(model.id, organizationId); return buildModelGovernance(model, getModelValidationReport(), calibration, benchmarkCalibration(calibration)); });
-  res.json(buildPilotReadiness({ runtime: getRuntimeReadiness(), catalog: getDataCatalogReadiness(), sourceHealth: getSourceHealthOverview(Date.now(), organizationId), modelGovernance, actionLibrary: getActionLibraryReadiness(), tenancy: { organizationId }, pilotFeedback: listPilotFeedback(organizationId), historicalFixtures: getCalibrationOverview(undefined, organizationId).fixtures || [] }));
+  res.json(buildPilotReadiness({ runtime: getRuntimeReadiness(), catalog: getDataCatalogReadinessForOrganization(organizationId), sourceHealth: getSourceHealthOverview(Date.now(), organizationId), modelGovernance, actionLibrary: getActionLibraryReadiness(), tenancy: { organizationId }, pilotFeedback: listPilotFeedback(organizationId), historicalFixtures: getCalibrationOverview(undefined, organizationId).fixtures || [] }));
 });
 app.get('/api/pilots/interview-guide', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(getPilotInterviewGuide()));
 app.get('/api/pilots/metrics', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => { const organizationId = req.user?.organizationId || DEFAULT_ORGANIZATION_ID; return res.json(buildPilotMetrics({ cases: listCases({ limit: 200, organizationId }), actionPlans: listActionPlans({ limit: 200, organizationId }), sourceHealth: getSourceHealthOverview(Date.now(), organizationId), notifications: listNotifications(false, organizationId) })); });
@@ -613,7 +614,7 @@ app.use('/api/pilots/package', authIfConfigured, roleIfConfigured('admin', 'risk
   const organizationId = req.user?.organizationId || DEFAULT_ORGANIZATION_ID;
   const modelGovernance = listModels().map((model) => { const calibration = getCalibrationOverview(model.id, organizationId); return buildModelGovernance(model, getModelValidationReport(), calibration, benchmarkCalibration(calibration)); });
   const runtime = getRuntimeReadiness();
-  const catalog = getDataCatalogReadiness();
+  const catalog = getDataCatalogReadinessForOrganization(organizationId);
   const sourceHealth = getSourceHealthOverview(Date.now(), organizationId);
   const actionLibrary = getActionLibraryReadiness();
   const readiness = buildPilotReadiness({ runtime, catalog, sourceHealth, modelGovernance, actionLibrary, tenancy: { organizationId }, pilotFeedback: listPilotFeedback(organizationId), historicalFixtures: getCalibrationOverview(undefined, organizationId).fixtures || [] });
@@ -628,7 +629,7 @@ app.get('/api/pilots/package', authIfConfigured, roleIfConfigured('admin', 'risk
   const organizationId = req.user?.organizationId || DEFAULT_ORGANIZATION_ID;
   const modelGovernance = listModels().map((model) => { const calibration = getCalibrationOverview(model.id, organizationId); return buildModelGovernance(model, getModelValidationReport(), calibration, benchmarkCalibration(calibration)); });
   const runtime = getRuntimeReadiness();
-  const catalog = getDataCatalogReadiness();
+  const catalog = getDataCatalogReadinessForOrganization(organizationId);
   const sourceHealth = getSourceHealthOverview(Date.now(), organizationId);
   const actionLibrary = getActionLibraryReadiness();
   const readiness = buildPilotReadiness({ runtime, catalog, sourceHealth, modelGovernance, actionLibrary, tenancy: { organizationId }, pilotFeedback: listPilotFeedback(organizationId), historicalFixtures: getCalibrationOverview(undefined, organizationId).fixtures || [] });
