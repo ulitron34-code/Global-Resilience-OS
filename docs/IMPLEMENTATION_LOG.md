@@ -1,5 +1,13 @@
 # Implementation Log
 
+## Bloque: wedge comercial y preparación de piloto (2026-08-09)
+
+- Se añadió `docs/COMMERCIAL_WEDGE.md` con ICP, compradores, tres casos de uso,
+  definición de evento crítico, catálogo mínimo, criterios de éxito y guion de
+  entrevistas.
+- El documento distingue preparación local de evidencia externa y enlaza el
+  wedge con pilot kit, paquetes de decisión y gates de abstención.
+
 ## Bloque: readiness unificado de fuentes (2026-08-09)
 
 - La regla se centralizÃ³ en `sourceReadiness.js` y tambiÃ©n protege la ingesta
