@@ -8,11 +8,11 @@ La base local de Global Resilience OS queda implementada y verificable para cont
 
 ## Evidencia ejecutada
 
-- Backend: `npm.cmd test` — 44 pruebas correctas.
+- Backend: `npm.cmd test` — 45 pruebas correctas.
 - Frontend: `npm.cmd run lint` y `npm.cmd run build` — correctos.
 - Smoke end-to-end local: `LOCAL SMOKE TEST: PASS`.
 - Release evidence: `npm.cmd run verify` — PASS.
-- Rendimiento local: 60 solicitudes, 0 errores, p95 152.79 ms.
+- Rendimiento local: 60 solicitudes, 0 errores, p95 144.06 ms.
 - Auditoría portable: 0 hallazgos.
 - Dependencias de producción backend/frontend: 0 vulnerabilidades reportadas.
 - Reproducibilidad: manifests, lockfiles, `.env.example`, exclusiones y entrypoints: PASS.

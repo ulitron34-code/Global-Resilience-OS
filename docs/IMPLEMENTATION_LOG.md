@@ -116,3 +116,10 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
 - Los planes ahora conservan `statusHistory`, `assignedAt`, `decisionAt`, `executionStartedAt` y `completedAt`.
 - `GET /api/action-plans/timing` y `GET /api/metrics/scorecard` exponen el tiempo local de asignación y decisión cuando existe evidencia temporal.
 - Detección y explicación permanecen pendientes hasta recibir timestamps comparables de fuentes y revisión.
+## Bloque: rate limit específico para Decision Room (2026-08-09)
+
+- Se añadió un límite de 60 solicitudes por minuto por IP y token para el
+  endpoint público de enlaces compartidos.
+- Los excesos responden `429` con `Retry-After: 60`; los enlaces siguen sin
+  almacenamiento en caché.
+- Una prueba API cubre el límite antes de alcanzar el límite global.

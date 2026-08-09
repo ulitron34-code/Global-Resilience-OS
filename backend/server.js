@@ -111,6 +111,9 @@ const SERVICE_VERSION = '0.9.0';
 const requestCounts = new Map();
 const operationalMetrics = { startedAt: new Date().toISOString(), requests: 0, errors: 0, byRoute: new Map() };
 const loginAttempts = new Map();
+const shareRequestCounts = new Map();
+const SHARE_RATE_WINDOW_MS = 60_000;
+const SHARE_RATE_LIMIT = 60;
 
 const configuredOrigins = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',').map((origin) => origin.trim()).filter(Boolean) : null;
 app.use(cors({ origin: (origin, callback) => {
@@ -431,7 +434,27 @@ app.post('/api/cases/:caseId/shares/:shareId/revoke', authIfConfigured, roleIfCo
   if (!result) return res.status(404).json({ error: 'Enlace de decisión no encontrado' });
   res.json(result);
 });
-app.get('/api/shares/:token', (req, res) => {
+
+function shareRateLimit(req, res, next) {
+  const now = Date.now();
+  const key = `${req.ip || 'local'}:${req.params.token}`;
+  const current = shareRequestCounts.get(key) || { startedAt: now, count: 0 };
+  if (now - current.startedAt > SHARE_RATE_WINDOW_MS) { current.startedAt = now; current.count = 0; }
+  current.count += 1;
+  shareRequestCounts.set(key, current);
+  if (shareRequestCounts.size > 5000) {
+    for (const [entryKey, entry] of shareRequestCounts) {
+      if (now - entry.startedAt > SHARE_RATE_WINDOW_MS) shareRequestCounts.delete(entryKey);
+    }
+  }
+  if (current.count > SHARE_RATE_LIMIT) {
+    res.set('retry-after', '60');
+    return res.status(429).json({ error: 'Límite de acceso al enlace excedido', retryAfterSeconds: 60 });
+  }
+  next();
+}
+
+app.get('/api/shares/:token', shareRateLimit, (req, res) => {
   const result = getDecisionPackageByShareToken(req.params.token);
   if (!result) return res.status(404).json({ error: 'Enlace inexistente, revocado o expirado' });
   res.set('Cache-Control', 'no-store').json(result);

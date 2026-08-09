@@ -38,3 +38,16 @@ test('decision share API creates, serves and revokes a read-only package', async
   const revokedResponse = await fetch(`${baseUrl}${created.apiPath}`);
   assert.equal(revokedResponse.status, 404);
 });
+
+test('decision share API applies a dedicated per-token rate limit', async () => {
+  const createdResponse = await fetch(`${baseUrl}/api/cases/RS-0827/shares`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ expiresInHours: 12, audience: 'rate limit test' }) });
+  const created = await createdResponse.json();
+  let limited = null;
+  for (let index = 0; index < 61; index += 1) {
+    const response = await fetch(`${baseUrl}${created.apiPath}`);
+    if (response.status === 429) { limited = response; break; }
+  }
+  assert.ok(limited, 'the public share must be rate limited before the global API limit');
+  assert.equal(limited.headers.get('retry-after'), '60');
+  assert.equal((await limited.json()).retryAfterSeconds, 60);
+});

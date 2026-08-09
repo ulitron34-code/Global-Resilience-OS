@@ -74,7 +74,7 @@ Fecha de auditoria: 8 de agosto de 2026.
 
 ## Gates de aceptacion local
 
-- Backend: 44 pruebas pasando.
+- Backend: 45 pruebas pasando.
 - Frontend: lint y build de produccion pasando.
 - Smoke local: PASS.
 - OpenAPI: JSON valido; 134 rutas documentadas, sin faltantes ni duplicados.

@@ -28,3 +28,9 @@ Antes de producción se debe migrar el registro de enlaces a Supabase, aplicar
 RLS por organización, añadir rate limiting específico para enlaces, registrar
 IP/actor conforme a la política de privacidad y revisar la exposición de cada
 campo del paquete.
+## Protección local
+
+El endpoint público aplica un límite específico de 60 accesos por minuto por
+IP y token, responde `429` con `Retry-After: 60` y conserva `Cache-Control:
+no-store`. Este control local no sustituye WAF, CDN, almacenamiento gestionado
+ni políticas de privacidad del entorno productivo.
