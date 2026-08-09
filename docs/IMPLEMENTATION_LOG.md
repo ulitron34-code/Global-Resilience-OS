@@ -349,3 +349,5 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
 - La clasificacion de fuentes ilustrativas se centralizo por estado, cobertura,
   nombre e identificador; salud, calidad, scorecard y piloto ya no dependen
   unicamente del sufijo `-demo`.
+- Pilot Readiness ahora exige al menos una fuente no ilustrativa para superar
+  el gate tecnico y reporta el conteo de fuentes productivas por separado.

@@ -88,3 +88,12 @@ test('demo sources never count as productive pilot coverage', () => {
   assert.match(result.definitions.sourceCoverage, /demo no cuenta/);
   assert.ok(result.missingEvidence.includes('fuentes productivas licenciadas'));
 });
+
+test('pilot readiness does not pass source gate with demo-only feeds', () => {
+  const result = buildPilotReadiness({
+    ...technicalInputs,
+    sourceHealth: { sources: [{ id: 'provider-demo', status: 'demo', health: 'demo' }] },
+  });
+  assert.equal(result.checks.find((check) => check.id === 'source_health').pass, false);
+  assert.equal(result.technicalReady, false);
+});

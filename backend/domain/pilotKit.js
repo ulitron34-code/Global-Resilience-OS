@@ -17,10 +17,12 @@ export function buildPilotReadiness({ runtime, catalog, sourceHealth, modelGover
   const economicEvidenceCount = feedback.filter((item) => ['pilot_review', 'gate_review'].includes(item.stage) && item.evidenceType === 'economic_value' && item.evidence).length;
   const successCriteriaCount = feedback.filter((item) => ['pilot_review', 'gate_review'].includes(item.stage) && item.evidenceType === 'success_criteria' && item.evidence).length;
   const verifiedHistoricalCount = (Array.isArray(historicalFixtures) ? historicalFixtures : []).filter((item) => getCalibrationEligibility(item).eligible).length;
+  const observedSources = Array.isArray(sourceHealth?.sources) ? sourceHealth.sources : [];
+  const productiveSourceCount = observedSources.filter((item) => !isIllustrativeSource(item)).length;
   const checks = [
     { id: 'runtime', label: 'Runtime local reproducible', pass: Boolean(runtime?.ready), evidence: runtime?.ready ? 'runtime readiness pass' : 'configuracion local incompleta' },
     { id: 'data_quality', label: 'Datos no materiales sin gate', pass: Boolean(catalog?.ready), evidence: catalog?.ready ? 'catalogo listo' : 'licencia/cobertura/frescura requieren revision' },
-    { id: 'source_health', label: 'Fuentes observables', pass: Boolean(sourceHealth?.sources?.length), evidence: `${sourceHealth?.sources?.length || 0} fuentes observadas` },
+    { id: 'source_health', label: 'Fuentes productivas observables', pass: productiveSourceCount > 0, evidence: `${productiveSourceCount}/${observedSources.length} fuentes no ilustrativas observadas` },
     { id: 'model_abstention', label: 'Modelo con abstencion', pass: Array.isArray(modelGovernance) && modelGovernance.every((item) => item?.decision), evidence: Array.isArray(modelGovernance) ? `${modelGovernance.length} decisiones de gobernanza` : 'gobernanza no disponible' },
     { id: 'action_library', label: 'Acciones con readiness', pass: Boolean(actionLibrary?.ready), evidence: actionLibrary?.ready ? 'biblioteca local lista' : 'biblioteca requiere revision' },
     { id: 'tenant_context', label: 'Contexto de organizacion', pass: Boolean(tenancy?.organizationId), evidence: tenancy?.organizationId || 'sin organizacion activa' },
@@ -64,7 +66,7 @@ export function buildPilotMetrics({ cases = [], actionPlans = [], sourceHealth, 
   return {
     scope: 'local-pilot',
     generatedAt: new Date().toISOString(),
-    metrics: { casesObserved: cases.length, casesClosed: closedCases, actionsDocumented: documentedActions, outcomesRecorded: withOutcome, sourceCoverage: sourceCount ? healthySources / sourceCount : null, illustrativeSourceCount: illustrativeSources, notificationsObserved: notifications.length },
+    metrics: { casesObserved: cases.length, casesClosed: closedCases, actionsDocumented: documentedActions, outcomesRecorded: withOutcome, sourceCoverage: sourceCount ? healthySources / sourceCount : null, productiveSourceCount: sourceCount - illustrativeSources, illustrativeSourceCount: illustrativeSources, notificationsObserved: notifications.length },
     definitions: { timeToDecision: 'requiere timestamps de senal y decision', avoidedLoss: 'requiere outcome con evidencia; no se infiere del demo', hoursRecovered: 'requiere captura de tiempo del usuario', sourceCoverage: 'proporcion de fuentes con health healthy; demo no cuenta como cobertura productiva' },
     missingEvidence: ['cliente piloto', 'baseline externo', 'timestamps de decision', 'costo evitado validado', 'fuentes productivas licenciadas'],
   };
