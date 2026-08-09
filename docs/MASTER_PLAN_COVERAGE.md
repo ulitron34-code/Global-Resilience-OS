@@ -13,7 +13,7 @@ Fecha de auditoria: 9 de agosto de 2026.
 | 4. Action OS | Implementada localmente | playbooks, planes, aprobacion, outcomes, recovery y action library | Ticketing, mensajeria y acciones reales |
 | 5. Produccion enterprise | Preparada/documentada | RBAC, contrato de entorno, SQL Supabase 001-005, RLS, snapshots, backups, handoff y auditoría externa local | GitHub actualizado, RLS real con dos organizaciones, SSO/MFA, secretos y observabilidad |
 | 6. Piloto | Preparacion local | pilot kit, readiness y scorecard | Cliente, datos reales, baseline y medicion de valor |
-| 7. Escala y defensa | Roadmap local | roadmap, red cooperativa seed y evidencia regulatoria | Red real, marketplace, certificaciones y unit economics |
+| 7. Escala y defensa | Roadmap local ampliado | roadmap, red cooperativa seed, perfiles regionales/verticales, caso económico y evidencia regulatoria | Red real, marketplace, certificaciones y unit economics validado con clientes |
 
 ## Capacidades locales verificadas
 
@@ -31,6 +31,8 @@ Fecha de auditoria: 9 de agosto de 2026.
 - Seguridad local, contrato de entorno y bloqueo de acciones externas.
 - Ingesta batch, fixtures historicas y gates de contratos de conectores.
 - Paquete de piloto, scorecard operativo y Enterprise Readiness.
+- Perfiles regionales y verticales con datos requeridos, abstención productiva y revisión de supuestos.
+- Caso económico de piloto con valor protegido, neto de primer año, payback y gate explícito de evidencia; no valida willingness-to-pay.
 - Esquema Supabase 001-005 con tablas normalizadas, RLS y politicas de lectura
   y escritura acotadas por tenant y rol.
 - Control plane normalizado para notificaciones, webhooks, entregas y jobs en
@@ -39,7 +41,7 @@ Fecha de auditoria: 9 de agosto de 2026.
 - Proyección determinista del control plane para backfill normalizado, con
   validación de tenant, claves foráneas y ausencia de secretos planos.
 - CI preparado para Node 20/22 con permisos de solo lectura.
-- OpenAPI completo: 139 rutas documentadas, sin faltantes ni duplicados.
+- OpenAPI completo: 146 rutas documentadas, sin faltantes ni duplicados.
 
 ## Pendientes que no deben simularse localmente
 
@@ -54,7 +56,7 @@ Fecha de auditoria: 9 de agosto de 2026.
 
 ## Gates de aceptacion local
 
-- Backend: 92 pruebas pasando.
+- Backend: 96 pruebas pasando.
 - Frontend: lint y build de produccion pasando.
 - `npm.cmd run verify`: PASS completo, incluyendo smoke, rendimiento,
   artefacto standalone, exportacion PDF, auditoria portable, reproducibilidad,

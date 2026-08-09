@@ -4,11 +4,11 @@ Fecha de corte: 2026-08-09.
 
 ## Estado local verificado
 
-- Backend: 92 pruebas PASS.
+- Backend: 96 pruebas PASS.
 - Frontend: lint y build PASS.
 - Release evidence: `npm.cmd run verify` PASS.
 - Plan Maestro: fases locales 0-7 y salvaguardas PASS.
-- OpenAPI: 139 rutas documentadas, sin faltantes ni duplicados.
+- OpenAPI: 146 rutas documentadas, sin faltantes ni duplicados.
 - Supabase schema audit: migraciones 001-005, tablas, columnas de tenant,
   RLS y politicas de lectura PASS.
 - Smoke, artefacto standalone, exportacion PDF, rendimiento, reproducibilidad,
