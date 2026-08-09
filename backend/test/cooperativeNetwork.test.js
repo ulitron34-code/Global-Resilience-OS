@@ -14,11 +14,21 @@ test('cooperative preview records consent evidence without sharing before review
     consent: true,
     consentActor: 'analyst@example.com',
     consentAt: '2026-08-08T13:00:00Z',
+    reidentificationReviewed: true,
+    reviewActor: 'privacy@example.com',
+    reviewAt: '2026-08-08T13:05:00Z',
   });
   assert.equal(preview.status, 'ready_for_human_review');
   assert.equal(preview.sharedSignals.length, 3);
-  assert.deepEqual(preview.consentEvidence, { purpose: 'cooperative_incident_preview', actor: 'analyst@example.com', recordedAt: '2026-08-08T13:00:00Z', scope: 'dry_run_only' });
+  assert.deepEqual(preview.consentEvidence, { purpose: 'cooperative_incident_preview', actor: 'analyst@example.com', recordedAt: '2026-08-08T13:00:00Z', scope: 'dry_run_only', reidentificationReview: { required: true, completed: true, actor: 'privacy@example.com', completedAt: '2026-08-08T13:05:00Z' } });
   assert.equal(verifyPackageIntegrity(preview), true);
   assert.equal(Object.hasOwn(preview.sharedSignals[0], 'id'), false);
   assert.equal(Object.hasOwn(preview.sharedSignals[0], 'location'), false);
+});
+
+test('cooperative preview abstains until re-identification review is explicit', () => {
+  const preview = buildCooperativeIncidentPreview({ alerts: [{ severity: 'high', impactUsd: 100000, sourceIds: [], createdAt: '2026-08-08T10:00:00Z' }, { severity: 'medium', impactUsd: 1000, sourceIds: [], createdAt: '2026-08-08T10:00:00Z' }, { severity: 'low', impactUsd: 100, sourceIds: [], createdAt: '2026-08-08T10:00:00Z' }], consent: true, minCohort: 3 });
+  assert.equal(preview.status, 'reidentification_review_required');
+  assert.equal(preview.sharedSignals.length, 0);
+  assert.equal(preview.consentEvidence.reidentificationReview.completed, false);
 });

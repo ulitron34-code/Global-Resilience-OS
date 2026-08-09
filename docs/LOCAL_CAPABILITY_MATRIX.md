@@ -65,6 +65,10 @@ externas se mantienen fuera de alcance por decisión del proyecto.
 
 ## Gates locales
 
+El preview cooperativo exige consentimiento, cohorte minima y revision explicita
+de reidentificacion antes de generar senales compartibles; el modo real sigue
+bloqueado por `dry_run_only`.
+
 ```powershell
 cd backend; npm test
 cd ..; node scripts/local-smoke-test.js

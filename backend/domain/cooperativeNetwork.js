@@ -12,7 +12,7 @@ function dayBucket(value) {
   return Number.isFinite(parsed) ? new Date(parsed).toISOString().slice(0, 10) : null;
 }
 
-export function buildCooperativeIncidentPreview({ alerts = [], minCohort = 3, consent = false, consentActor = null, consentAt = null } = {}) {
+export function buildCooperativeIncidentPreview({ alerts = [], minCohort = 3, consent = false, consentActor = null, consentAt = null, reidentificationReviewed = false, reviewActor = null, reviewAt = null } = {}) {
   const cohort = Math.max(3, Math.min(20, Number(minCohort) || 3));
   const signals = (Array.isArray(alerts) ? alerts : []).map((alert) => ({
     severity: alert.severity || 'unknown',
@@ -22,16 +22,16 @@ export function buildCooperativeIncidentPreview({ alerts = [], minCohort = 3, co
     observedDay: dayBucket(alert.payload?.observedAt || alert.createdAt),
   }));
   const eligible = signals.length >= cohort;
-  const canShare = Boolean(consent) && eligible;
+  const canShare = Boolean(consent) && eligible && Boolean(reidentificationReviewed);
   return attachPackageIntegrity({
     schemaVersion: '1.0.0-local',
     generatedAt: new Date().toISOString(),
     mode: 'dry_run_only',
     consentRequired: true,
     consentProvided: Boolean(consent),
-    consentEvidence: { purpose: 'cooperative_incident_preview', actor: consent ? consentActor || 'operator_unspecified' : null, recordedAt: consent ? consentAt || new Date().toISOString() : null, scope: 'dry_run_only' },
+    consentEvidence: { purpose: 'cooperative_incident_preview', actor: consent ? consentActor || 'operator_unspecified' : null, recordedAt: consent ? consentAt || new Date().toISOString() : null, scope: 'dry_run_only', reidentificationReview: { required: true, completed: Boolean(reidentificationReviewed), actor: reidentificationReviewed ? reviewActor || 'reviewer_unspecified' : null, completedAt: reidentificationReviewed ? reviewAt || new Date().toISOString() : null } },
     anonymization: { applied: true, removedFields: ['id', 'externalId', 'location', 'caseId', 'organizationId'], kAnonymityMinimum: cohort, cohortEligible: eligible },
-    status: canShare ? 'ready_for_human_review' : !consent ? 'consent_required' : 'abstain_insufficient_cohort',
+    status: canShare ? 'ready_for_human_review' : !consent ? 'consent_required' : !eligible ? 'abstain_insufficient_cohort' : 'reidentification_review_required',
     signalCount: signals.length,
     sharedSignals: canShare ? signals : [],
     disclaimer: 'PrevisualizaciÃ³n local anonimizada. No comparte datos, no contacta otros tenants y requiere gobernanza, consentimiento y revisiÃ³n de reidentificaciÃ³n antes de cualquier red cooperativa real.'

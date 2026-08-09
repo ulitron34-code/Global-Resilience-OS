@@ -1,5 +1,12 @@
 # Implementation Log
 
+## Bloque: gate explícito de reidentificación cooperativa (2026-08-09)
+
+- El preview cooperativo ahora requiere consentimiento, cohorte mínima y una
+  revisión explícita de reidentificación antes de marcarse listo para revisión.
+- La UI expone ambos controles y el paquete conserva actor/fecha de la revisión;
+  el intercambio real continúa bloqueado por `dry_run_only`.
+
 ## Bloque: evidencia de consentimiento de red cooperativa (2026-08-09)
 
 - El preview cooperativo conserva propósito, actor, fecha y alcance del
