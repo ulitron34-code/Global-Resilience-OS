@@ -105,6 +105,7 @@ import {
   listIncidents,
   createIncident,
   updateIncident,
+  getRemoteStoreStatus,
 } from './domain/store.js';
 
 export const app = express();
@@ -254,6 +255,7 @@ app.get('/api/runtime/supabase/check', async (req, res) => {
   const result = await checkSupabaseConnection();
   res.status(result.reachable ? 200 : 503).json(result);
 });
+app.get('/api/runtime/supabase/persistence', (req, res) => res.json(getRemoteStoreStatus()));
 app.get('/api/runtime/config-contract', (req, res) => { const contract = getEnvironmentContract(); res.status(contract.ready ? 200 : 503).json(contract); });
 app.get('/api/readiness/enterprise', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => {
   const modelGovernance = listModels().map((model) => { const calibration = getCalibrationOverview(model.id); return buildModelGovernance(model, getModelValidationReport(), calibration, benchmarkCalibration(calibration)); });

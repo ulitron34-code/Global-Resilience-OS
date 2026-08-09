@@ -6,12 +6,14 @@ export function getSupabaseConfig(env = process.env) {
   const serviceRoleKeyConfigured = Boolean(env.SUPABASE_SERVICE_ROLE_KEY);
   const dataMode = env.DATA_MODE || 'illustrative';
   const persistenceMode = env.PERSISTENCE_MODE || (dataMode === 'supabase' ? 'supabase' : 'local-file');
+  const organizationSlug = env.SUPABASE_ORGANIZATION_SLUG || 'global-resilience-pilot';
   return {
     projectUrl: url,
     projectRef: url.match(/https:\/\/([a-z0-9-]+)\.supabase\.co/i)?.[1] || null,
     anonKeyConfigured,
     serviceRoleKeyConfigured,
     persistenceMode,
+    organizationSlug,
     configured: anonKeyConfigured || serviceRoleKeyConfigured,
     safeForClient: anonKeyConfigured,
   };
@@ -33,6 +35,11 @@ export function getSupabaseReadiness(env = process.env) {
     config: { ...config, anonKeyConfigured: config.anonKeyConfigured, serviceRoleKeyConfigured: config.serviceRoleKeyConfigured },
     disclaimer: 'La configuración no valida credenciales contra la red; la prueba de conexión se ejecuta al habilitar el adaptador remoto.',
   };
+}
+
+export function getSupabaseRemoteConfig(env = process.env) {
+  const config = getSupabaseConfig(env);
+  return { ...config, serviceRoleKey: env.SUPABASE_SERVICE_ROLE_KEY || null };
 }
 
 export async function checkSupabaseConnection(env = process.env, fetchImpl = fetch) {

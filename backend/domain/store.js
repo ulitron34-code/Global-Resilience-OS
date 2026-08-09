@@ -1,5 +1,5 @@
 import { createHash, createHmac, randomBytes } from 'node:crypto';
-import { persistState, restoreState, verifyAuditChain } from './persistence.js';
+import { getRemotePersistenceStatus, persistState, restoreState, verifyAuditChain } from './persistence.js';
 import { computeImpact } from '../engine/impactEngine.js';
 import { validateEventEnvelope } from './eventContract.js';
 import { canTransitionIncident, normalizeIncidentInput, validateIncidentPatch } from './incidentOps.js';
@@ -36,7 +36,7 @@ const initialAuditLog = [
   { id: 'AUD-0002', entityType: 'case', entityId: 'RS-0827', action: 'correlation_confirmed', actor: 'system', message: 'Cable y congestión portuaria elevan la exposición.', createdAt: now },
   { id: 'AUD-0001', entityType: 'case', entityId: 'RS-0827', action: 'case_opened', actor: 'system', message: 'Umbral de impacto mayor a $2M activado.', createdAt: now },
 ];
-const restored = restoreState(structuredClone(seed));
+const restored = await restoreState(structuredClone(seed));
 const state = { alerts: restored.alerts, cases: restored.cases, scenarios: restored.scenarios, sources: restored.sources, deadLetters: restored.deadLetters || [], calibrationFixtures: restored.calibrationFixtures || [], pilotFeedback: restored.pilotFeedback || [], incidents: restored.incidents || [], sourceIntakeReviews: restored.sourceIntakeReviews || [], decisionShares: restored.decisionShares || [] };
 const auditLog = restored.auditLog || initialAuditLog;
 const notifications = restored.notifications || [
@@ -46,6 +46,10 @@ const comments = restored.comments || [];
 const webhooks = restored.webhooks || [];
 const webhookDeliveries = restored.webhookDeliveries || [];
 const jobRuns = restored.jobRuns || [];
+
+if (getRemotePersistenceStatus().enabled && getRemotePersistenceStatus().state === 'empty') persistState(state, auditLog, notifications, comments, webhooks, webhookDeliveries, jobRuns);
+
+export function getRemoteStoreStatus() { return getRemotePersistenceStatus(); }
 
 function clone(value) {
   return structuredClone(value);
