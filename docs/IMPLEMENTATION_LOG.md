@@ -487,3 +487,9 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
 - La UI conserva `—` cuando no hay evidencia y muestra la nota del scorecard;
   el auditor de contrato UI verifica estas claves.
 La suite vigente queda en 86 pruebas backend PASS.
+## Bloque: integridad y redacción del preview cooperativo (2026-08-09)
+
+- El preview cooperativo usa la misma huella SHA-256 verificable que los
+  paquetes de evidencia.
+- La prueba confirma que los campos identificables no llegan a `sharedSignals`
+  y que el paquete queda limitado a `dry_run_only`.

@@ -15,3 +15,6 @@ anonimizacion revisada, control de reidentificacion y suficiente muestra histór
 El preview conserva `consentEvidence` con propósito, actor, fecha y alcance
 `dry_run_only`; esto documenta autorización para revisar el paquete, no autoriza
 el intercambio real de datos.
+El preview conserva también una huella SHA-256 verificable del paquete. La
+huella no autoriza intercambio, elimina identificadores antes de compartir y
+queda limitada a revisión humana en `dry_run_only`.

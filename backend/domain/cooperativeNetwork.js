@@ -1,3 +1,5 @@
+import { attachPackageIntegrity } from './packageIntegrity.js';
+
 function impactBand(value) {
   const amount = Number(value) || 0;
   if (amount >= 1_000_000) return '1m_plus';
@@ -21,7 +23,7 @@ export function buildCooperativeIncidentPreview({ alerts = [], minCohort = 3, co
   }));
   const eligible = signals.length >= cohort;
   const canShare = Boolean(consent) && eligible;
-  return {
+  return attachPackageIntegrity({
     schemaVersion: '1.0.0-local',
     generatedAt: new Date().toISOString(),
     mode: 'dry_run_only',
@@ -33,5 +35,5 @@ export function buildCooperativeIncidentPreview({ alerts = [], minCohort = 3, co
     signalCount: signals.length,
     sharedSignals: canShare ? signals : [],
     disclaimer: 'PrevisualizaciÃ³n local anonimizada. No comparte datos, no contacta otros tenants y requiere gobernanza, consentimiento y revisiÃ³n de reidentificaciÃ³n antes de cualquier red cooperativa real.'
-  };
+  });
 }
