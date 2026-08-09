@@ -33,6 +33,7 @@ Fecha de auditoria: 9 de agosto de 2026.
 - Paquete de piloto, scorecard operativo y Enterprise Readiness.
 - Perfiles regionales y verticales con datos requeridos, abstención productiva y revisión de supuestos.
 - Caso económico de piloto con valor protegido, neto de primer año, payback y gate explícito de evidencia; no valida willingness-to-pay.
+- Matriz verificable del backlog P0/P1/P2 en `docs/PLAN_BACKLOG_STATUS.md`, separando entregables locales de bloqueos externos.
 - Esquema Supabase 001-005 con tablas normalizadas, RLS y politicas de lectura
   y escritura acotadas por tenant y rol.
 - Control plane normalizado para notificaciones, webhooks, entregas y jobs en

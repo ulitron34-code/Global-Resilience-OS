@@ -537,3 +537,7 @@ Se añadió `POST /api/pilots/value-case` y su panel operativo. Calcula exposici
 ## Bloque: contexto de decisión en el paquete de piloto (2026-08-09)
 
 El paquete JSON y Markdown de piloto ahora conserva el perfil regional/vertical aplicado y el estado del caso económico. Así el handoff mantiene visibles la abstención del modelo y que el willingness-to-pay todavía no está validado.
+
+## Bloque: matriz verificable del backlog P0/P1/P2 (2026-08-09)
+
+Se documentó el estado de cada ítem del Plan Maestro con evidencia local y el requisito externo que todavía lo bloquea. La matriz evita confundir un contrato o un dry-run con una integración productiva.
