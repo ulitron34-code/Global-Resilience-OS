@@ -9,7 +9,7 @@ function check(id, phase, required, evidence) {
 }
 
 const phases = {
-  'phase-0': ['docs/PRODUCT_REQUIREMENTS.md', 'docs/DATA_REQUIREMENTS.md', 'docs/PILOT_READINESS.md', 'docs/COMMERCIAL_WEDGE.md'],
+  'phase-0': ['docs/PRODUCT_REQUIREMENTS.md', 'docs/DATA_REQUIREMENTS.md', 'docs/PILOT_READINESS.md', 'docs/COMMERCIAL_WEDGE.md', 'docs/MASTER_PLAN_30_DAY_EXECUTION.md'],
   'phase-1': ['backend/server.js', 'backend/test', 'backend/.env.example', 'frontend/.env.example', 'docs/THREAT_MODEL.md', 'docs/RELEASE_CHECKLIST.md', 'scripts/local-smoke-test.js', 'scripts/local-installation-check.js', 'package.json'],
   'phase-2': ['backend/domain/eventContract.js', 'backend/domain/dataCatalog.js', 'backend/domain/batchIngestion.js', 'backend/domain/connectors.js', 'docs/DATA_CONTRACTS.md', 'docs/CONNECTOR_CONTRACTS.md', 'docs/SOURCE_HEALTH_SWEEP.md'],
   'phase-3': ['backend/domain/impactGraph.js', 'backend/domain/entityResolution.js', 'backend/domain/evidenceClassification.js', 'backend/domain/calibrationBenchmark.js', 'backend/domain/backtesting.js', 'backend/domain/sensitivityAnalysis.js', 'backend/domain/uncertainty.js', 'docs/TEMPORAL_IMPACT_GRAPH.md', 'docs/BACKTESTING.md'],

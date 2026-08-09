@@ -4,7 +4,7 @@
 
 - [x] `backend npm test` pasa sin fallos.
 - [x] `frontend npm run lint` pasa sin warnings accionables.
-- [ ] `frontend npm run build` genera un artefacto reproducible en este
+- [x] `frontend npm run build` genera un artefacto reproducible en este
   entorno; el comando queda pendiente mientras esbuild no puede leer la ruta
   de configuración desde su proceso hijo.
 - [x] `scripts/standalone-artifact-check.js` sirve `frontend/dist` y verifica HTML/assets sin backend.

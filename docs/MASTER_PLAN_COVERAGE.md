@@ -6,7 +6,7 @@ Fecha de auditoria: 9 de agosto de 2026.
 
 | Fase | Estado local | Evidencia | Bloqueo restante |
 |---|---|---|---|
-| 0. Definicion y foco | Preparada localmente | `COMMERCIAL_WEDGE.md`, `PRODUCT_REQUIREMENTS.md`, `ROADMAP.md`, pilot kit | Entrevistas reales, ICP validado y presupuesto del piloto |
+| 0. Definicion y foco | Preparada localmente | `COMMERCIAL_WEDGE.md`, `PRODUCT_REQUIREMENTS.md`, `ROADMAP.md`, `MASTER_PLAN_30_DAY_EXECUTION.md`, pilot kit | Entrevistas reales, ICP validado y presupuesto del piloto |
 | 1. Hardening local | Implementada | tests, lint, build, smoke, OpenAPI, threat model, restore, instalacion limpia y CI preparado | Ejecutar CI remoto y staging |
 | 2. Datos reales y calidad | Infraestructura local preparada | contratos, catalogo, batch, DLQ y conectores | Licencias, adaptadores autorizados e historial real |
 | 3. Impact Graph y calibracion | Baseline local implementado | grafo temporal, entity resolution, calibracion y backtesting | Eventos historicos y validacion experta |
