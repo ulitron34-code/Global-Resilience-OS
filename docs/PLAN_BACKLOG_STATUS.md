@@ -40,7 +40,7 @@ un cliente. `Implementado local` no significa apto para vender como enterprise.
 |---|---|---|---|
 | Red cooperativa anonimizada | Preview local | consentimiento, k-anonymity e integridad | Consorcio real y consentimiento legal |
 | Marketplace de capacidad | Dry-run local | ofertas, inquiries y `externalAction=blocked` | Proveedores, cotizaciones y contratos |
-| APIs para terceros | Contrato local | OpenAPI 146/146 y conectores | Partners y SLA |
+| APIs para terceros | Contrato local | OpenAPI 147/147 y conectores | Partners y SLA |
 | Modelos regionales/verticales | Perfiles locales asumidos | `/api/models/profiles` y panel | Datos licenciados y calibración por segmento |
 | Paquetes regulatorios | Implementado local como evidencia | frameworks y evidence map | Asesoría legal y certificación |
 | Agentes asistivos | Implementado local con límites | sugerencias, abstención y aprobación humana | Evaluación independiente y datos reales |

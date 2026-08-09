@@ -549,3 +549,11 @@ Se documentó el estado de cada ítem del Plan Maestro con evidencia local y el 
 ## Bloque: redacción de enlaces compartidos (2026-08-09)
 
 Los paquetes expuestos por enlaces de solo lectura ahora aplican `local-share-redaction-v1`. Se conservan caso, escenario y evidencia necesarios para revisión, pero se excluyen tenant, payload crudo, secretos, hashes de token, contratos de licencia y actores internos.
+# Bloque: manifiesto verificable de handoff
+
+- Se agrego `GET /api/ops/evidence-manifest` con hashes SHA-256, tamanos y estado
+  de los artefactos esenciales del Plan Maestro, OpenAPI, Supabase y release.
+- El endpoint devuelve metadatos ordenados y un digest del manifiesto; no lee ni
+  expone estado mutable, credenciales o secretos.
+- La evidencia sigue siendo local: almacenamiento firmado, retencion y validacion
+  externa permanecen deliberadamente fuera de este bloque.

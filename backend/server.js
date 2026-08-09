@@ -41,6 +41,7 @@ import { buildOperationalScorecard } from './domain/operationalScorecard.js';
 import { buildEnterpriseReadiness } from './domain/enterpriseReadiness.js';
 import { attachDecisionEvidence } from './domain/decisionEvidence.js';
 import { buildCooperativeIncidentPreview } from './domain/cooperativeNetwork.js';
+import { buildEvidenceManifest } from './domain/evidenceManifest.js';
 import { authIfConfigured, listRoles, listUsers, login, requireAuth, revokeToken, roleIfConfigured } from './auth/auth.js';
 import {
   createCaseFromAlert,
@@ -304,6 +305,7 @@ app.get('/api/health/readiness', (req, res) => {
 app.get('/api/ops/snapshot', authIfConfigured, roleIfConfigured('admin'), (req, res) => {
   res.type('application/json').set('Content-Disposition', 'attachment; filename="resilience-local-snapshot.json"').send(JSON.stringify(getLocalSnapshot(req.user?.organizationId || DEFAULT_ORGANIZATION_ID), null, 2));
 });
+app.get('/api/ops/evidence-manifest', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(buildEvidenceManifest()));
 app.post('/api/ops/control-plane/projection', authIfConfigured, roleIfConfigured('admin'), (req, res) => {
   try {
     const organizationId = req.user?.organizationId || DEFAULT_ORGANIZATION_ID;

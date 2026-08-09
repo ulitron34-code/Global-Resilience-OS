@@ -9,6 +9,7 @@ El esquema OpenAPI resumido está en `docs/openapi.local.json`.
 - `GET /api/compliance/readiness` — controles locales y dependencias externas; no es certificación legal.
 - `GET /api/quality/report` — integridad de referencias, deduplicación y valores del estado local.
 - `GET /api/ops/snapshot` — snapshot JSON del estado del tenant autenticado; con `AUTH_REQUIRED=true` requiere admin.
+- `GET /api/ops/evidence-manifest` — manifiesto local SHA-256 de los artefactos de handoff; no expone contenidos ni secretos.
 - `POST /api/ops/restore` — restaura un snapshot validado sólo dentro del tenant autenticado, preservando otras organizaciones; requiere admin en modo protegido.
 - `POST /api/ops/control-plane/projection` — genera una proyección determinista y validada de notificaciones, webhooks, entregas y jobs para backfill hacia el esquema normalizado; requiere admin en modo protegido.
 - `GET /api/ops/metrics` — solicitudes, errores, latencia por ruta (promedio,

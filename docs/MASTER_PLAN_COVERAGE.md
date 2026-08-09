@@ -42,7 +42,9 @@ Fecha de auditoria: 9 de agosto de 2026.
 - Proyección determinista del control plane para backfill normalizado, con
   validación de tenant, claves foráneas y ausencia de secretos planos.
 - CI preparado para Node 20/22 con permisos de solo lectura.
-- OpenAPI completo: 146 rutas documentadas, sin faltantes ni duplicados.
+- OpenAPI completo: 147 rutas documentadas, sin faltantes ni duplicados.
+- Manifiesto local de integridad SHA-256 para artefactos de handoff, sin
+  exposición de contenidos operativos ni secretos.
 
 ## Pendientes que no deben simularse localmente
 

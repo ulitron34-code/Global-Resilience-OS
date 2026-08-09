@@ -8,7 +8,7 @@ Fecha de corte: 2026-08-09.
 - Frontend: lint y build PASS.
 - Release evidence: `npm.cmd run verify` PASS.
 - Plan Maestro: fases locales 0-7 y salvaguardas PASS.
-- OpenAPI: 146 rutas documentadas, sin faltantes ni duplicados.
+- OpenAPI: 147 rutas documentadas, sin faltantes ni duplicados.
 - Supabase schema audit: migraciones 001-005, tablas, columnas de tenant,
   RLS y politicas de lectura PASS.
 - Smoke, artefacto standalone, exportacion PDF, rendimiento, reproducibilidad,
@@ -29,6 +29,10 @@ Los bloques mas recientes tambien incluyen perfiles regionales y verticales
 con abstencion explicita, caso economico de piloto gated por evidencia,
 preview de retencion parametrizable en modo dry-run y redaccion de paquetes
 compartidos bajo la politica `local-share-redaction-v1`.
+
+El handoff tambien puede comprobar la presencia e integridad de sus artefactos
+con `GET /api/ops/evidence-manifest`; el manifiesto es local y no sustituye la
+firma, almacenamiento ni verificacion de CI externa.
 
 ## Validacion externa aun requerida
 

@@ -30,6 +30,7 @@ externas se mantienen fuera de alcance por decisión del proyecto.
 | Datos | Fuentes licenciadas y calibración histórica | `docs/LIMITACIONES.md` | Pendiente de validación |
 
 | Operacion | Restauracion controlada desde snapshot | `/api/ops/restore` + confirmacion UX | Implementado local |
+| Trazabilidad | Manifiesto SHA-256 de artefactos de handoff | `/api/ops/evidence-manifest` | Implementado local; firma/almacenamiento externo pendientes |
 | Observabilidad | Metricas de solicitudes, errores y latencia tenant-scoped | `/api/ops/metrics` + panel Operacion | Implementado local |
 
 | Calidad | Integridad de referencias, deduplicacion y valores | `/api/quality/report` + Data quality gate | Implementado local |
