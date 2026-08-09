@@ -25,6 +25,16 @@ check('demo-policies-removed', ['sources', 'alerts', 'cases', 'scenarios', 'audi
 check('snapshot-policies', ['members can read platform snapshots', 'members can insert platform snapshots', 'members can update platform snapshots'].every((name) => sql.includes(`create policy "${name}"`)), 'snapshot read/write policies are organization-scoped');
 const writePolicies = ['analysts can insert action plan events', 'analysts can insert decision shares', 'analysts can update decision shares', 'analysts can insert source intake reviews', 'analysts can update source intake reviews', 'analysts can insert calibration fixtures', 'analysts can update calibration fixtures', 'analysts can insert incidents', 'analysts can update incidents'];
 check('operational-write-policies', writePolicies.every((name) => sql.includes(`create policy "${name}"`)), 'normalized operational writes require analyst or admin role and tenant match');
+const policyBody = (name) => {
+  const start = sql.indexOf(`create policy "${name}"`);
+  if (start < 0) return '';
+  const next = sql.indexOf('create policy "', start + 1);
+  return sql.slice(start, next < 0 ? undefined : next);
+};
+check('operational-write-policy-scope', writePolicies.every((name) => {
+  const body = policyBody(name);
+  return body.includes('organization_id = public.current_organization_id()') && body.includes("public.current_app_role() in ('admin', 'risk_analyst')");
+}), 'every normalized write policy checks tenant and allowed app role');
 const failed = checks.filter((item) => item.status === 'fail');
 console.log(JSON.stringify({ schemaVersion: '1.2.0-local', checkedAt: new Date().toISOString(), gate: failed.length ? 'FAIL' : 'PASS', files, checks, disclaimer: 'Textual local audit; run it again in Supabase staging before production.' }, null, 2));
 if (failed.length) process.exitCode = 1;
