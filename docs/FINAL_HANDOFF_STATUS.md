@@ -33,7 +33,7 @@ pública de solo lectura.
 ## Estado externo comprobado
 
 - GitHub: el remoto permanece en `8a0cfc2`; el checkout local está en
-  `ebd0e46`, 70 commits adelante y pendiente de publicación.
+  76 commits adelante y pendiente de publicación.
 - Supabase: tres migraciones aplicadas; `platform_snapshots` verificada con RLS
   y tres políticas.
 - Vercel: interfaz pública activa.

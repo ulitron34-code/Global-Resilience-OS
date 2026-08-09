@@ -13,7 +13,7 @@ Fecha de corte: 2026-08-09.
   RLS y politicas de lectura PASS.
 - Smoke, artefacto standalone, exportacion PDF, rendimiento, reproducibilidad,
   instalacion limpia y auditoria portable PASS.
-- Working tree limpio en el commit `ebd0e46`.
+- Working tree limpio en el commit local más reciente.
 
 ## Implementado localmente
 
