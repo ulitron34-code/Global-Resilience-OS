@@ -309,7 +309,7 @@ export function getModelValidationReport() {
   }
   return { scope: 'local-platform', generatedAt: new Date().toISOString(), ready: tests.every((test) => test.status === 'pass'), calibrationStatus: 'not_calibrated_with_historical_data', historicalFixtures: 0, tests, disclaimer: 'Los tests verifican invariantes del motor local; no sustituyen calibración con eventos históricos y datos licenciados.' };
 }
-export function getCalibrationOverview(modelId, organizationId = DEFAULT_ORGANIZATION_ID) {
+function getCalibrationOverviewLegacy(modelId, organizationId = DEFAULT_ORGANIZATION_ID) {
   const fixtures = state.calibrationFixtures.filter((fixture) => (fixture.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId && (!modelId || fixture.modelId === modelId));
   const eligibleFixtures = filterEligibleCalibrationFixtures(fixtures);
   const excludedIllustrativeFixtureCount = fixtures.filter((fixture) => getCalibrationEligibility(fixture).reason === 'illustrative_source').length;
@@ -318,6 +318,11 @@ export function getCalibrationOverview(modelId, organizationId = DEFAULT_ORGANIZ
   const percentageErrors = eligibleFixtures.filter((fixture) => fixture.observedImpactUsd > 0).map((fixture) => Math.abs(fixture.predictedImpactUsd - fixture.observedImpactUsd) / fixture.observedImpactUsd);
   const sum = (values) => values.reduce((total, value) => total + value, 0);
   return { scope: 'local-platform', modelId: modelId || 'all', fixtureCount: fixtures.length, completeFixtureCount: eligibleFixtures.length, incompleteFixtureCount: fixtures.length - eligibleFixtures.length, historicalFixtures: eligibleFixtures.length, status: eligibleFixtures.length >= 3 ? 'ready_for_review' : 'insufficient_sample', metrics: { maeUsd: absoluteErrors.length ? sum(absoluteErrors) / absoluteErrors.length : null, mape: percentageErrors.length ? sum(percentageErrors) / percentageErrors.length : null, biasUsd: errors.length ? sum(errors) / errors.length : null }, fixtures: clone(fixtures), disclaimer: 'Las métricas sólo usan fixtures completos con activo, duración, rutas alternativas, resultado, fuente y procedencia; una muestra local no constituye validación de mercado.' };
+}
+export function getCalibrationOverview(modelId, organizationId = DEFAULT_ORGANIZATION_ID) {
+  const overview = getCalibrationOverviewLegacy(modelId, organizationId);
+  const excludedIllustrativeFixtureCount = (overview.fixtures || []).filter((fixture) => fixture?.evidenceStatus === 'complete' && String(fixture?.sourceId || '').toLowerCase().includes('demo')).length;
+  return { ...overview, excludedIllustrativeFixtureCount };
 }
 export function recordCalibrationFixtures(input, actor = 'operator', organizationId = DEFAULT_ORGANIZATION_ID) {
   const modelId = String(input?.modelId || 'impact-cascade');

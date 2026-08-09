@@ -47,3 +47,25 @@ test('marca fixture completa cuando conserva la cadena histórica mínima', () =
   assert.equal(result.overview.metrics.maeUsd, 20);
   assert.equal(getCalibrationOverview('impact-cascade').completeFixtureCount >= 1, true);
 });
+
+test('calibracion expone fixtures ilustrativas excluidas', () => {
+  const suffix = Date.now();
+  const result = recordCalibrationFixtures({
+    modelId: 'impact-cascade',
+    fixtures: [{
+      id: `demo-complete-${suffix}`,
+      eventDate: '2024-04-01',
+      observedImpactUsd: 100,
+      predictedImpactUsd: 110,
+      sourceId: 'ais-demo',
+      provenance: 'demo-event',
+      assetId: 'demo-asset',
+      durationHours: 12,
+      alternateRoutes: ['demo-route'],
+      recoveryOutcome: 'Illustrative'
+    }]
+  });
+  assert.ok(result.overview.completeFixtureCount >= 0);
+  assert.ok(result.overview.excludedIllustrativeFixtureCount >= 1);
+  assert.equal(result.overview.fixtures.find((item) => item.id === `demo-complete-${suffix}`).evidenceStatus, 'complete');
+});

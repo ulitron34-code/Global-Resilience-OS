@@ -337,3 +337,6 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
   de evidencia productiva.
 - Pilot readiness reutiliza la misma elegibilidad de calibracion: fixtures
   incompletas o ilustrativas ya no pueden abrir el gate historico del piloto.
+- El resumen general de calibracion tambien expone el conteo de fixtures
+  ilustrativas excluidas, manteniendo consistencia entre overview, benchmark y
+  backtesting.
