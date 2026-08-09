@@ -1,5 +1,12 @@
 # Implementation Log
 
+## Bloque: Decision Room Markdown (2026-08-09)
+
+- Los enlaces compartibles de solo lectura admiten descarga Markdown sin
+  exponer hashes, tokens persistidos ni capacidades de mutación.
+- Decision Room muestra el botón de descarga y la prueba API verifica formato,
+  `no-store` y contenido legible.
+
 ## Bloque: paquete de piloto Markdown (2026-08-09)
 
 - El paquete consolidado de piloto admite exportación JSON y Markdown.

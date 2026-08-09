@@ -25,6 +25,7 @@ import { buildModelGovernance } from './domain/modelGovernance.js';
 import { buildAssistiveSuggestion } from './domain/assistiveAgent.js';
 import { buildPilotMetrics, buildPilotReadiness, getPilotInterviewGuide, normalizePilotFeedback } from './domain/pilotKit.js';
 import { pilotPackageToMarkdown } from './domain/pilotPackage.js';
+import { decisionPackageToMarkdown } from './domain/decisionPackageMarkdown.js';
 import { getIncidentRunbook } from './domain/incidentOps.js';
 import { buildSecurityPosture } from './domain/securityPosture.js';
 import { validateBatchInput } from './domain/batchIngestion.js';
@@ -469,6 +470,7 @@ function shareRateLimit(req, res, next) {
 app.get('/api/shares/:token', shareRateLimit, (req, res) => {
   const result = getDecisionPackageByShareToken(req.params.token);
   if (!result) return res.status(404).json({ error: 'Enlace inexistente, revocado o expirado' });
+  if (['markdown', 'md'].includes(String(req.query.format || '').toLowerCase())) return res.type('text/markdown').set('Cache-Control', 'no-store').set('Content-Disposition', 'attachment; filename="shared-decision-package.md"').send(decisionPackageToMarkdown(result));
   res.set('Cache-Control', 'no-store').json(result);
 });
 app.get('/api/audit/export', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => {

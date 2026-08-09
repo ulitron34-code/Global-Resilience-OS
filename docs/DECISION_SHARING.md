@@ -1,5 +1,8 @@
 # Decision sharing local
 
+El endpoint público admite `?format=json|markdown`; Markdown permite descargar
+una copia legible sin exponer el token almacenado ni habilitar mutaciones.
+
 La plataforma permite crear un enlace temporal de solo lectura para que un
 analista comparta un paquete de decisión con un revisor o cliente piloto.
 

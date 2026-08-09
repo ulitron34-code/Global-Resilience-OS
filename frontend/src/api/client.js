@@ -504,6 +504,17 @@ export async function revokeDecisionShare(caseId, shareId) {
 export async function getSharedDecisionPackage(token) {
   return fetchWithTimeout(`${BACKEND_URL}/api/shares/${encodeURIComponent(token)}`);
 }
+export async function downloadSharedDecisionPackage(token) {
+  const response = await fetch(`${BACKEND_URL}/api/shares/${encodeURIComponent(token)}?format=markdown`);
+  if (!response.ok) throw new Error(`No se pudo exportar el paquete compartido (${response.status})`);
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = 'shared-decision-package.md';
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
 
 export async function downloadLocalSnapshot() {
   const token = localStorage.getItem('resilience_token');

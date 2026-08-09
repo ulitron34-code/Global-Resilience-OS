@@ -32,6 +32,7 @@ Los endpoints de alertas, casos y métricas aceptan `vertical` como filtro. Las 
 - `GET /api/cases/:id/audit` — bitácora de cambios del caso.
 - `GET /api/cases/:id/decision-package?format=json|markdown` — exporta el paquete auditable en JSON técnico o Markdown legible para comité/operador.
 - `GET /api/pilots/package?format=json|markdown` — exporta el paquete consolidado de preparación de piloto.
+- `GET /api/shares/:token?format=json|markdown` — consulta o descarga un paquete compartido de solo lectura.
 - `GET /api/cases/:id/shares` — lista enlaces temporales de decisión sin exponer tokens.
 - `POST /api/cases/:id/shares` — crea un enlace de solo lectura; entrega el token claro una sola vez.
 - `POST /api/cases/:caseId/shares/:shareId/revoke` — revoca un enlace de decisión.

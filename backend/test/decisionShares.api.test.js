@@ -32,6 +32,10 @@ test('decision share API creates, serves and revokes a read-only package', async
   assert.equal(sharedResponse.status, 200);
   assert.equal(sharedResponse.headers.get('cache-control'), 'no-store');
   assert.equal((await sharedResponse.json()).package.case.id, 'RS-0827');
+  const sharedMarkdown = await fetch(`${baseUrl}${created.apiPath}?format=markdown`);
+  assert.equal(sharedMarkdown.status, 200);
+  assert.equal(sharedMarkdown.headers.get('content-type'), 'text/markdown; charset=utf-8');
+  assert.match(await sharedMarkdown.text(), /Paquete de decisi/);
 
   const revokeResponse = await fetch(`${baseUrl}/api/cases/RS-0827/shares/${created.share.id}/revoke`, { method: 'POST' });
   assert.equal(revokeResponse.status, 200);
