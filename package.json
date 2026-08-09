@@ -12,6 +12,7 @@
     "check:openapi": "node scripts/local-openapi-route-audit.js",
     "check:supabase": "node scripts/local-supabase-schema-check.js",
     "check:handoff": "node scripts/local-external-handoff-audit.js",
+    "check:production-preflight": "node scripts/local-production-preflight.js",
     "verify": "node scripts/local-release-evidence.js",
     "verify:install": "node scripts/local-installation-check.js",
     "start": "npm --prefix backend start",

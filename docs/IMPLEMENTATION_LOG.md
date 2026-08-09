@@ -1,5 +1,13 @@
 # Implementation Log
 
+## Bloque: preflight local de producción y tenant isolation (2026-08-09)
+
+- `npm.cmd run check:production-preflight` valida la matriz de configuración,
+  el rechazo de fuentes ilustrativas y una proyección control-plane para dos
+  organizaciones.
+- El preflight comprueba claves foráneas, IDs deterministas por tenant y que no
+  se proyecten secretos planos; mantiene explícitas las verificaciones externas.
+
 ## Bloque: auditoría ejecutable de handoff externo (2026-08-09)
 
 - Se añadió `npm.cmd run check:handoff` para validar el paquete de migraciones,

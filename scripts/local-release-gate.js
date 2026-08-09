@@ -25,7 +25,7 @@ const requiredFiles = [
   'scripts/local-reproducibility-check.js', 'docs/REPRODUCIBILITY_CHECK.md',
   'scripts/local-supabase-schema-check.js', 'docs/SUPABASE_SCHEMA_AUDIT.md',
   'backend/domain/enterpriseReadiness.js', 'docs/ENTERPRISE_READINESS.md',
-  'scripts/local-plan-audit.js', 'docs/LOCAL_PLAN_AUDIT.md', 'docs/UI_CONTRACT_AUDIT.md', 'scripts/local-ui-contract-audit.js', 'scripts/local-external-handoff-audit.js', 'docs/EXTERNAL_HANDOFF_AUDIT.md', 'docs/CURRENT_STATUS.md',
+  'scripts/local-plan-audit.js', 'docs/LOCAL_PLAN_AUDIT.md', 'docs/UI_CONTRACT_AUDIT.md', 'scripts/local-ui-contract-audit.js', 'scripts/local-external-handoff-audit.js', 'scripts/local-production-preflight.js', 'docs/EXTERNAL_HANDOFF_AUDIT.md', 'docs/PRODUCTION_PREFLIGHT.md', 'docs/CURRENT_STATUS.md',
   'scripts/local-openapi-route-audit.js', 'docs/OPENAPI_ROUTE_AUDIT.md',
 ];
 for (const relative of requiredFiles) check(`file:${relative}`, existsSync(file(relative)), 'required local artifact');
@@ -49,6 +49,8 @@ const openapiRouteAudit = readFileSync(file('scripts/local-openapi-route-audit.j
 check('openapi-route-audit', openapiRouteAudit.includes('documentedCount') && openapiRouteAudit.includes('duplicateRoutes'), 'OpenAPI route parity audit is present');
 const handoffAudit = readFileSync(file('scripts/local-external-handoff-audit.js'), 'utf8');
 check('external-handoff-audit', handoffAudit.includes('externalBlockers') && handoffAudit.includes('SUPABASE_SERVICE_ROLE_KEY'), 'external handoff package keeps blockers explicit and secrets managed');
+const productionPreflight = readFileSync(file('scripts/local-production-preflight.js'), 'utf8');
+check('production-preflight', productionPreflight.includes('externalVerificationStillRequired') && productionPreflight.includes('tenant-projection-isolates-rows'), 'production preflight keeps external verification explicit and checks tenant isolation');
 
 const failed = checks.filter((item) => item.status === 'fail');
 console.log(JSON.stringify({ gate: failed.length ? 'FAIL' : 'PASS', checkedAt: new Date().toISOString(), checks }, null, 2));
