@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { validateSourceIntake } from '../domain/dataCatalog.js';
+import { getDataCatalogReadiness, validateSourceIntake } from '../domain/dataCatalog.js';
 
 const complete = {
   id: 'licensed-ais-provider', name: 'Licensed AIS Provider', domain: 'maritime', coverage: 'global_vessel_events', sourceClass: 'licensed_feed', licenseStatus: 'active', requiredFor: ['maritime_alerts'],
@@ -20,4 +20,11 @@ test('source intake preview abstains for demo coverage, inactive license and mis
   assert.equal(result.decision, 'abstain_source_registration');
   assert.ok(result.missingLicenseFields.includes('contractRef'));
   assert.ok(result.checks.some((check) => check.id === 'non_demo_coverage' && !check.pass));
+});
+
+test('catalog readiness keeps illustrative records pending despite complete license metadata', () => {
+  const result = getDataCatalogReadiness([{ ...complete, id: 'provider-illustrative', coverage: 'illustrative_routes' }]);
+  assert.equal(result.ready, false);
+  assert.equal(result.checks[0].status, 'pending');
+  assert.equal(result.checks[0].illustrative, true);
 });

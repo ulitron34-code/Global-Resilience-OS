@@ -365,3 +365,5 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
   fuente ilustrativa aunque su identificador parezca productivo.
 - El preview de alta y la validacion de cada registro aplican el mismo bloqueo;
   una licencia declarada no convierte datos ilustrativos en evidencia operativa.
+- El readiness del catalogo ahora expone `illustrative` y mantiene pendiente
+  cualquier registro ilustrativo, incluso con metadatos contractuales completos.
