@@ -83,3 +83,16 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
 - La aprobación local conserva `activationStatus: blocked_external`; no activa
   fuentes ni simula licencia o integración productiva.
 - Snapshots, reset local y auditoría incluyen la cola de revisiones.
+## Bloque: Decision sharing local (2026-08-09)
+
+- Se añadieron enlaces temporales de solo lectura para paquetes de decisión.
+- El token claro se entrega una sola vez; el estado local conserva únicamente
+  SHA-256, expiración, revocación, contador y último acceso.
+- Se agregaron endpoints autenticados para crear/listar/revocar y un endpoint
+  público controlado por token con `Cache-Control: no-store`.
+- La UI de casos permite crear el enlace, copiarlo y revocarlo; la vista muestra
+  su estado y accesos sin exponer secretos.
+- Pruebas unitarias y API cubren creación, consulta, metadatos sin hash,
+  revocación y rechazo de tokens inválidos.
+- Sigue bloqueado para producción hasta migrar a Supabase/RLS, añadir política
+  de privacidad, rate limit específico y revisar campos compartibles.

@@ -41,6 +41,10 @@ import {
   compareScenarios,
   getCase,
   getDecisionPackage,
+  listDecisionShares,
+  createDecisionShare,
+  revokeDecisionShare,
+  getDecisionPackageByShareToken,
   getLatestBrief,
   getOverviewMetrics,
   getReadiness,
@@ -412,6 +416,24 @@ app.get('/api/cases/:id/decision-package', authIfConfigured, roleIfConfigured('a
   const organizationId = req.user?.organizationId || DEFAULT_ORGANIZATION_ID;
   const enriched = { ...item, actionPlans: listActionPlans({ organizationId, caseId: req.params.id }), recoveryProfile: buildRecoveryProfile({ cableId: 'seamewe3', severity: 'total', horizons: [24, 168, 720] }), regulatoryEvidenceMap: buildRegulatoryEvidenceMap({ scope: req.params.id, evidence: [] }), packageCapabilities: ['case', 'alert', 'sources', 'models', 'scenarios', 'audit', 'comments', 'action_plans', 'recovery_counterfactual', 'regulatory_evidence'] };
   res.type('application/json').set('Content-Disposition', `attachment; filename="decision-package-${req.params.id}.json"`).send(JSON.stringify(enriched, null, 2));
+});
+app.get('/api/cases/:id/shares', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => res.json(listDecisionShares(req.params.id)));
+app.post('/api/cases/:id/shares', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => {
+  try {
+    const result = createDecisionShare(req.params.id, req.body || {}, req.user?.email || 'operator');
+    if (!result) return res.status(404).json({ error: 'Caso no encontrado' });
+    res.status(201).json(result);
+  } catch (error) { res.status(400).json({ error: error.message }); }
+});
+app.post('/api/cases/:caseId/shares/:shareId/revoke', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => {
+  const result = revokeDecisionShare(req.params.caseId, req.params.shareId, req.user?.email || 'operator');
+  if (!result) return res.status(404).json({ error: 'Enlace de decisión no encontrado' });
+  res.json(result);
+});
+app.get('/api/shares/:token', (req, res) => {
+  const result = getDecisionPackageByShareToken(req.params.token);
+  if (!result) return res.status(404).json({ error: 'Enlace inexistente, revocado o expirado' });
+  res.set('Cache-Control', 'no-store').json(result);
 });
 app.get('/api/audit/export', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => {
   const filters = { q: req.query.q };

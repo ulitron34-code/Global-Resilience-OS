@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ArrowRight, CheckCircle2, Clock3, UserRound } from 'lucide-react';
-import { addCaseComment, createActionPlan, createIncident, createWebhook, downloadAudit, downloadBrief, downloadDecisionPackage, downloadLocalSnapshot, getActionPlans, getAuditIntegrity, getCaseAudit, getCaseComments, getCases, getDataCatalogReadiness, getDataQualityReport, getDeadLetters, getImpactGraph, getIncidents, getJobs, getLatestBrief, getOperationalMetrics, getPilotFeedback, getPilotMetrics, getPilotReadiness, getPlaybooks, getProvenanceOverview, getRetentionOverview, getRuntimeReadiness, getSecurityPosture, getSlaOverview, getSourceHealthOverview, getSources, getTenancyContext, getWebhooks, previewActionPlan, processLocalWebhookDeliveries, recordActionPlanOutcome, recordPilotFeedback, resetLocalDemo, restoreLocalSnapshot, retryDeadLetter, rotateWebhookSecret, runDemoIngestionJob, runSlaSweep, runSourceHealthSweep, updateActionPlan, updateCase, updateIncident } from '../api/client';
+import { addCaseComment, createActionPlan, createDecisionShare, createIncident, createWebhook, downloadAudit, downloadBrief, downloadDecisionPackage, downloadLocalSnapshot, getActionPlans, getAuditIntegrity, getCaseAudit, getCaseComments, getCases, getDataCatalogReadiness, getDataQualityReport, getDeadLetters, getDecisionShares, getImpactGraph, getIncidents, getJobs, getLatestBrief, getOperationalMetrics, getPilotFeedback, getPilotMetrics, getPilotReadiness, getPlaybooks, getProvenanceOverview, getRetentionOverview, getRuntimeReadiness, getSecurityPosture, getSlaOverview, getSourceHealthOverview, getSources, getTenancyContext, getWebhooks, previewActionPlan, processLocalWebhookDeliveries, recordActionPlanOutcome, recordPilotFeedback, resetLocalDemo, restoreLocalSnapshot, retryDeadLetter, revokeDecisionShare, rotateWebhookSecret, runDemoIngestionJob, runSlaSweep, runSourceHealthSweep, updateActionPlan, updateCase, updateIncident } from '../api/client';
 import CableList from './CableList';
 import ImpactPanel from './ImpactPanel';
 import ReportExport from './ReportExport';
@@ -98,6 +98,8 @@ export function CasesView({ vertical = 'Oil & Gas' }) {
   const [sort, setSort] = useState('sla_urgent');
   const [exportError, setExportError] = useState('');
   const [actionError, setActionError] = useState('');
+  const [shares, setShares] = useState([]);
+  const [shareResult, setShareResult] = useState(null);
   const user = useSessionStore((state) => state.user);
   const canOperate = !user || user.role !== 'viewer';
 
@@ -107,6 +109,7 @@ export function CasesView({ vertical = 'Oil & Gas' }) {
   const selectedCaseId = selectedCase?.id;
   useEffect(() => { if (selectedCaseId) getCaseAudit(selectedCaseId).then(setAudit); }, [selectedCaseId]);
   useEffect(() => { if (selectedCaseId) getCaseComments(selectedCaseId).then(setComments); }, [selectedCaseId]);
+  useEffect(() => { if (selectedCaseId) getDecisionShares(selectedCaseId).then(setShares); }, [selectedCaseId]);
   const handleUpdate = async (patch) => {
     if (!selectedCase) return;
     setActionError('');
@@ -119,8 +122,11 @@ export function CasesView({ vertical = 'Oil & Gas' }) {
   };
   const handleComment = async (event) => { event.preventDefault(); if (!selectedCase || !commentText.trim()) return; setActionError(''); try { const item = await addCaseComment(selectedCase.id, commentText); setComments((current) => [item, ...current]); setCommentText(''); } catch (error) { setActionError(error.message); } };
   const handleDecisionPackage = async () => { if (!selectedCase) return; setExportError(''); try { await downloadDecisionPackage(selectedCase.id); } catch (error) { setExportError(error.message); } };
+  const handleCreateShare = async () => { if (!selectedCase || !canOperate) return; setActionError(''); try { const result = await createDecisionShare(selectedCase.id, { expiresInHours: 72, audience: 'revisor de decisión' }); setShareResult(result); setShares((current) => [result.share, ...current]); if (navigator.clipboard) await navigator.clipboard.writeText(`${window.location.origin}${result.path}`); } catch (error) { setActionError(error.message); } };
+  const handleRevokeShare = async (shareId) => { if (!selectedCase || !canOperate) return; try { const result = await revokeDecisionShare(selectedCase.id, shareId); setShares((current) => current.map((item) => item.id === result.id ? result : item)); } catch (error) { setActionError(error.message); } };
 
   return (
+    <>
     <section className="flex flex-col gap-4">
       <SectionIntro
         eyebrow="Alerta → caso → resolución → auditoría"
@@ -129,7 +135,7 @@ export function CasesView({ vertical = 'Oil & Gas' }) {
       />
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-4">
         <div className="bg-panel border border-line rounded-lg overflow-hidden">
-          <div className="p-4 border-b border-line flex flex-col md:flex-row md:items-center justify-between gap-3"><h2 className="font-display font-semibold text-ink">Cola de casos</h2><div className="flex flex-wrap gap-2"><input aria-label="Buscar casos" value={search} onChange={(event) => setSearch(event.target.value)} className="control !w-48" placeholder="Buscar caso..." /><button onClick={async () => { setExportError(''); try { await downloadAudit('csv'); } catch (error) { setExportError(error.message); } }} className="border border-line rounded px-3 text-xs text-ink-muted hover:text-ink">Exportar auditoria</button><button onClick={handleDecisionPackage} disabled={!selectedCase} className="border border-signal/40 text-signal rounded px-3 text-xs disabled:opacity-50">Paquete de decisión</button></div></div>
+          <div className="p-4 border-b border-line flex flex-col md:flex-row md:items-center justify-between gap-3"><h2 className="font-display font-semibold text-ink">Cola de casos</h2><div className="flex flex-wrap gap-2"><input aria-label="Buscar casos" value={search} onChange={(event) => setSearch(event.target.value)} className="control !w-48" placeholder="Buscar caso..." /><button onClick={async () => { setExportError(''); try { await downloadAudit('csv'); } catch (error) { setExportError(error.message); } }} className="border border-line rounded px-3 text-xs text-ink-muted hover:text-ink">Exportar auditoria</button><button onClick={handleDecisionPackage} disabled={!selectedCase} className="border border-signal/40 text-signal rounded px-3 text-xs disabled:opacity-50">Paquete de decisión</button><button onClick={handleCreateShare} disabled={!selectedCase || !canOperate} className="border border-signal/40 text-signal rounded px-3 text-xs disabled:opacity-50">Compartir solo lectura</button></div></div>
           <div className="px-4 py-2 border-b border-line/60 flex flex-wrap gap-2"><select aria-label="Filtrar estado" value={caseStatus} onChange={(event) => setCaseStatus(event.target.value)} className="control !w-36"><option value="">Todos los estados</option><option value="open">Abierto</option><option value="in_progress">En progreso</option><option value="blocked">Bloqueado</option><option value="closed">Cerrado</option></select><select aria-label="Filtrar prioridad" value={priority} onChange={(event) => setPriority(event.target.value)} className="control !w-32"><option value="">Prioridad</option><option value="P1">P1</option><option value="P2">P2</option><option value="P3">P3</option></select><input aria-label="Filtrar responsable" value={owner} onChange={(event) => setOwner(event.target.value)} className="control !w-40" placeholder="Responsable..." /><select aria-label="Ordenar casos" value={sort} onChange={(event) => setSort(event.target.value)} className="control !w-44"><option value="sla_urgent">SLA más urgente</option><option value="impact_desc">Mayor impacto</option></select></div>
           {exportError && <div role="alert" className="px-4 py-2 text-xs text-alert border-b border-alert/20">No se pudo exportar: {exportError}</div>}
           {actionError && <div role="alert" className="px-4 py-2 text-xs text-alert border-b border-alert/20">No se pudo completar la acción: {actionError}</div>}
@@ -143,8 +149,14 @@ export function CasesView({ vertical = 'Oil & Gas' }) {
           <div className="mt-5 border-t border-line pt-4"><div className="font-mono text-[10px] uppercase tracking-widest text-ink-dim">Colaboración</div><div className="space-y-2 mt-3 max-h-28 overflow-y-auto">{comments.map((item) => <div key={item.id} className="text-xs text-ink-muted"><span className="font-mono text-[10px] text-signal">{item.author}</span> · {item.body}</div>)}{!comments.length && <div className="text-xs text-ink-dim">Sin comentarios todavía.</div>}</div><form onSubmit={handleComment} className="flex gap-2 mt-3"><input disabled={!canOperate} value={commentText} onChange={(event) => setCommentText(event.target.value)} className="control" placeholder={canOperate ? 'Añadir comentario...' : 'Solo lectura'} /><button disabled={!canOperate || !commentText.trim()} className="bg-signal text-void rounded px-3 text-xs font-semibold disabled:opacity-50">Enviar</button></form></div><div className="flex gap-2 mt-5"><button disabled={!canOperate} onClick={() => handleUpdate({ owner: 'Me' })} className="flex-1 border border-line rounded py-2 text-xs text-ink-muted hover:text-ink disabled:opacity-50">{canOperate ? 'Asignar a mí' : 'Solo lectura'}</button><button disabled={!canOperate} onClick={() => handleUpdate({ humanValidation: 'validated', status: 'closed' })} className="flex-1 bg-signal text-void rounded py-2 text-xs font-semibold disabled:opacity-50">Validar & cerrar</button></div>
         </div>
       </div>
-    </section>
+     </section>
+       <DecisionShareSummary shares={shares} result={shareResult} canOperate={canOperate} onRevoke={handleRevokeShare} />
+    </>
   );
+}
+
+function DecisionShareSummary({ shares, result, canOperate, onRevoke }) {
+  return <div className="bg-panel border border-line rounded-lg p-4"><div className="font-mono text-[10px] uppercase tracking-widest text-signal">Enlaces de decisión</div><p className="text-xs text-ink-muted mt-2">Enlaces temporales de solo lectura para revisión humana. El token claro sólo se muestra al crearlo.</p>{result && <div className="mt-2 border border-signal/30 rounded p-2 text-[10px] text-signal break-all">Token creado: {result.path}</div>}<div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3">{shares.map((share) => <div key={share.id} className="border border-line rounded p-2 text-xs"><div className="flex justify-between gap-2"><span className="font-mono text-[10px] text-signal">{share.id}</span><span className={share.status === 'active' ? 'text-signal' : 'text-alert'}>{share.status}</span></div><div className="text-[10px] text-ink-dim mt-1">Expira {new Date(share.expiresAt).toLocaleString('es-MX')} · accesos {share.accessCount}</div>{share.status === 'active' && <button type="button" onClick={() => onRevoke(share.id)} disabled={!canOperate} className="border border-alert/40 text-alert rounded px-2 py-1 text-[10px] mt-2 disabled:opacity-50">Revocar</button>}</div>)}{!shares.length && <div className="text-[10px] text-ink-dim">Selecciona un caso y crea un enlace de revisión.</div>}</div></div>;
 }
 
 export function ExecutiveBriefView({ onScenario, vertical = 'Oil & Gas', region = 'global', horizon = '72' }) {

@@ -52,6 +52,9 @@ Fecha de auditoria: 8 de agosto de 2026.
 - Paquete consolidado de piloto exportable con readiness, entrevistas, métricas, feedback, scorecard y próximos gates.
 - Auditoría textual del esquema Supabase, RLS, tenant helper y eliminación de políticas demo.
 - Enterprise Readiness consolidado con decisión de handoff, bloqueos locales y dependencias externas.
+- Enlaces temporales de paquetes de decisión con hash de token, solo lectura,
+  expiración, revocación y auditoría de accesos; queda documentada la migración
+  futura a Supabase/RLS para producción.
 
 ## Pendientes que no deben simularse localmente
 

@@ -476,6 +476,18 @@ export async function downloadDecisionPackage(caseId) {
   URL.revokeObjectURL(url);
 }
 
+export async function getDecisionShares(caseId) {
+  return fetchWithTimeout(`${BACKEND_URL}/api/cases/${caseId}/shares`);
+}
+
+export async function createDecisionShare(caseId, input = {}) {
+  return fetchWithTimeout(`${BACKEND_URL}/api/cases/${caseId}/shares`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(input) });
+}
+
+export async function revokeDecisionShare(caseId, shareId) {
+  return fetchWithTimeout(`${BACKEND_URL}/api/cases/${caseId}/shares/${shareId}/revoke`, { method: 'POST' });
+}
+
 export async function downloadLocalSnapshot() {
   const token = localStorage.getItem('resilience_token');
   const response = await fetch(`${BACKEND_URL}/api/ops/snapshot`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });

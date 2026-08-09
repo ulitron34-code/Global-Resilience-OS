@@ -37,7 +37,7 @@ const initialAuditLog = [
   { id: 'AUD-0001', entityType: 'case', entityId: 'RS-0827', action: 'case_opened', actor: 'system', message: 'Umbral de impacto mayor a $2M activado.', createdAt: now },
 ];
 const restored = restoreState(structuredClone(seed));
-const state = { alerts: restored.alerts, cases: restored.cases, scenarios: restored.scenarios, sources: restored.sources, deadLetters: restored.deadLetters || [], calibrationFixtures: restored.calibrationFixtures || [], pilotFeedback: restored.pilotFeedback || [], incidents: restored.incidents || [], sourceIntakeReviews: restored.sourceIntakeReviews || [] };
+const state = { alerts: restored.alerts, cases: restored.cases, scenarios: restored.scenarios, sources: restored.sources, deadLetters: restored.deadLetters || [], calibrationFixtures: restored.calibrationFixtures || [], pilotFeedback: restored.pilotFeedback || [], incidents: restored.incidents || [], sourceIntakeReviews: restored.sourceIntakeReviews || [], decisionShares: restored.decisionShares || [] };
 const auditLog = restored.auditLog || initialAuditLog;
 const notifications = restored.notifications || [
   { id: 'NOT-0001', type: 'critical_alert', title: 'SMW-5 requiere atención', message: 'Existe una alerta crítica abierta en Suez / Mar Rojo.', read: false, createdAt: now },
@@ -314,6 +314,56 @@ export function getDecisionPackage(caseId) {
     comments: comments.filter((comment) => comment.caseId === caseId),
   });
 }
+function publicDecisionShare(share) {
+  const { tokenHash: _tokenHash, ...safe } = share;
+  if (safe.status === 'active' && Date.parse(safe.expiresAt) <= Date.now()) safe.status = 'expired';
+  return clone(safe);
+}
+function normalizeShareExpiry(input) {
+  const requested = Number(input?.expiresInHours);
+  const hours = Number.isFinite(requested) ? requested : 72;
+  return Math.min(Math.max(Math.round(hours), 1), 720);
+}
+export function listDecisionShares(caseId) {
+  return clone(state.decisionShares.filter((item) => !caseId || item.caseId === caseId).map(publicDecisionShare));
+}
+export function createDecisionShare(caseId, input = {}, actor = 'operator') {
+  if (!state.cases.some((item) => item.id === caseId)) return null;
+  const token = randomBytes(32).toString('base64url');
+  const createdAt = new Date().toISOString();
+  const expiresAt = new Date(Date.now() + normalizeShareExpiry(input) * 60 * 60 * 1000).toISOString();
+  const share = { id: `SH-${randomBytes(5).toString('hex').toUpperCase()}`, caseId, tokenHash: createHash('sha256').update(token).digest('hex'), audience: String(input.audience || 'decision_reviewer').trim().slice(0, 120), status: 'active', createdBy: actor, createdAt, expiresAt, revokedAt: null, revokedBy: null, accessCount: 0, lastAccessedAt: null };
+  state.decisionShares.unshift(share);
+  auditLog.unshift({ id: `AUD-${String(auditLog.length + 1).padStart(4, '0')}`, entityType: 'decision_share', entityId: share.id, action: 'decision_share_created', actor, message: `Enlace de decisión creado para ${caseId}; expira ${expiresAt}.`, createdAt });
+  persistState(state, auditLog, notifications, comments, webhooks, webhookDeliveries, jobRuns);
+  return { share: publicDecisionShare(share), token, path: `/api/shares/${token}`, disclaimer: 'El token se muestra una sola vez; guárdalo de forma segura.' };
+}
+export function revokeDecisionShare(caseId, shareId, actor = 'operator') {
+  const share = state.decisionShares.find((item) => item.id === shareId && item.caseId === caseId);
+  if (!share) return null;
+  if (share.status !== 'revoked') {
+    share.status = 'revoked';
+    share.revokedAt = new Date().toISOString();
+    share.revokedBy = actor;
+    auditLog.unshift({ id: `AUD-${String(auditLog.length + 1).padStart(4, '0')}`, entityType: 'decision_share', entityId: share.id, action: 'decision_share_revoked', actor, message: `Enlace de decisión revocado para ${caseId}.`, createdAt: share.revokedAt });
+    persistState(state, auditLog, notifications, comments, webhooks, webhookDeliveries, jobRuns);
+  }
+  return publicDecisionShare(share);
+}
+export function getDecisionPackageByShareToken(token) {
+  if (typeof token !== 'string' || token.length < 32) return null;
+  const tokenHash = createHash('sha256').update(token).digest('hex');
+  const share = state.decisionShares.find((item) => item.tokenHash === tokenHash);
+  if (!share || share.status !== 'active' || Date.parse(share.expiresAt) <= Date.now()) return null;
+  const accessedAt = new Date().toISOString();
+  share.accessCount += 1;
+  share.lastAccessedAt = accessedAt;
+  const packageData = getDecisionPackage(share.caseId);
+  if (!packageData) return null;
+  auditLog.unshift({ id: `AUD-${String(auditLog.length + 1).padStart(4, '0')}`, entityType: 'decision_share', entityId: share.id, action: 'decision_share_accessed', actor: 'share_token', message: `Paquete de decisión consultado para ${share.caseId}.`, createdAt: accessedAt });
+  persistState(state, auditLog, notifications, comments, webhooks, webhookDeliveries, jobRuns);
+  return { share: { id: share.id, caseId: share.caseId, audience: share.audience, status: share.status, expiresAt: share.expiresAt, accessedAt }, package: packageData, disclaimer: 'Vista de solo lectura; los datos demo y las limitaciones del paquete siguen vigentes.' };
+}
 export function listAudit(entityId, filters = {}) { return clone(page(auditLog.filter((item) => (!entityId || item.entityId === entityId) && (!filters.q || `${item.action} ${item.actor} ${item.message}`.toLowerCase().includes(String(filters.q).toLowerCase()))), filters)); }
 export function countAudit(entityId, filters = {}) { return auditLog.filter((item) => (!entityId || item.entityId === entityId) && (!filters.q || `${item.action} ${item.actor} ${item.message}`.toLowerCase().includes(String(filters.q).toLowerCase()))).length; }
 export function listComments(caseId) { return clone(comments.filter((item) => item.caseId === caseId)); }
@@ -527,6 +577,7 @@ export function resetLocalDemo(actor = 'admin') {
   state.pilotFeedback = [];
   state.incidents = [];
   state.sourceIntakeReviews = [];
+  state.decisionShares = [];
   auditLog.splice(0, auditLog.length, ...clone(initialAuditLog));
   notifications.splice(0, notifications.length, { id: 'NOT-0001', type: 'critical_alert', title: 'SMW-5 requiere atención', message: 'Existe una alerta crítica abierta en Suez / Mar Rojo.', read: false, createdAt: now });
   comments.splice(0, comments.length);
@@ -539,7 +590,7 @@ export function resetLocalDemo(actor = 'admin') {
 
 export function restoreLocalSnapshot(snapshot, actor = 'admin') {
   const candidate = snapshot?.state;
-  const collections = ['alerts', 'cases', 'scenarios', 'sources', 'deadLetters', 'calibrationFixtures', 'pilotFeedback', 'incidents', 'sourceIntakeReviews'];
+  const collections = ['alerts', 'cases', 'scenarios', 'sources', 'deadLetters', 'calibrationFixtures', 'pilotFeedback', 'incidents', 'sourceIntakeReviews', 'decisionShares'];
   if (!candidate || collections.some((key) => !Array.isArray(candidate[key]))) throw new Error('Snapshot inválido: faltan colecciones principales');
   if ([...collections, 'auditLog', 'notifications', 'comments', 'webhooks', 'webhookDeliveries', 'jobRuns'].some((key) => {
     const value = key === 'auditLog' || key === 'notifications' || key === 'comments' || key === 'webhooks' || key === 'webhookDeliveries' || key === 'jobRuns' ? snapshot[key] : candidate[key];

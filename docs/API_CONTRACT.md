@@ -31,6 +31,10 @@ Los endpoints de alertas, casos y métricas aceptan `vertical` como filtro. Las 
 - `PATCH /api/cases/:id` — actualiza owner, status o validación humana.
 - `GET /api/cases/:id/audit` — bitácora de cambios del caso.
 - `GET /api/cases/:id/decision-package` — exporta un paquete JSON con caso, alerta, fuentes, modelos, escenarios, comentarios y auditoría.
+- `GET /api/cases/:id/shares` — lista enlaces temporales de decisión sin exponer tokens.
+- `POST /api/cases/:id/shares` — crea un enlace de solo lectura; entrega el token claro una sola vez.
+- `POST /api/cases/:caseId/shares/:shareId/revoke` — revoca un enlace de decisión.
+- `GET /api/shares/:token` — consulta pública controlada del paquete; requiere token válido y no usa caché.
 - `GET /api/audit/export?entityId=RS-0827&format=json|csv` — exporta auditoría global o de una entidad.
 - `GET /api/audit/integrity` — verifica la cadena hash local, entradas selladas e inconsistencias.
 - `GET /api/scenarios` — escenarios guardados.
