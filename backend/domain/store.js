@@ -7,6 +7,7 @@ import { buildEvidence } from './evidenceClassification.js';
 import { listDataCatalog, validateSourceIntake } from './dataCatalog.js';
 
 const now = new Date().toISOString();
+const DEFAULT_ORGANIZATION_ID = 'nashadi-demo';
 
 const seed = {
   alerts: [
@@ -159,22 +160,23 @@ export function compareScenarios(ids = []) {
 }
 export function listSources() { return clone(state.sources); }
 export function listSourceIntakeReviews(filters = {}) {
-  const items = state.sourceIntakeReviews.filter((item) => !filters.status || item.status === filters.status);
+  const organizationId = filters.organizationId || DEFAULT_ORGANIZATION_ID;
+  const items = state.sourceIntakeReviews.filter((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId && (!filters.status || item.status === filters.status));
   return clone(items.slice(0, Math.min(Math.max(Number(filters.limit) || 100, 1), 200)));
 }
-export function createSourceIntakeReview(input, actor = 'operator') {
+export function createSourceIntakeReview(input, actor = 'operator', organizationId = DEFAULT_ORGANIZATION_ID) {
   const candidate = input?.candidate || input;
   const preview = validateSourceIntake(candidate);
   if (!preview.ready) throw new Error('La fuente no pasa el preview contractual');
   const createdAt = new Date().toISOString();
-  const item = { id: `SIR-${randomBytes(4).toString('hex').toUpperCase()}`, candidate: preview.candidate, previewChecks: preview.checks, status: 'pending_review', activationStatus: 'blocked_external', reviewNote: null, createdAt, updatedAt: createdAt, createdBy: actor, reviewedBy: null };
+  const item = { id: `SIR-${randomBytes(4).toString('hex').toUpperCase()}`, organizationId, candidate: preview.candidate, previewChecks: preview.checks, status: 'pending_review', activationStatus: 'blocked_external', reviewNote: null, createdAt, updatedAt: createdAt, createdBy: actor, reviewedBy: null };
   state.sourceIntakeReviews.unshift(item);
   auditLog.unshift({ id: `AUD-${String(auditLog.length + 1).padStart(4, '0')}`, entityType: 'source_intake_review', entityId: item.id, action: 'source_intake_review_created', actor, message: `Revisión de fuente ${item.id} creada; activación externa bloqueada.`, createdAt });
   persistState(state, auditLog, notifications, comments, webhooks, webhookDeliveries, jobRuns);
   return clone(item);
 }
-export function updateSourceIntakeReview(id, input = {}, actor = 'operator') {
-  const item = state.sourceIntakeReviews.find((candidate) => candidate.id === id);
+export function updateSourceIntakeReview(id, input = {}, actor = 'operator', organizationId = DEFAULT_ORGANIZATION_ID) {
+  const item = state.sourceIntakeReviews.find((candidate) => candidate.id === id && (candidate.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId);
   if (!item) return null;
   const status = String(input.status || '').trim();
   if (!['approved_local', 'rejected'].includes(status)) throw new Error('status de revisión de fuente inválido');
@@ -198,18 +200,18 @@ export function recordPilotFeedback(input, actor = 'operator') {
   return clone(item);
 }
 export function getSource(id) { return clone(state.sources.find((item) => item.id === id) ?? null); }
-export function listIncidents(filters = {}) { return clone(state.incidents.filter((item) => (!filters.status || item.status === filters.status) && (!filters.severity || item.severity === filters.severity)).slice(0, Math.min(Math.max(Number(filters.limit) || 100, 1), 200))); }
-export function createIncident(input, actor = 'operator') {
+export function listIncidents(filters = {}) { const organizationId = filters.organizationId || DEFAULT_ORGANIZATION_ID; return clone(state.incidents.filter((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId && (!filters.status || item.status === filters.status) && (!filters.severity || item.severity === filters.severity)).slice(0, Math.min(Math.max(Number(filters.limit) || 100, 1), 200))); }
+export function createIncident(input, actor = 'operator', organizationId = DEFAULT_ORGANIZATION_ID) {
   const normalized = normalizeIncidentInput(input);
   const createdAt = new Date().toISOString();
-  const item = { id: `IR-${randomBytes(4).toString('hex').toUpperCase()}`, ...normalized, status: 'open', owner: actor, timeline: [{ at: createdAt, action: 'opened', actor }], createdAt, updatedAt: createdAt };
+  const item = { id: `IR-${randomBytes(4).toString('hex').toUpperCase()}`, organizationId, ...normalized, status: 'open', owner: actor, timeline: [{ at: createdAt, action: 'opened', actor }], createdAt, updatedAt: createdAt };
   state.incidents.unshift(item);
   auditLog.unshift({ id: `AUD-${String(auditLog.length + 1).padStart(4, '0')}`, entityType: 'incident', entityId: item.id, action: 'incident_opened', actor, message: `Incidente ${item.id} abierto.`, createdAt });
   persistState(state, auditLog, notifications, comments, webhooks, webhookDeliveries, jobRuns);
   return clone(item);
 }
-export function updateIncident(id, input, actor = 'operator') {
-  const item = state.incidents.find((candidate) => candidate.id === id);
+export function updateIncident(id, input, actor = 'operator', organizationId = DEFAULT_ORGANIZATION_ID) {
+  const item = state.incidents.find((candidate) => candidate.id === id && (candidate.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId);
   if (!item) return null;
   const patch = validateIncidentPatch(input);
   const changedAt = new Date().toISOString();

@@ -22,3 +22,11 @@ test('rejected source intake review requires a note', () => {
   const created = createSourceIntakeReview({ candidate: { ...candidate, id: `${candidate.id}-reject` } });
   assert.throws(() => updateSourceIntakeReview(created.id, { status: 'rejected' }), /requiere nota/);
 });
+
+test('source intake reviews are isolated by organization', () => {
+  const created = createSourceIntakeReview({ candidate: { ...candidate, id: `${candidate.id}-tenant-a` } }, 'tenant-a@example.com', 'tenant-a-demo');
+  assert.equal(created.organizationId, 'tenant-a-demo');
+  assert.equal(listSourceIntakeReviews({ organizationId: 'tenant-b-demo' }).some((item) => item.id === created.id), false);
+  assert.equal(updateSourceIntakeReview(created.id, { status: 'approved_local' }, 'tenant-b@example.com', 'tenant-b-demo'), null);
+  assert.ok(listSourceIntakeReviews({ organizationId: 'tenant-a-demo' }).some((item) => item.id === created.id));
+});

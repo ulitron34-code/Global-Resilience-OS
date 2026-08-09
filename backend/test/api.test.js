@@ -416,6 +416,16 @@ describe('Global Resilience OS API', () => {
       const tenantBPlans = await fetch(`${baseUrl}/api/action-plans`, { headers: { authorization: `Bearer ${tenantB.token}` } });
       assert.equal(tenantBPlans.status, 200);
       assert.equal((await tenantBPlans.json()).some((plan) => plan.id === tenantPlanBody.id), false);
+
+      const tenantIncident = await fetch(`${baseUrl}/api/incidents`, { method: 'POST', headers: { authorization: `Bearer ${tenantA.token}`, 'content-type': 'application/json' }, body: JSON.stringify({ title: 'Tenant A incident', severity: 'sev2', summary: 'Incident isolated for tenant testing' }) });
+      assert.equal(tenantIncident.status, 201);
+      const tenantIncidentBody = await tenantIncident.json();
+      assert.equal(tenantIncidentBody.organizationId, 'tenant-a-demo');
+      const tenantBIncidents = await fetch(`${baseUrl}/api/incidents`, { headers: { authorization: `Bearer ${tenantB.token}` } });
+      assert.equal(tenantBIncidents.status, 200);
+      assert.equal((await tenantBIncidents.json()).some((incident) => incident.id === tenantIncidentBody.id), false);
+      const crossTenantIncidentUpdate = await fetch(`${baseUrl}/api/incidents/${tenantIncidentBody.id}`, { method: 'PATCH', headers: { authorization: `Bearer ${tenantB.token}`, 'content-type': 'application/json' }, body: JSON.stringify({ title: 'Cross tenant mutation' }) });
+      assert.equal(crossTenantIncidentUpdate.status, 404);
     } finally {
       if (previous === undefined) delete process.env.AUTH_REQUIRED;
       else process.env.AUTH_REQUIRED = previous;

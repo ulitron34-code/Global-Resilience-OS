@@ -4,7 +4,7 @@ Fecha de corte: 2026-08-08.
 
 ## Estado local verificado
 
-- Backend: 51 pruebas PASS.
+- Backend: 52 pruebas PASS.
 - Frontend: lint y build PASS.
 - Release evidence: `npm.cmd run verify` PASS.
 - Plan Maestro: fases locales 0-7 y salvaguardas PASS.

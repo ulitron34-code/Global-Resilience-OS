@@ -50,7 +50,7 @@ Fecha de auditoria: 8 de agosto de 2026.
 
 ## Gates de aceptacion local
 
-- Backend: 51 pruebas pasando.
+- Backend: 52 pruebas pasando.
 - Frontend: lint y build de produccion pasando.
 - `npm.cmd run verify`: PASS completo, incluyendo smoke, rendimiento,
   artefacto standalone, exportacion PDF, auditoria portable, reproducibilidad,
