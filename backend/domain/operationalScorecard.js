@@ -1,3 +1,5 @@
+import { filterEligibleCalibrationFixtures } from './calibrationEligibility.js';
+
 function ratio(part, whole) { return whole ? Number((part / whole).toFixed(4)) : null; }
 function average(values) { const valid = values.filter((value) => Number.isFinite(value)); return valid.length ? Number((valid.reduce((sum, value) => sum + value, 0) / valid.length).toFixed(2)) : null; }
 
@@ -9,7 +11,8 @@ export function buildOperationalScorecard({ alerts = [], cases = [], actionPlans
   const outcomeErrors = documentedActions.map((item) => Math.abs(Number(item.forecast?.lossIfWaitUsd || 0) - Number(item.outcome.actualLossUsd || 0))).filter(Number.isFinite);
   const freshSources = sources.filter((item) => item.status === 'connected' && !String(item.id || '').endsWith('-demo'));
   const overdueCases = cases.filter((item) => item.status !== 'closed' && Number.isFinite(Date.parse(item.createdAt)) && Number.isFinite(Number(item.slaMinutes)) && Date.parse(item.createdAt) + Number(item.slaMinutes) * 60000 < referenceTime);
-  const modelErrors = calibrationFixtures.map((item) => Math.abs(Number(item.predictedImpactUsd) - Number(item.observedImpactUsd))).filter(Number.isFinite);
+  const eligibleCalibrationFixtures = filterEligibleCalibrationFixtures(calibrationFixtures).filter((item) => Number.isFinite(Number(item.predictedImpactUsd)) && Number.isFinite(Number(item.observedImpactUsd)));
+  const modelErrors = eligibleCalibrationFixtures.map((item) => Math.abs(Number(item.predictedImpactUsd) - Number(item.observedImpactUsd))).filter(Number.isFinite);
   const incidentsOpen = incidents.filter((item) => !['closed', 'resolved'].includes(item.status));
 
   const decisionTimes = actionPlans.map((item) => {
@@ -33,8 +36,10 @@ export function buildOperationalScorecard({ alerts = [], cases = [], actionPlans
     },
     models: {
       calibrationFixtures: calibrationFixtures.length,
+      eligibleCalibrationFixtures: eligibleCalibrationFixtures.length,
+      excludedIllustrativeCalibrationFixtures: calibrationFixtures.filter((item) => item?.evidenceStatus === 'complete' && String(item?.sourceId || '').toLowerCase().includes('demo')).length,
       meanAbsoluteErrorUsd: average(modelErrors),
-      abstentionReady: calibrationFixtures.length >= 3,
+      abstentionReady: eligibleCalibrationFixtures.length >= 3,
       disclaimer: 'Las métricas locales no prueban precisión de mercado; requieren eventos históricos licenciados y revisión experta.',
     },
     business: {

@@ -49,3 +49,18 @@ test('operational scorecard excludes demo and pending sources from readiness', (
   assert.equal(scorecard.product.sources.pendingExternal, 1);
   assert.equal(scorecard.product.sources.readinessRate, 0.25);
 });
+
+test('operational scorecard excludes illustrative and incomplete calibration fixtures', () => {
+  const scorecard = buildOperationalScorecard({
+    calibrationFixtures: [
+      { id: 'demo-fixture', sourceId: 'ais-demo', provenance: 'demo', evidenceStatus: 'complete', observedImpactUsd: 100, predictedImpactUsd: 1 },
+      { id: 'incomplete-fixture', sourceId: 'licensed-source', provenance: 'contract', evidenceStatus: 'incomplete', observedImpactUsd: 100, predictedImpactUsd: 1 },
+      { id: 'authorized-fixture', sourceId: 'licensed-source', provenance: 'contract', evidenceStatus: 'complete', observedImpactUsd: 100, predictedImpactUsd: 90 },
+    ],
+  });
+  assert.equal(scorecard.models.calibrationFixtures, 3);
+  assert.equal(scorecard.models.eligibleCalibrationFixtures, 1);
+  assert.equal(scorecard.models.excludedIllustrativeCalibrationFixtures, 1);
+  assert.equal(scorecard.models.meanAbsoluteErrorUsd, 10);
+  assert.equal(scorecard.models.abstentionReady, false);
+});

@@ -343,3 +343,6 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
 - Pilot feedback ahora admite `evidenceType` estructurado; el readiness exige
   evidencia de valor economico y criterio de exito medible antes de marcar
   `customerReady`. La interfaz incluye un ledger dedicado para capturarlos.
+- El scorecard operativo reutiliza la elegibilidad de calibracion y expone
+  fixtures de entrada, elegibles y excluidas; el paquete Markdown conserva el
+  tipo y el texto de evidencia por registro.
