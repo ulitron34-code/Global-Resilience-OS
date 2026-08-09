@@ -11,9 +11,10 @@ export function evaluateDataQuality({ catalog = [], sources = [], now = new Date
     const licensePass = item.licenseStatus === 'active';
     const licenseMetadataPass = hasCompleteLicenseMetadata(item);
     const coveragePass = !String(item.coverage || '').includes('illustrative') && !String(item.coverage || '').includes('demo');
-    const freshnessPass = sourcePresent && (item.refreshSlaHours === null || (ageMinutes !== null && ageMinutes <= item.refreshSlaHours * 60));
-    const status = sourcePresent && licensePass && licenseMetadataPass && coveragePass && freshnessPass ? 'pass' : 'abstain';
-    return { id: item.id, label: item.name, requiredFor: item.requiredFor, status, sourcePresent, licensePass, licenseMetadataPass, coveragePass, freshnessPass, ageMinutes: ageMinutes === null ? null : Math.round(ageMinutes), blocking: [!sourcePresent && 'source', !licensePass && 'license', !licenseMetadataPass && 'license_metadata', !coveragePass && 'coverage', !freshnessPass && 'freshness'].filter(Boolean) };
+    const sourceConnectionPass = sourcePresent && source.status === 'connected' && !String(item.id).endsWith('-demo');
+    const freshnessPass = sourceConnectionPass && (item.refreshSlaHours === null || (ageMinutes !== null && ageMinutes <= item.refreshSlaHours * 60));
+    const status = sourcePresent && sourceConnectionPass && licensePass && licenseMetadataPass && coveragePass && freshnessPass ? 'pass' : 'abstain';
+    return { id: item.id, label: item.name, requiredFor: item.requiredFor, status, sourcePresent, sourceConnectionPass, licensePass, licenseMetadataPass, coveragePass, freshnessPass, ageMinutes: ageMinutes === null ? null : Math.round(ageMinutes), blocking: [!sourcePresent && 'source', !sourceConnectionPass && 'connection', !licensePass && 'license', !licenseMetadataPass && 'license_metadata', !coveragePass && 'coverage', !freshnessPass && 'freshness'].filter(Boolean) };
   });
   const materialReady = checks.length > 0 && checks.every((check) => check.status === 'pass');
   return { schemaVersion: '1.0.0-local', ready: materialReady, checkedAt: now.toISOString(), checks, counts: { total: checks.length, pass: checks.filter((item) => item.status === 'pass').length, abstain: checks.filter((item) => item.status === 'abstain').length }, decision: materialReady ? 'allow_material_recommendations' : 'abstain_material_recommendations', disclaimer: 'Gate local de calidad. Una fuente no licenciada, ilustrativa o stale bloquea recomendaciones materiales; no sustituye revisión contractual.' };

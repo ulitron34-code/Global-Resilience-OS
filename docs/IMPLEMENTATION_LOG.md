@@ -226,6 +226,16 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
 - Se añadió una prueba para evitar que una fuente demo conectada localmente se
   interprete como fuente productiva.
 
+## Bloque: continuidad de fuentes intake en data quality gate (2026-08-09)
+
+- El catálogo usado por `data-quality/gate`, previews de planes y sugerencias
+  ahora combina el catálogo semilla con las fuentes registradas por tenant.
+- Una fuente `pending_external` conserva su ficha contractual, pero permanece
+  en `abstain` por frescura/activación; no puede habilitar recomendaciones
+  materiales antes de conectarse realmente.
+- La prueba protegida verifica que el registro recién creado aparezca en el
+  gate del tenant correcto y conserve el bloqueo de frescura.
+
 ## Bloque: Executive Brief sin score fijo no calibrado (2026-08-09)
 
 - Executive Brief deja de pintar un `72/100` fijo en el frontend.

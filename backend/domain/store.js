@@ -171,6 +171,14 @@ export function compareScenarios(ids = [], organizationId = DEFAULT_ORGANIZATION
   return { scenarios: clone(decorated), baselineId: baseline.id, deltas: decorated.map((item) => ({ id: item.id, lossVsBaselineUsd: item.lossIfWaitUsd - baseline.lossIfWaitUsd, mitigationCostVsBaselineUsd: item.mitigationCostUsd - baseline.mitigationCostUsd, protectedValueVsBaselineUsd: item.protectedValueUsd - baseline.protectedValueUsd })) };
 }
 export function listSources(organizationId = DEFAULT_ORGANIZATION_ID) { return clone(state.sources.filter((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId)); }
+
+export function listDataCatalogForOrganization(organizationId = DEFAULT_ORGANIZATION_ID) {
+  const catalog = new Map(listDataCatalog().map((item) => [item.id, item]));
+  for (const source of listSources(organizationId)) {
+    if (!catalog.has(source.id)) catalog.set(source.id, { id: source.id, name: source.name, domain: source.domain || null, coverage: source.coverage || null, sourceClass: source.kind || 'external_feed_placeholder', licenseStatus: source.licenseStatus || 'verification_required', refreshSlaHours: source.refreshSlaHours ?? null, requiredFor: source.requiredFor || [], license: source.license || null });
+  }
+  return clone([...catalog.values()]);
+}
 export function listSourceIntakeReviews(filters = {}) {
   const organizationId = filters.organizationId || DEFAULT_ORGANIZATION_ID;
   const items = state.sourceIntakeReviews.filter((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId && (!filters.status || item.status === filters.status));

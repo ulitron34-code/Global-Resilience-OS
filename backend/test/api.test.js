@@ -495,6 +495,11 @@ describe('Global Resilience OS API', () => {
       const tenantAProvenanceAfterIntake = await fetch(`${baseUrl}/api/governance/provenance`, { headers: { authorization: `Bearer ${tenantA.token}` } });
       const tenantAProvenanceBody = await tenantAProvenanceAfterIntake.json();
       assert.equal(tenantAProvenanceBody.sources.find((source) => source.id === intakeCandidate.id).licenseStatus, 'active');
+      const tenantAQualityGateAfterIntake = await fetch(`${baseUrl}/api/data-quality/gate`, { headers: { authorization: `Bearer ${tenantA.token}` } });
+      const tenantAQualityGateBody = await tenantAQualityGateAfterIntake.json();
+      const registeredQualityCheck = tenantAQualityGateBody.checks.find((check) => check.id === intakeCandidate.id);
+      assert.equal(registeredQualityCheck.status, 'abstain');
+      assert.ok(registeredQualityCheck.blocking.includes('freshness'));
       const tenantBNotifications = await fetch(`${baseUrl}/api/notifications`, { headers: { authorization: `Bearer ${tenantB.token}` } });
       assert.equal(tenantBNotifications.status, 200);
       assert.equal((await tenantBNotifications.json()).some((notification) => notification.title === 'Tenant A signal'), false);

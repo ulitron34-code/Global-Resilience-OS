@@ -103,6 +103,7 @@ import {
   createSourceIntakeReview,
   updateSourceIntakeReview,
   registerSourceFromIntakeReview,
+  listDataCatalogForOrganization,
   listIncidents,
   createIncident,
   updateIncident,
@@ -331,7 +332,7 @@ app.get('/api/data-catalog/intake-reviews', authIfConfigured, roleIfConfigured('
 app.post('/api/data-catalog/intake-reviews', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => { try { res.status(201).json(createSourceIntakeReview(req.body || {}, req.user?.email || 'operator', req.user?.organizationId || DEFAULT_ORGANIZATION_ID)); } catch (error) { res.status(400).json({ error: error.message }); } });
 app.patch('/api/data-catalog/intake-reviews/:id', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => { try { const item = updateSourceIntakeReview(req.params.id, req.body || {}, req.user?.email || 'operator', req.user?.organizationId || DEFAULT_ORGANIZATION_ID); if (!item) return res.status(404).json({ error: 'Revisión de fuente no encontrada' }); res.json(item); } catch (error) { res.status(400).json({ error: error.message }); } });
 app.post('/api/data-catalog/intake-reviews/:id/register-local', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => { try { const result = registerSourceFromIntakeReview(req.params.id, req.user?.email || 'operator', req.user?.organizationId || DEFAULT_ORGANIZATION_ID); if (!result) return res.status(404).json({ error: 'RevisiÃ³n de fuente no encontrada' }); res.status(201).json(result); } catch (error) { res.status(400).json({ error: error.message }); } });
-app.get('/api/data-quality/gate', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(evaluateDataQuality({ catalog: listDataCatalog(), sources: listSources(req.user?.organizationId || DEFAULT_ORGANIZATION_ID) })));
+app.get('/api/data-quality/gate', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(evaluateDataQuality({ catalog: listDataCatalogForOrganization(req.user?.organizationId || DEFAULT_ORGANIZATION_ID), sources: listSources(req.user?.organizationId || DEFAULT_ORGANIZATION_ID) })));
 app.post('/api/data-quality/validate', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => { const source = listSources(req.user?.organizationId || DEFAULT_ORGANIZATION_ID).find((item) => item.id === req.body?.sourceId) || {}; res.json(validateDataRecord(req.body || {}, source)); });
 app.get('/api/contracts', (req, res) => res.json(listSchemas()));
 app.get('/api/contracts/readiness', (req, res) => res.json(getSchemaRegistryReadiness()));
@@ -369,7 +370,7 @@ app.post('/api/entities/resolve', (req, res) => {
 app.post('/api/action-plans/preview', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => {
   try {
     const plan = attachDecisionEvidence(buildActionPlan(req.body || {}), req.body || {});
-    const dataQualityGate = evaluateDataQuality({ catalog: listDataCatalog(), sources: listSources(req.user?.organizationId || DEFAULT_ORGANIZATION_ID) });
+    const dataQualityGate = evaluateDataQuality({ catalog: listDataCatalogForOrganization(req.user?.organizationId || DEFAULT_ORGANIZATION_ID), sources: listSources(req.user?.organizationId || DEFAULT_ORGANIZATION_ID) });
     res.json({ ...plan, dataQualityGate, materialRecommendationAllowed: dataQualityGate.ready && !plan.decision.startsWith('abstain') });
   }
   catch (error) { res.status(400).json({ error: error.message }); }
@@ -391,7 +392,7 @@ app.post('/api/assistant/suggestion', authIfConfigured, roleIfConfigured('admin'
   const model = listModels().find((item) => item.id === 'impact-cascade');
   const calibration = getCalibrationOverview('impact-cascade');
   const modelGovernance = buildModelGovernance(model, validation, calibration, benchmarkCalibration(calibration));
-    const dataQualityGate = evaluateDataQuality({ catalog: listDataCatalog(), sources: listSources(req.user?.organizationId || DEFAULT_ORGANIZATION_ID) });
+    const dataQualityGate = evaluateDataQuality({ catalog: listDataCatalogForOrganization(req.user?.organizationId || DEFAULT_ORGANIZATION_ID), sources: listSources(req.user?.organizationId || DEFAULT_ORGANIZATION_ID) });
   res.json(buildAssistiveSuggestion(req.body || {}, { dataQualityGate, modelGovernance }));
 });
 app.get('/api/action-plans/:id', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => {
