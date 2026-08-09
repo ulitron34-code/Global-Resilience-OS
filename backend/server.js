@@ -587,37 +587,40 @@ app.get('/api/models/calibration/benchmark', authIfConfigured, roleIfConfigured(
 app.get('/api/models/governance', (req, res) => { const validation = getModelValidationReport(); res.json(listModels().map((model) => { const calibration = getCalibrationOverview(model.id); return buildModelGovernance(model, validation, calibration, benchmarkCalibration(calibration)); })); });
 app.get('/api/models/governance/:id', (req, res) => { const model = listModels().find((item) => item.id === req.params.id); if (!model) return res.status(404).json({ error: 'Modelo no encontrado' }); const validation = getModelValidationReport(); const calibration = getCalibrationOverview(model.id); res.json(buildModelGovernance(model, validation, calibration, benchmarkCalibration(calibration))); });
 app.get('/api/pilots/readiness', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => {
-  const modelGovernance = listModels().map((model) => { const calibration = getCalibrationOverview(model.id); return buildModelGovernance(model, getModelValidationReport(), calibration, benchmarkCalibration(calibration)); });
-  res.json(buildPilotReadiness({ runtime: getRuntimeReadiness(), catalog: getDataCatalogReadiness(), sourceHealth: getSourceHealthOverview(), modelGovernance, actionLibrary: getActionLibraryReadiness(), tenancy: { organizationId: DEFAULT_ORGANIZATION_ID }, pilotFeedback: listPilotFeedback(), historicalFixtures: getCalibrationOverview().fixtures || [] }));
+  const organizationId = req.user?.organizationId || DEFAULT_ORGANIZATION_ID;
+  const modelGovernance = listModels().map((model) => { const calibration = getCalibrationOverview(model.id, organizationId); return buildModelGovernance(model, getModelValidationReport(), calibration, benchmarkCalibration(calibration)); });
+  res.json(buildPilotReadiness({ runtime: getRuntimeReadiness(), catalog: getDataCatalogReadiness(), sourceHealth: getSourceHealthOverview(), modelGovernance, actionLibrary: getActionLibraryReadiness(), tenancy: { organizationId }, pilotFeedback: listPilotFeedback(organizationId), historicalFixtures: getCalibrationOverview(undefined, organizationId).fixtures || [] }));
 });
 app.get('/api/pilots/interview-guide', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(getPilotInterviewGuide()));
-app.get('/api/pilots/metrics', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(buildPilotMetrics({ cases: listCases({ limit: 200 }), actionPlans: listActionPlans({ limit: 200 }), sourceHealth: getSourceHealthOverview(), notifications: listNotifications() })));
+app.get('/api/pilots/metrics', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => { const organizationId = req.user?.organizationId || DEFAULT_ORGANIZATION_ID; return res.json(buildPilotMetrics({ cases: listCases({ limit: 200, organizationId }), actionPlans: listActionPlans({ limit: 200, organizationId }), sourceHealth: getSourceHealthOverview(), notifications: listNotifications(false, organizationId) })); });
 app.use('/api/pilots/package', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res, next) => {
   if (!['markdown', 'md'].includes(String(req.query.format || '').toLowerCase())) return next();
-  const modelGovernance = listModels().map((model) => { const calibration = getCalibrationOverview(model.id); return buildModelGovernance(model, getModelValidationReport(), calibration, benchmarkCalibration(calibration)); });
+  const organizationId = req.user?.organizationId || DEFAULT_ORGANIZATION_ID;
+  const modelGovernance = listModels().map((model) => { const calibration = getCalibrationOverview(model.id, organizationId); return buildModelGovernance(model, getModelValidationReport(), calibration, benchmarkCalibration(calibration)); });
   const runtime = getRuntimeReadiness();
   const catalog = getDataCatalogReadiness();
   const sourceHealth = getSourceHealthOverview();
   const actionLibrary = getActionLibraryReadiness();
-  const readiness = buildPilotReadiness({ runtime, catalog, sourceHealth, modelGovernance, actionLibrary, tenancy: { organizationId: DEFAULT_ORGANIZATION_ID }, pilotFeedback: listPilotFeedback(), historicalFixtures: getCalibrationOverview().fixtures || [] });
-  const cases = listCases({ limit: 200 });
-  const actionPlans = listActionPlans({ limit: 200, organizationId: req.user?.organizationId || DEFAULT_ORGANIZATION_ID });
-  const metrics = buildPilotMetrics({ cases, actionPlans, sourceHealth, notifications: listNotifications() });
-  const scorecard = buildOperationalScorecard({ alerts: listAlerts({ limit: 200 }), cases, actionPlans, sources: listSources(), deadLetters: listDeadLetters(), incidents: listIncidents({ organizationId: req.user?.organizationId || DEFAULT_ORGANIZATION_ID }), calibrationFixtures: getCalibrationOverview().fixtures || [] });
+  const readiness = buildPilotReadiness({ runtime, catalog, sourceHealth, modelGovernance, actionLibrary, tenancy: { organizationId }, pilotFeedback: listPilotFeedback(organizationId), historicalFixtures: getCalibrationOverview(undefined, organizationId).fixtures || [] });
+  const cases = listCases({ limit: 200, organizationId });
+  const actionPlans = listActionPlans({ limit: 200, organizationId });
+  const metrics = buildPilotMetrics({ cases, actionPlans, sourceHealth, notifications: listNotifications(false, organizationId) });
+  const scorecard = buildOperationalScorecard({ alerts: listAlerts({ limit: 200, organizationId }), cases, actionPlans, sources: listSources(), deadLetters: listDeadLetters(undefined, organizationId), incidents: listIncidents({ organizationId }), calibrationFixtures: getCalibrationOverview(undefined, organizationId).fixtures || [] });
   const packet = { schemaVersion: '1.0.0-local', generatedAt: new Date().toISOString(), readiness, interviewGuide: getPilotInterviewGuide(), metrics, scorecard, feedback: listPilotFeedback(), nextActions: ['Realizar cinco entrevistas estructuradas', 'Autorizar fuentes y registrar licencias', 'Cargar 3-5 eventos históricos verificables', 'Definir baseline y criterio go/no-go'], disclaimer: 'Paquete local de preparación; no demuestra valor comercial ni sustituye validación con cliente.' };
   return res.type('text/markdown').set('Content-Disposition', 'attachment; filename="global-resilience-pilot-package.md"').send(pilotPackageToMarkdown(packet));
 });
 app.get('/api/pilots/package', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => {
-  const modelGovernance = listModels().map((model) => { const calibration = getCalibrationOverview(model.id); return buildModelGovernance(model, getModelValidationReport(), calibration, benchmarkCalibration(calibration)); });
+  const organizationId = req.user?.organizationId || DEFAULT_ORGANIZATION_ID;
+  const modelGovernance = listModels().map((model) => { const calibration = getCalibrationOverview(model.id, organizationId); return buildModelGovernance(model, getModelValidationReport(), calibration, benchmarkCalibration(calibration)); });
   const runtime = getRuntimeReadiness();
   const catalog = getDataCatalogReadiness();
   const sourceHealth = getSourceHealthOverview();
   const actionLibrary = getActionLibraryReadiness();
-  const readiness = buildPilotReadiness({ runtime, catalog, sourceHealth, modelGovernance, actionLibrary, tenancy: { organizationId: DEFAULT_ORGANIZATION_ID }, pilotFeedback: listPilotFeedback(), historicalFixtures: getCalibrationOverview().fixtures || [] });
-  const cases = listCases({ limit: 200 });
-  const actionPlans = listActionPlans({ limit: 200, organizationId: req.user?.organizationId || DEFAULT_ORGANIZATION_ID });
-  const metrics = buildPilotMetrics({ cases, actionPlans, sourceHealth, notifications: listNotifications() });
-  const scorecard = buildOperationalScorecard({ alerts: listAlerts({ limit: 200 }), cases, actionPlans, sources: listSources(), deadLetters: listDeadLetters(), incidents: listIncidents({ organizationId: req.user?.organizationId || DEFAULT_ORGANIZATION_ID }), calibrationFixtures: getCalibrationOverview().fixtures || [] });
+  const readiness = buildPilotReadiness({ runtime, catalog, sourceHealth, modelGovernance, actionLibrary, tenancy: { organizationId }, pilotFeedback: listPilotFeedback(organizationId), historicalFixtures: getCalibrationOverview(undefined, organizationId).fixtures || [] });
+  const cases = listCases({ limit: 200, organizationId });
+  const actionPlans = listActionPlans({ limit: 200, organizationId });
+  const metrics = buildPilotMetrics({ cases, actionPlans, sourceHealth, notifications: listNotifications(false, organizationId) });
+  const scorecard = buildOperationalScorecard({ alerts: listAlerts({ limit: 200, organizationId }), cases, actionPlans, sources: listSources(), deadLetters: listDeadLetters(undefined, organizationId), incidents: listIncidents({ organizationId }), calibrationFixtures: getCalibrationOverview(undefined, organizationId).fixtures || [] });
   res.json({ schemaVersion: '1.0.0-local', generatedAt: new Date().toISOString(), readiness, interviewGuide: getPilotInterviewGuide(), metrics, scorecard, feedback: listPilotFeedback(), nextActions: ['Realizar cinco entrevistas estructuradas', 'Autorizar fuentes y registrar licencias', 'Cargar 3-5 eventos históricos verificables', 'Definir baseline y criterio go/no-go'], disclaimer: 'Paquete local de preparación; no demuestra valor comercial ni sustituye validación con cliente.' });
 });
 app.get('/api/pilots/feedback', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(listPilotFeedback(req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
@@ -677,7 +680,7 @@ app.post('/api/jobs/demo-ingest', authIfConfigured, roleIfConfigured('admin', 'r
 app.post('/api/jobs/sla-sweep', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => res.status(201).json(runSlaSweep(req.user?.email || 'scheduler')));
 app.post('/api/jobs/source-health-sweep', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => res.status(201).json(runSourceHealthSweep(req.user?.email || 'scheduler')));
 app.get('/api/metrics/overview', (req, res) => res.json(getOverviewMetrics({ vertical: req.query.vertical })));
-app.get('/api/metrics/scorecard', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(buildOperationalScorecard({ alerts: listAlerts({ limit: 200 }), cases: listCases({ limit: 200 }), actionPlans: listActionPlans({ limit: 200, organizationId: req.user?.organizationId || DEFAULT_ORGANIZATION_ID }), sources: listSources(), deadLetters: listDeadLetters(), incidents: listIncidents({ organizationId: req.user?.organizationId || DEFAULT_ORGANIZATION_ID }), calibrationFixtures: getCalibrationOverview().fixtures || [] })));
+ app.get('/api/metrics/scorecard', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => { const organizationId = req.user?.organizationId || DEFAULT_ORGANIZATION_ID; return res.json(buildOperationalScorecard({ alerts: listAlerts({ limit: 200, organizationId }), cases: listCases({ limit: 200, organizationId }), actionPlans: listActionPlans({ limit: 200, organizationId }), sources: listSources(), deadLetters: listDeadLetters(undefined, organizationId), incidents: listIncidents({ organizationId }), calibrationFixtures: getCalibrationOverview(undefined, organizationId).fixtures || [] })); });
 app.get('/api/briefs/latest', (req, res) => res.json(getLatestBrief({ audience: req.query.audience })));
 app.get('/api/briefs/latest/export', (req, res) => {
   const brief = getLatestBrief({ audience: req.query.audience });
