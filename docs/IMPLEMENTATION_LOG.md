@@ -198,6 +198,16 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
   `organizationId` correcto y ausencia de filtración de fuentes.
 ## Bloque: snapshots y readiness tenant-scoped (2026-08-09)
 
+## Bloque: contrato temporal uniforme del Impact Graph (2026-08-09)
+
+- Nodos, aristas y trayectorias exponen `sourceId`, `licenseRef`, `observedAt`,
+  `validFrom`, `validTo`, `confidence` y `reviewStatus`.
+- Los registros semilla conservan `reviewStatus: illustrative`,
+  `licenseRef: null` y evidencia `assumed`; el contrato no convierte datos demo
+  en datos licenciados ni en causalidad histórica validada.
+- La auditoría API verifica el contrato completo en el grafo filtrado y en la
+  trayectoria cable-vertical.
+
 ## Bloque: Executive Brief sin score fijo no calibrado (2026-08-09)
 
 - Executive Brief deja de pintar un `72/100` fijo en el frontend.

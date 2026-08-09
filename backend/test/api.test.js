@@ -86,10 +86,17 @@ describe('Global Resilience OS API', () => {
     const graphBody = await graph.json();
     assert.equal(graphBody.counts.cables, 1);
     assert.ok(graphBody.edges.some((edge) => edge.relation === 'exposes_directly'));
+    assert.deepEqual(graphBody.temporalContract, ['sourceId', 'licenseRef', 'observedAt', 'validFrom', 'validTo', 'confidence', 'reviewStatus']);
+    assert.ok(graphBody.nodes.every((item) => graphBody.temporalContract.every((field) => Object.hasOwn(item.attributes, field))));
+    assert.ok(graphBody.edges.every((item) => graphBody.temporalContract.every((field) => Object.hasOwn(item, field))));
+    assert.ok(graphBody.nodes.every((item) => item.attributes.reviewStatus === 'illustrative' && item.attributes.licenseRef === null));
 
     const path = await fetch(`${baseUrl}/api/graph/paths?cableId=seamewe3&verticalId=petroleo`);
     assert.equal(path.status, 200);
-    assert.equal((await path.json()).relation, 'exposes_directly');
+    const pathBody = await path.json();
+    assert.equal(pathBody.relation, 'exposes_directly');
+    assert.deepEqual(pathBody.temporalContract, graphBody.temporalContract);
+    assert.equal(pathBody.reviewStatus, 'illustrative');
 
     const playbooks = await fetch(`${baseUrl}/api/playbooks`);
     assert.equal(playbooks.status, 200);
