@@ -1,5 +1,7 @@
+import { filterEligibleCalibrationFixtures } from './calibrationEligibility.js';
+
 export function benchmarkCalibration(overview) {
-  const fixtures = Array.isArray(overview?.fixtures) ? overview.fixtures.filter((fixture) => fixture.evidenceStatus === 'complete') : [];
+  const fixtures = filterEligibleCalibrationFixtures(Array.isArray(overview?.fixtures) ? overview.fixtures : []);
   if (!fixtures.length) return { scope: 'local-platform', status: 'insufficient_sample', fixtureCount: 0, baseline: 'mean_observed_impact', modelMaeUsd: null, baselineMaeUsd: null, improvementPct: null, gate: 'abstain_no_fixtures', disclaimer: 'No existe evidencia histórica suficiente para evaluar mejora.' };
   const mean = fixtures.reduce((sum, item) => sum + Number(item.observedImpactUsd), 0) / fixtures.length;
   const mae = (values) => values.reduce((sum, value) => sum + Math.abs(value), 0) / values.length;

@@ -6,6 +6,7 @@ import { canTransitionIncident, normalizeIncidentInput, validateIncidentPatch } 
 import { buildEvidence } from './evidenceClassification.js';
 import { getDataCatalogReadiness, listDataCatalog, validateSourceIntake } from './dataCatalog.js';
 import { buildControlPlaneProjection, validateControlPlaneProjection } from './controlPlaneProjection.js';
+import { getCalibrationEligibility, filterEligibleCalibrationFixtures } from './calibrationEligibility.js';
 
 const now = new Date().toISOString();
 const DEFAULT_ORGANIZATION_ID = 'nashadi-demo';
@@ -310,7 +311,8 @@ export function getModelValidationReport() {
 }
 export function getCalibrationOverview(modelId, organizationId = DEFAULT_ORGANIZATION_ID) {
   const fixtures = state.calibrationFixtures.filter((fixture) => (fixture.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId && (!modelId || fixture.modelId === modelId));
-  const eligibleFixtures = fixtures.filter((fixture) => fixture.evidenceStatus === 'complete');
+  const eligibleFixtures = filterEligibleCalibrationFixtures(fixtures);
+  const excludedIllustrativeFixtureCount = fixtures.filter((fixture) => getCalibrationEligibility(fixture).reason === 'illustrative_source').length;
   const errors = eligibleFixtures.map((fixture) => fixture.predictedImpactUsd - fixture.observedImpactUsd);
   const absoluteErrors = errors.map((value) => Math.abs(value));
   const percentageErrors = eligibleFixtures.filter((fixture) => fixture.observedImpactUsd > 0).map((fixture) => Math.abs(fixture.predictedImpactUsd - fixture.observedImpactUsd) / fixture.observedImpactUsd);

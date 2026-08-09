@@ -326,3 +326,9 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
 - Readiness empresarial, postura de seguridad y calibración usan el tenant del
   token; se añadieron administradores demo por organización para probar el flujo
   de backup/restore con control de rol.
+# 2026-08-09 - Elegibilidad de calibracion historica
+
+- Se centralizo el filtro de fixtures historicos elegibles.
+- Fixtures completas cuyo `sourceId` es demo o contiene `demo` ya no entran en benchmark ni backtesting.
+- La calibracion conserva los registros cargados, pero sus metricas solo usan evidencia historica no ilustrativa con procedencia.
+- Se agrego cobertura automatica para impedir que una fuente demo infle el tamano de muestra.

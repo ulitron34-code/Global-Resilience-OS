@@ -1,8 +1,10 @@
+import { filterEligibleCalibrationFixtures } from './calibrationEligibility.js';
+
 function mean(values) { return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : null; }
 function median(values) { if (!values.length) return null; const sorted = [...values].sort((a, b) => a - b); const middle = Math.floor(sorted.length / 2); return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2; }
 
 export function buildBacktestReport(fixtures = [], options = {}) {
-  const eligible = fixtures.filter((item) => item.evidenceStatus === 'complete' && Number.isFinite(Number(item.observedImpactUsd)) && Number.isFinite(Number(item.predictedImpactUsd)) && Number(item.observedImpactUsd) >= 0 && Number(item.predictedImpactUsd) >= 0);
+  const eligible = filterEligibleCalibrationFixtures(fixtures).filter((item) => Number.isFinite(Number(item.observedImpactUsd)) && Number.isFinite(Number(item.predictedImpactUsd)) && Number(item.observedImpactUsd) >= 0 && Number(item.predictedImpactUsd) >= 0);
   const observed = eligible.map((item) => Number(item.observedImpactUsd));
   const baselineValue = options.baselineValue === undefined ? median(observed) : Number(options.baselineValue);
   const modelErrors = eligible.map((item) => Math.abs(Number(item.predictedImpactUsd) - Number(item.observedImpactUsd)));
