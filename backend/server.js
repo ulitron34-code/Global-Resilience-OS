@@ -106,6 +106,7 @@ import {
   createIncident,
   updateIncident,
   getRemoteStoreStatus,
+  getControlPlaneProjection,
   flushPersistence,
 } from './domain/store.js';
 
@@ -272,6 +273,16 @@ app.get('/api/health/readiness', (req, res) => {
 });
 app.get('/api/ops/snapshot', authIfConfigured, roleIfConfigured('admin'), (req, res) => {
   res.type('application/json').set('Content-Disposition', 'attachment; filename="resilience-local-snapshot.json"').send(JSON.stringify(getLocalSnapshot(), null, 2));
+});
+app.post('/api/ops/control-plane/projection', authIfConfigured, roleIfConfigured('admin'), (req, res) => {
+  try {
+    const organizationId = req.user?.organizationId || DEFAULT_ORGANIZATION_ID;
+    const organizationUuid = req.body?.organizationUuid || req.query.organizationUuid;
+    const projectionTimestamp = req.body?.projectionTimestamp || req.query.projectionTimestamp;
+    res.json(getControlPlaneProjection(organizationUuid, organizationId, projectionTimestamp));
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 });
 app.post('/api/ops/restore', authIfConfigured, roleIfConfigured('admin'), (req, res) => {
   try {

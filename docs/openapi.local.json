@@ -106,6 +106,7 @@
     "/api/auth/users": { "get": { "summary": "List local users", "security": [{ "bearerAuth": [] }], "responses": { "200": { "description": "Users" } } } },
     "/api/version": { "get": { "summary": "API version", "responses": { "200": { "description": "Service and API version" } } } },
     "/api/ops/snapshot": { "get": { "summary": "Create local snapshot", "security": [{ "bearerAuth": [] }], "responses": { "200": { "description": "Validated snapshot" } } } },
+    "/api/ops/control-plane/projection": { "post": { "summary": "Validate normalized control-plane projection", "security": [{ "bearerAuth": [] }], "responses": { "200": { "description": "Tenant-scoped projection and backfill validation" }, "400": { "description": "Invalid organization UUID or projection" } } } },
     "/api/compliance/readiness": { "get": { "summary": "Local compliance readiness", "responses": { "200": { "description": "Controls and limitations" } } } },
     "/api/connectors/{id}": { "get": { "summary": "Get connector contract", "parameters": [{ "$ref": "#/components/parameters/Id" }], "responses": { "200": { "description": "Connector" }, "404": { "description": "Connector not found" } } } },
     "/api/playbooks/{id}": { "get": { "summary": "Get playbook detail", "parameters": [{ "$ref": "#/components/parameters/Id" }], "responses": { "200": { "description": "Playbook" }, "404": { "description": "Playbook not found" } } } },

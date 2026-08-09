@@ -5,6 +5,7 @@ import { validateEventEnvelope } from './eventContract.js';
 import { canTransitionIncident, normalizeIncidentInput, validateIncidentPatch } from './incidentOps.js';
 import { buildEvidence } from './evidenceClassification.js';
 import { listDataCatalog, validateSourceIntake } from './dataCatalog.js';
+import { buildControlPlaneProjection, validateControlPlaneProjection } from './controlPlaneProjection.js';
 
 const now = new Date().toISOString();
 const DEFAULT_ORGANIZATION_ID = 'nashadi-demo';
@@ -56,6 +57,11 @@ if (getRemotePersistenceStatus().enabled && getRemotePersistenceStatus().state =
 
 export function getRemoteStoreStatus() { return getRemotePersistenceStatus(); }
 export { flushPersistence };
+
+export function getControlPlaneProjection(organizationUuid, organizationId = DEFAULT_ORGANIZATION_ID, projectionTimestamp) {
+  const projection = buildControlPlaneProjection({ organizationId, organizationUuid, projectionTimestamp, notifications: listNotifications(false, organizationId), webhooks: listWebhooks(organizationId), webhookDeliveries: listWebhookDeliveries(undefined, organizationId), jobRuns: listJobRuns(organizationId) });
+  return { ...projection, validation: validateControlPlaneProjection(projection) };
+}
 
 function clone(value) {
   return structuredClone(value);

@@ -637,6 +637,11 @@ describe('Global Resilience OS API', () => {
     const snapshot = await fetch(`${baseUrl}/api/ops/snapshot`);
     assert.equal(snapshot.status, 200);
     assert.match(await snapshot.text(), /local-platform/);
+    const projection = await fetch(`${baseUrl}/api/ops/control-plane/projection`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ organizationUuid: '11111111-1111-4111-8111-111111111111', projectionTimestamp: '2026-08-09T00:00:00Z' }) });
+    assert.equal(projection.status, 200);
+    const projectionBody = await projection.json();
+    assert.equal(projectionBody.validation.valid, true);
+    assert.equal(projectionBody.reconciliation.secretPlaintextProjected, false);
     const integrity = await fetch(`${baseUrl}/api/audit/integrity`);
     assert.equal(integrity.status, 200);
     const integrityBody = await integrity.json();
