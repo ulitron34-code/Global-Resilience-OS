@@ -367,3 +367,6 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
   una licencia declarada no convierte datos ilustrativos en evidencia operativa.
 - El readiness del catalogo ahora expone `illustrative` y mantiene pendiente
   cualquier registro ilustrativo, incluso con metadatos contractuales completos.
+- La evidencia de planes distingue enlaces ilustrativos de enlaces productivos y
+  expone `productionEligible`/`productionDecision` sin confundir trazabilidad
+  local con aptitud para recomendaciones materiales.
