@@ -141,7 +141,10 @@ describe('Global Resilience OS API', () => {
     assert.equal(readinessBody.checks.auditIntegrity, true);
     const runtimeReadiness = await fetch(`${baseUrl}/api/runtime/readiness`);
     assert.equal(runtimeReadiness.status, 200);
-    assert.equal((await runtimeReadiness.json()).checks.externalActionsDisabledByDefault, true);
+    const runtimeReadinessBody = await runtimeReadiness.json();
+    assert.equal(runtimeReadinessBody.checks.externalActionsDisabledByDefault, true);
+    assert.equal(runtimeReadinessBody.checks.remotePersistence, true);
+    assert.equal(runtimeReadinessBody.persistence.enabled, false);
     const catalog = await fetch(`${baseUrl}/api/data-catalog`);
     assert.ok((await catalog.json()).some((item) => item.id === 'cables-demo'));
     const connectors = await fetch(`${baseUrl}/api/connectors`);

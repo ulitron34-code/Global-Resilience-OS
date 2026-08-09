@@ -120,6 +120,20 @@ const SHARE_RATE_WINDOW_MS = 60_000;
 const SHARE_RATE_LIMIT = 60;
 const GLOBAL_RATE_LIMIT = Number(process.env.GLOBAL_RATE_LIMIT || (process.env.NODE_ENV === 'test' ? 1000 : 120));
 
+function getOperationalRuntimeReadiness() {
+  const base = getRuntimeReadiness();
+  const persistence = getRemoteStoreStatus();
+  const remoteRequired = ['staging', 'production'].includes(base.config?.mode) && process.env.PERSISTENCE_MODE === 'supabase';
+  const remoteReady = !remoteRequired || (persistence.enabled && persistence.state === 'ready' && Boolean(persistence.organizationId));
+  const checks = { ...base.checks, remotePersistence: remoteReady };
+  return {
+    ...base,
+    ready: Object.values(checks).every(Boolean),
+    checks,
+    persistence: { enabled: persistence.enabled, state: persistence.state, organizationId: persistence.organizationId, lastError: persistence.lastError },
+  };
+}
+
 const configuredOrigins = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',').map((origin) => origin.trim()).filter(Boolean) : null;
 app.use(cors({ origin: (origin, callback) => {
   if (!origin || !configuredOrigins || configuredOrigins.includes(origin)) return callback(null, true);
@@ -249,7 +263,7 @@ app.get('/api/compliance/readiness', (req, res) => res.json(getComplianceReadine
 app.get('/api/quality/report', (req, res) => res.json(getDataQualityReport()));
 app.get('/api/governance/provenance', (req, res) => res.json(getProvenanceOverview()));
 app.get('/api/governance/retention', (req, res) => res.json(getRetentionOverview()));
-app.get('/api/runtime/readiness', (req, res) => { const readiness = getRuntimeReadiness(); res.status(readiness.ready ? 200 : 503).json(readiness); });
+app.get('/api/runtime/readiness', (req, res) => { const readiness = getOperationalRuntimeReadiness(); res.status(readiness.ready ? 200 : 503).json(readiness); });
 app.get('/api/runtime/supabase', (req, res) => res.json(getSupabaseReadiness()));
 app.get('/api/runtime/supabase/check', async (req, res) => {
   const result = await checkSupabaseConnection();
@@ -259,7 +273,8 @@ app.get('/api/runtime/supabase/persistence', (req, res) => res.json(getRemoteSto
 app.get('/api/runtime/config-contract', (req, res) => { const contract = getEnvironmentContract(); res.status(contract.ready ? 200 : 503).json(contract); });
 app.get('/api/readiness/enterprise', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => {
   const modelGovernance = listModels().map((model) => { const calibration = getCalibrationOverview(model.id); return buildModelGovernance(model, getModelValidationReport(), calibration, benchmarkCalibration(calibration)); });
-  res.json(buildEnterpriseReadiness({ runtime: getRuntimeReadiness(), environmentContract: getEnvironmentContract(), security: buildSecurityPosture({ runtime: getRuntimeReadiness(), audit: getAuditIntegrity(), tenancy: { organizationId: DEFAULT_ORGANIZATION_ID }, snapshot: getLocalSnapshot() }), catalog: getDataCatalogReadiness(), modelGovernance, actionLibrary: getActionLibraryReadiness(), schemaAudit: true, releaseGate: true }));
+  const runtime = getOperationalRuntimeReadiness();
+  res.json(buildEnterpriseReadiness({ runtime, environmentContract: getEnvironmentContract(), security: buildSecurityPosture({ runtime, audit: getAuditIntegrity(), tenancy: { organizationId: DEFAULT_ORGANIZATION_ID }, snapshot: getLocalSnapshot() }), catalog: getDataCatalogReadiness(), modelGovernance, actionLibrary: getActionLibraryReadiness(), schemaAudit: true, releaseGate: true }));
 });
 app.get('/api/data-catalog', (req, res) => res.json(listDataCatalog()));
 app.get('/api/data-catalog/readiness', (req, res) => res.json(getDataCatalogReadiness()));
