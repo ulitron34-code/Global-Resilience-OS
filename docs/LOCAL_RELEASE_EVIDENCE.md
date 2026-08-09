@@ -22,3 +22,8 @@ mismo módulo usado por el botón del frontend y verifica la firma `%PDF-`.
 
 No requiere GitHub, Supabase, Vercel ni credenciales externas; es un control
 reproducible para la copia local/USB.
+
+En el entorno de trabajo restringido actual, el subproceso de esbuild puede
+fallar con `Acceso denegado` al resolver `frontend/vite.config.js`. Ese caso
+debe conservarse como `FAIL` hasta repetir el build en una PowerShell normal;
+no se debe convertir en un PASS artificial.

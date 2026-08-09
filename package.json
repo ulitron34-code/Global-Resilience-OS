@@ -9,6 +9,7 @@
     "lint": "npm --prefix frontend run lint",
     "build": "node scripts/build-frontend.js",
     "check:plan": "node scripts/local-plan-audit.js",
+    "check:openapi": "node scripts/local-openapi-route-audit.js",
     "check:supabase": "node scripts/local-supabase-schema-check.js",
     "verify": "node scripts/local-release-evidence.js",
     "verify:install": "node scripts/local-installation-check.js",
