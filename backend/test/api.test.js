@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { after, before, describe, it } from 'node:test';
-import { startServer } from '../server.js';
+import { startServer, stopServer } from '../server.js';
 import { createActionPlan, getActionPlan, listActionPlans } from '../domain/actionPlanStore.js';
 
 let server;
@@ -15,9 +15,9 @@ before(() => new Promise((resolve) => {
   });
 }));
 
-after(() => new Promise((resolve, reject) => {
-  server.close((error) => (error ? reject(error) : resolve()));
-}));
+after(async () => {
+  await stopServer(server);
+});
 
 async function postSimulation(body) {
   return fetch(`${baseUrl}/api/simulate-rupture`, {

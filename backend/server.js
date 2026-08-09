@@ -106,6 +106,7 @@ import {
   createIncident,
   updateIncident,
   getRemoteStoreStatus,
+  flushPersistence,
 } from './domain/store.js';
 
 export const app = express();
@@ -681,6 +682,27 @@ export function startServer(port = PORT) {
   });
 }
 
+export async function stopServer(server, timeoutMs = 10_000) {
+  if (!server?.listening) return flushPersistence();
+  const closePromise = new Promise((resolve, reject) => server.close((error) => (error ? reject(error) : resolve())));
+  let timer;
+  try {
+    await Promise.race([
+      Promise.all([flushPersistence(), closePromise]),
+      new Promise((_, reject) => { timer = setTimeout(() => reject(new Error('Tiempo de cierre agotado')), timeoutMs); }),
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
-  startServer();
+  const server = startServer();
+  const shutdown = async (signal) => {
+    console.log(`\n${signal} recibido; vaciando persistencia y cerrando servidor.`);
+    try { await stopServer(server); process.exit(0); }
+    catch (error) { console.error(`Cierre incompleto: ${error.message}`); process.exit(1); }
+  };
+  process.once('SIGTERM', () => shutdown('SIGTERM'));
+  process.once('SIGINT', () => shutdown('SIGINT'));
 }

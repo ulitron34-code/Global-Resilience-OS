@@ -1,5 +1,5 @@
 import { createHash, createHmac, randomBytes } from 'node:crypto';
-import { getRemotePersistenceStatus, persistState, restoreState, verifyAuditChain } from './persistence.js';
+import { flushPersistence, getRemotePersistenceStatus, persistState, restoreState, verifyAuditChain } from './persistence.js';
 import { computeImpact } from '../engine/impactEngine.js';
 import { validateEventEnvelope } from './eventContract.js';
 import { canTransitionIncident, normalizeIncidentInput, validateIncidentPatch } from './incidentOps.js';
@@ -50,6 +50,7 @@ const jobRuns = restored.jobRuns || [];
 if (getRemotePersistenceStatus().enabled && getRemotePersistenceStatus().state === 'empty') persistState(state, auditLog, notifications, comments, webhooks, webhookDeliveries, jobRuns);
 
 export function getRemoteStoreStatus() { return getRemotePersistenceStatus(); }
+export { flushPersistence };
 
 function clone(value) {
   return structuredClone(value);

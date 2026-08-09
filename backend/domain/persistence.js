@@ -87,6 +87,11 @@ function queueRemoteSnapshot(state, auditLog, notifications, comments, webhooks,
 
 export function getRemotePersistenceStatus() { return { ...remoteStatus }; }
 
+export async function flushPersistence() {
+  await remoteWriteChain;
+  return getRemotePersistenceStatus();
+}
+
 export async function restoreState(seed) {
   if (remoteEnabled) return loadRemoteSnapshot(seed);
   if (isTest || !existsSync(stateFile)) return seed;
