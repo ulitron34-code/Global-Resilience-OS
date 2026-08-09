@@ -476,7 +476,8 @@ app.patch('/api/cases/:id', authIfConfigured, roleIfConfigured('admin', 'risk_an
 });
 app.get('/api/cases/:id/audit', (req, res) => {
   const filters = { q: req.query.q, limit: req.query.limit, offset: req.query.offset };
-  res.set('x-total-count', String(countAudit(req.params.id, filters))).json(listAudit(req.params.id, filters));
+  const organizationId = req.user?.organizationId || DEFAULT_ORGANIZATION_ID;
+  res.set('x-total-count', String(countAudit(req.params.id, filters, organizationId))).json(listAudit(req.params.id, filters, organizationId));
 });
 app.get('/api/cases/:id/decision-package', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => {
   const item = getDecisionPackage(req.params.id, req.user?.organizationId || DEFAULT_ORGANIZATION_ID);
@@ -537,7 +538,8 @@ app.get('/api/shares/:token', shareRateLimit, (req, res) => {
 });
 app.get('/api/audit/export', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => {
   const filters = { q: req.query.q };
-  const items = listAudit(req.query.entityId, filters);
+  if (req.query.entityId && !getCase(req.query.entityId, req.user?.organizationId || DEFAULT_ORGANIZATION_ID)) return res.status(404).json({ error: 'Entidad no encontrada' });
+  const items = listAudit(req.query.entityId, filters, req.user?.organizationId || DEFAULT_ORGANIZATION_ID);
   if (req.query.format === 'csv') {
     const rows = [['ID', 'Entidad', 'Entidad ID', 'Acción', 'Actor', 'Mensaje', 'Creado'], ...items.map((item) => [item.id, item.entityType, item.entityId, item.action, item.actor, item.message, item.createdAt])];
     res.type('text/csv').set('Content-Disposition', 'attachment; filename="audit-export.csv"').send(rows.map((row) => row.map((value) => `"${String(value ?? '').replaceAll('"', '""')}"`).join(',')).join('\n'));
@@ -548,10 +550,10 @@ app.get('/api/audit/export', authIfConfigured, roleIfConfigured('admin', 'risk_a
 app.get('/api/audit/integrity', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(getAuditIntegrity()));
 app.get('/api/ops/sla', (req, res) => res.json(getSlaOverview({ vertical: req.query.vertical })));
 app.get('/api/ops/source-health', (req, res) => res.json(getSourceHealthOverview()));
-app.get('/api/cases/:id/comments', (req, res) => res.json(listComments(req.params.id)));
+app.get('/api/cases/:id/comments', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(listComments(req.params.id, req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
 app.post('/api/cases/:id/comments', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => {
   try {
-    const item = addComment(req.params.id, req.body?.body, req.user?.email || 'operator');
+    const item = addComment(req.params.id, req.body?.body, req.user?.email || 'operator', req.user?.organizationId || DEFAULT_ORGANIZATION_ID);
     if (!item) return res.status(404).json({ error: 'Caso no encontrado' });
     res.status(201).json(item);
   } catch (error) { res.status(400).json({ error: error.message }); }

@@ -310,7 +310,7 @@ export function recordCalibrationFixtures(input, actor = 'operator') {
 export function getDecisionPackage(caseId, organizationId = DEFAULT_ORGANIZATION_ID) {
   const caseItem = state.cases.find((item) => item.id === caseId && (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId);
   if (!caseItem) return null;
-  const alert = state.alerts.find((item) => item.id === caseItem.alertId) || null;
+  const alert = state.alerts.find((item) => item.id === caseItem.alertId && (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId) || null;
   const sourceIds = new Set(alert?.sourceIds || []);
   return clone({
     schemaVersion: 1,
@@ -319,9 +319,9 @@ export function getDecisionPackage(caseId, organizationId = DEFAULT_ORGANIZATION
     disclaimer: 'Artefacto local basado en datos demo; requiere validación humana y fuentes licenciadas antes de uso productivo.',
     case: caseItem,
     alert,
-    sources: state.sources.filter((source) => sourceIds.has(source.id)),
+    sources: state.sources.filter((source) => sourceIds.has(source.id) && (source.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId),
     modelRegistry: listModels(),
-    scenarios: state.scenarios.map((scenario) => ({ ...scenario, evidenceClass: scenario.evidenceClass || 'assumed', evidence: scenario.evidence || buildEvidence({ evidenceClass: 'assumed', sourceIds: [], modelId: 'impact-cascade', modelVersion: '0.5.0', assumptions: scenario.assumptions || [], inferred: ['scenario_economics'] }) })),
+    scenarios: state.scenarios.filter((scenario) => (scenario.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId).map((scenario) => ({ ...scenario, evidenceClass: scenario.evidenceClass || 'assumed', evidence: scenario.evidence || buildEvidence({ evidenceClass: 'assumed', sourceIds: [], modelId: 'impact-cascade', modelVersion: '0.5.0', assumptions: scenario.assumptions || [], inferred: ['scenario_economics'] }) })),
     evidenceChain: { observedSourceIds: [...sourceIds], inferredModelIds: listModels().map((model) => `${model.id}@${model.version}`), assumedScenarioCount: state.scenarios.length },
     audit: auditLog.filter((entry) => entry.entityId === caseId || entry.entityId === caseItem.alertId),
     comments: comments.filter((comment) => comment.caseId === caseId),
@@ -371,17 +371,25 @@ export function getDecisionPackageByShareToken(token) {
   const accessedAt = new Date().toISOString();
   share.accessCount += 1;
   share.lastAccessedAt = accessedAt;
-  const packageData = getDecisionPackage(share.caseId);
+  const packageData = getDecisionPackage(share.caseId, share.organizationId || DEFAULT_ORGANIZATION_ID);
   if (!packageData) return null;
   auditLog.unshift({ id: `AUD-${String(auditLog.length + 1).padStart(4, '0')}`, entityType: 'decision_share', entityId: share.id, action: 'decision_share_accessed', actor: 'share_token', message: `Paquete de decisión consultado para ${share.caseId}.`, createdAt: accessedAt });
   persistState(state, auditLog, notifications, comments, webhooks, webhookDeliveries, jobRuns);
   return { share: { id: share.id, caseId: share.caseId, audience: share.audience, status: share.status, expiresAt: share.expiresAt, accessedAt }, package: packageData, disclaimer: 'Vista de solo lectura; los datos demo y las limitaciones del paquete siguen vigentes.' };
 }
-export function listAudit(entityId, filters = {}) { return clone(page(auditLog.filter((item) => (!entityId || item.entityId === entityId) && (!filters.q || `${item.action} ${item.actor} ${item.message}`.toLowerCase().includes(String(filters.q).toLowerCase()))), filters)); }
-export function countAudit(entityId, filters = {}) { return auditLog.filter((item) => (!entityId || item.entityId === entityId) && (!filters.q || `${item.action} ${item.actor} ${item.message}`.toLowerCase().includes(String(filters.q).toLowerCase()))).length; }
-export function listComments(caseId) { return clone(comments.filter((item) => item.caseId === caseId)); }
-export function addComment(caseId, body, author = 'operator') {
-  if (!state.cases.some((item) => item.id === caseId)) return null;
+function auditBelongsToOrganization(item, organizationId) {
+  const collections = [state.alerts, state.cases, state.scenarios, state.sources, state.incidents, state.sourceIntakeReviews, state.calibrationFixtures, state.pilotFeedback, state.decisionShares];
+  const entity = collections.flat().find((candidate) => candidate.id === item.entityId);
+  return entity ? (entity.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId : organizationId === DEFAULT_ORGANIZATION_ID;
+}
+export function listAudit(entityId, filters = {}, organizationId = DEFAULT_ORGANIZATION_ID) { return clone(page(auditLog.filter((item) => auditBelongsToOrganization(item, organizationId) && (!entityId || item.entityId === entityId) && (!filters.q || `${item.action} ${item.actor} ${item.message}`.toLowerCase().includes(String(filters.q).toLowerCase()))), filters)); }
+export function countAudit(entityId, filters = {}, organizationId = DEFAULT_ORGANIZATION_ID) { return auditLog.filter((item) => auditBelongsToOrganization(item, organizationId) && (!entityId || item.entityId === entityId) && (!filters.q || `${item.action} ${item.actor} ${item.message}`.toLowerCase().includes(String(filters.q).toLowerCase()))).length; }
+export function listComments(caseId, organizationId = DEFAULT_ORGANIZATION_ID) {
+  if (!state.cases.some((item) => item.id === caseId && (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId)) return [];
+  return clone(comments.filter((item) => item.caseId === caseId));
+}
+export function addComment(caseId, body, author = 'operator', organizationId = DEFAULT_ORGANIZATION_ID) {
+  if (!state.cases.some((item) => item.id === caseId && (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId)) return null;
   if (typeof body !== 'string' || body.trim().length < 2) throw new Error('El comentario debe tener al menos 2 caracteres');
   const item = { id: `COM-${String(comments.length + 1).padStart(4, '0')}`, caseId, body: body.trim(), author, createdAt: new Date().toISOString() };
   comments.unshift(item);
