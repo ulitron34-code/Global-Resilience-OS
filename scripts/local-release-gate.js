@@ -25,7 +25,7 @@ const requiredFiles = [
   'scripts/local-reproducibility-check.js', 'docs/REPRODUCIBILITY_CHECK.md',
   'scripts/local-supabase-schema-check.js', 'docs/SUPABASE_SCHEMA_AUDIT.md',
   'backend/domain/enterpriseReadiness.js', 'docs/ENTERPRISE_READINESS.md',
-  'scripts/local-plan-audit.js', 'docs/LOCAL_PLAN_AUDIT.md', 'docs/UI_CONTRACT_AUDIT.md', 'scripts/local-ui-contract-audit.js', 'docs/CURRENT_STATUS.md',
+  'scripts/local-plan-audit.js', 'docs/LOCAL_PLAN_AUDIT.md', 'docs/UI_CONTRACT_AUDIT.md', 'scripts/local-ui-contract-audit.js', 'scripts/local-external-handoff-audit.js', 'docs/EXTERNAL_HANDOFF_AUDIT.md', 'docs/CURRENT_STATUS.md',
   'scripts/local-openapi-route-audit.js', 'docs/OPENAPI_ROUTE_AUDIT.md',
 ];
 for (const relative of requiredFiles) check(`file:${relative}`, existsSync(file(relative)), 'required local artifact');
@@ -47,6 +47,8 @@ const planAudit = readFileSync(file('scripts/local-plan-audit.js'), 'utf8');
 check('plan-audit', planAudit.includes('localPlanArtifacts') && planAudit.includes('external-actions'), 'master plan audit script is present and contains safety gates');
 const openapiRouteAudit = readFileSync(file('scripts/local-openapi-route-audit.js'), 'utf8');
 check('openapi-route-audit', openapiRouteAudit.includes('documentedCount') && openapiRouteAudit.includes('duplicateRoutes'), 'OpenAPI route parity audit is present');
+const handoffAudit = readFileSync(file('scripts/local-external-handoff-audit.js'), 'utf8');
+check('external-handoff-audit', handoffAudit.includes('externalBlockers') && handoffAudit.includes('SUPABASE_SERVICE_ROLE_KEY'), 'external handoff package keeps blockers explicit and secrets managed');
 
 const failed = checks.filter((item) => item.status === 'fail');
 console.log(JSON.stringify({ gate: failed.length ? 'FAIL' : 'PASS', checkedAt: new Date().toISOString(), checks }, null, 2));

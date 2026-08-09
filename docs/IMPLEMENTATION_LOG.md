@@ -1,5 +1,14 @@
 # Implementation Log
 
+## Bloque: auditoría ejecutable de handoff externo (2026-08-09)
+
+- Se añadió `npm.cmd run check:handoff` para validar el paquete de migraciones,
+  plantillas de entorno, workflow CI, manifiesto Render y controles de secretos.
+- El auditor deja explícitos los bloqueadores que sólo pueden verificarse en
+  GitHub, Supabase, Render, Vercel y con datos/licencias reales.
+- El release evidence y el release gate local incorporan esta comprobación sin
+  confundir un PASS local con un despliegue externo completado.
+
 ## Bloque: latencia operacional con timestamps explícitos (2026-08-09)
 
 - El contrato de eventos acepta y normaliza `detectedAt` como evidencia

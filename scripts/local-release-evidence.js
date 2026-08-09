@@ -23,6 +23,7 @@ const checks = [
   { id: 'installation-check', command: process.execPath, args: ['scripts/local-installation-check.js'] },
   { id: 'reproducibility', command: process.execPath, args: ['scripts/local-reproducibility-check.js'] },
   { id: 'supabase-schema-audit', command: process.execPath, args: ['scripts/local-supabase-schema-check.js'] },
+  { id: 'external-handoff-audit', command: process.execPath, args: ['scripts/local-external-handoff-audit.js'] },
   { id: 'master-plan-audit', command: process.execPath, args: ['scripts/local-plan-audit.js'] },
   { id: 'openapi-route-audit', command: process.execPath, args: ['scripts/local-openapi-route-audit.js'] },
   { id: 'release-gate', command: process.execPath, args: ['scripts/local-release-gate.js'] },
