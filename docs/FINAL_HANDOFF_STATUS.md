@@ -1,6 +1,6 @@
 # Estado de handoff local
 
-Actualización vigente: la suite local alcanza 99 pruebas backend PASS tras
+Actualización vigente: la suite local alcanza 101 pruebas backend PASS tras
 incorporar latencias opcionales de detección y explicación.
 
 Fecha de corte: 2026-08-09
@@ -32,7 +32,7 @@ pública de solo lectura.
   `PASS`.
 - Auditoría ejecutable del Plan Maestro: fases 0–7 y salvaguardas locales:
   `PASS`.
-- OpenAPI: 147 rutas Express con 147 operaciones documentadas, sin faltantes ni
+- OpenAPI: 148 rutas Express con 148 operaciones documentadas, sin faltantes ni
   duplicados.
 - Auditoría portable, reproducibilidad, instalación limpia y release gate:
   `PASS` en sus ejecuciones individuales.
@@ -68,5 +68,5 @@ pública de solo lectura.
 El estado local PASS no equivale a producción enterprise ni a cumplimiento
 regulatorio. Cada pendiente externo requiere evidencia verificable antes de
 comercializar la plataforma.
-Nota de corte vigente: usar 99 pruebas backend PASS; las cifras anteriores
+Nota de corte vigente: usar 101 pruebas backend PASS; las cifras anteriores
 son históricas y no representan el estado actual.

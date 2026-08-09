@@ -42,6 +42,7 @@ import { buildEnterpriseReadiness } from './domain/enterpriseReadiness.js';
 import { attachDecisionEvidence } from './domain/decisionEvidence.js';
 import { buildCooperativeIncidentPreview } from './domain/cooperativeNetwork.js';
 import { enrichAnonymousSectorBenchmark } from './domain/benchmarkReadiness.js';
+import { buildHistoricalBenchmarkPlan } from './domain/benchmarkPlan.js';
 import { buildEvidenceManifest } from './domain/evidenceManifest.js';
 import { authIfConfigured, listRoles, listUsers, login, requireAuth, revokeToken, roleIfConfigured } from './auth/auth.js';
 import {
@@ -659,6 +660,7 @@ app.get('/api/models/profiles', (req, res) => res.json({ ...listModelProfiles({ 
 app.get('/api/models/validation', (req, res) => res.json(getModelValidationReport()));
 app.get('/api/models/calibration', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(getCalibrationOverview(req.query.modelId, req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
 app.get('/api/models/calibration/benchmark', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(benchmarkCalibration(getCalibrationOverview(req.query.modelId, req.user?.organizationId || DEFAULT_ORGANIZATION_ID))));
+app.get('/api/models/benchmark-plan', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(buildHistoricalBenchmarkPlan(getCalibrationOverview(req.query.modelId, req.user?.organizationId || DEFAULT_ORGANIZATION_ID).fixtures)));
 app.get('/api/models/governance', (req, res) => { const validation = getModelValidationReport(); res.json(listModels().map((model) => { const calibration = getCalibrationOverview(model.id); return buildModelGovernance(model, validation, calibration, benchmarkCalibration(calibration)); })); });
 app.get('/api/models/governance/:id', (req, res) => { const model = listModels().find((item) => item.id === req.params.id); if (!model) return res.status(404).json({ error: 'Modelo no encontrado' }); const validation = getModelValidationReport(); const calibration = getCalibrationOverview(model.id); res.json(buildModelGovernance(model, validation, calibration, benchmarkCalibration(calibration))); });
 app.get('/api/pilots/readiness', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => {

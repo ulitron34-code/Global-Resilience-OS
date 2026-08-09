@@ -20,6 +20,7 @@
     "/api/connectors/readiness": { "get": { "summary": "Gate estructural de contratos de conectores", "responses": { "200": { "description": "Readiness local de contratos y estado dry-run" } } } },
     "/api/ingest/validate": { "post": { "summary": "Validar envelope de evento", "responses": { "200": { "description": "Evento válido" }, "400": { "description": "Contrato inválido" } } } },
     "/api/models/calibration/benchmark": { "get": { "summary": "Comparar modelo contra baseline", "responses": { "200": { "description": "Benchmark y gate de abstención" } } } },
+    "/api/models/benchmark-plan": { "get": { "summary": "Plan de cobertura de eventos históricos", "security": [{ "bearerAuth": [] }], "responses": { "200": { "description": "Objetivo de 10 eventos, slots cubiertos y gates de abstención" } } } },
     "/api/runtime/readiness": { "get": { "summary": "Readiness de runtime y seguridad local", "responses": { "200": { "description": "Runtime listo" }, "503": { "description": "Configuración incompleta" } } } },
     "/api/data-catalog": { "get": { "summary": "Catálogo de datos y licencias", "responses": { "200": { "description": "Fuentes catalogadas" } } } },
     "/api/data-catalog/readiness": { "get": { "summary": "Readiness de licencias y cobertura", "responses": { "200": { "description": "Estado del catálogo" } } } },

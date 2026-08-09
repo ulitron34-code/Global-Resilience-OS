@@ -7,6 +7,11 @@ cadena mínima de evidencia y el importador no convierte datos demo en evidencia
 `GET /api/models/backtest` compara el error absoluto medio del modelo con un
 baseline de mediana del impacto observado.
 
+`GET /api/models/benchmark-plan` mantiene el objetivo explícito de 10 eventos
+históricos y separa el mínimo de 3 eventos para una revisión inicial de la
+cobertura requerida para el benchmark. Los slots faltantes permanecen abiertos
+y no se rellenan con datos sintéticos.
+
 - Menos de tres fixtures: `abstain_for_production`.
 - Mejora sobre baseline: `candidate_for_human_review`.
 - Sin mejora: `exploratory_only`.

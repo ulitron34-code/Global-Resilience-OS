@@ -242,6 +242,12 @@ describe('Global Resilience OS API', () => {
     const benchmark = await fetch(`${baseUrl}/api/models/calibration/benchmark`);
     assert.equal(benchmark.status, 200);
     assert.equal((await benchmark.json()).gate, 'abstain_no_fixtures');
+    const benchmarkPlan = await fetch(`${baseUrl}/api/models/benchmark-plan`);
+    assert.equal(benchmarkPlan.status, 200);
+    const benchmarkPlanBody = await benchmarkPlan.json();
+    assert.equal(benchmarkPlanBody.targetEventCount, 10);
+    assert.equal(benchmarkPlanBody.remainingTargetSlots, 10);
+    assert.equal(benchmarkPlanBody.gates.productionClaim, 'abstain_until_licensed_review');
     const sectorBenchmark = await fetch(`${baseUrl}/api/benchmarks/sectors?minCohort=3`);
     assert.equal(sectorBenchmark.status, 200);
     const sectorBenchmarkBody = await sectorBenchmark.json();

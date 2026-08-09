@@ -4,13 +4,13 @@ Fecha de corte: 2026-08-09.
 
 ## Verificaciones ejecutadas
 
-El corte vigente es de 99 pruebas backend PASS, lint y build frontend PASS, y
+El corte vigente es de 101 pruebas backend PASS, lint y build frontend PASS, y
 `npm.cmd run verify` PASS. Las cifras anteriores de este archivo son
 históricas y no representan el estado actual.
 
 - Backend: `npm.cmd test` — 51 pruebas correctas.
 - Frontend: `npm.cmd run lint` — correcto.
-- OpenAPI: 147 rutas auditadas, 147 documentadas, sin duplicados.
+- OpenAPI: 148 rutas auditadas, 148 documentadas, sin duplicados.
 - Readiness empresarial: bloquea cuando faltan las evidencias explícitas de
   esquema y release; pasa esos dos checks únicamente con sus flags en `true`.
 - Configuración de ejemplo: los flags `LOCAL_SCHEMA_AUDIT_VERIFIED` y
