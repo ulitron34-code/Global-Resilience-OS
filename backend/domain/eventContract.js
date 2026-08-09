@@ -1,3 +1,5 @@
+import { normalizeOptionalTimestamp } from './timing.js';
+
 const SEVERITIES = new Set(['critical', 'high', 'medium', 'low']);
 const EVENT_TYPES = new Set(['ais_gap', 'port_delay', 'cable_degradation', 'market_move', 'geopolitical_signal', 'source_health']);
 function iso(value, field) { const parsed = Date.parse(value); if (!Number.isFinite(parsed)) throw new Error(`${field} debe ser ISO-8601 válido`); return new Date(parsed).toISOString(); }
@@ -16,8 +18,9 @@ export function validateEventEnvelope(input = {}, { production = process.env.APP
   const eventType = String(input.eventType).trim();
   if (production && !EVENT_TYPES.has(eventType)) throw new Error(`eventType no permitido en producción: ${eventType}`);
   const observedAt = input.observedAt ? iso(input.observedAt, 'observedAt') : new Date().toISOString();
+  const detectedAt = normalizeOptionalTimestamp(input.detectedAt, 'detectedAt');
   const retrievedAt = input.provenance?.retrievedAt ? iso(input.provenance.retrievedAt, 'provenance.retrievedAt') : new Date().toISOString();
   const licenseRef = input.provenance?.licenseRef ? String(input.provenance.licenseRef).slice(0, 200) : null;
   if (production && !licenseRef) throw new Error('provenance.licenseRef es requerido en producción');
-  return { schemaVersion: '1.0', externalId: input.externalId.trim(), sourceId: input.sourceId.trim(), eventType, title: input.title.trim(), severity: input.severity, impactUsd, confidence, observedAt, location: input.location ? String(input.location).trim() : 'No especificado', vertical: input.vertical ? String(input.vertical).trim() : 'Oil & Gas', payload: input.payload && typeof input.payload === 'object' ? input.payload : {}, provenance: { uri: input.provenance?.uri ? String(input.provenance.uri).slice(0, 1000) : null, retrievedAt, licenseRef } };
+  return { schemaVersion: '1.0', externalId: input.externalId.trim(), sourceId: input.sourceId.trim(), eventType, title: input.title.trim(), severity: input.severity, impactUsd, confidence, observedAt, ...(detectedAt ? { detectedAt } : {}), location: input.location ? String(input.location).trim() : 'No especificado', vertical: input.vertical ? String(input.vertical).trim() : 'Oil & Gas', payload: input.payload && typeof input.payload === 'object' ? input.payload : {}, provenance: { uri: input.provenance?.uri ? String(input.provenance.uri).slice(0, 1000) : null, retrievedAt, licenseRef } };
 }

@@ -1,5 +1,8 @@
 # Estado de handoff local
 
+Actualización vigente: la suite local alcanza 85 pruebas backend PASS tras
+incorporar latencias opcionales de detección y explicación.
+
 Fecha de corte: 2026-08-09
 
 ## Evidencia vigente (2026-08-09)

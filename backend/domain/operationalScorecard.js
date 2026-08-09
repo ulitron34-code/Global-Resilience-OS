@@ -1,5 +1,6 @@
 import { filterEligibleCalibrationFixtures, getCalibrationEligibility } from './calibrationEligibility.js';
 import { isProductiveConnectedSource } from './sourceClassification.js';
+import { durationMinutes, averageDuration } from './timing.js';
 
 function ratio(part, whole) { return whole ? Number((part / whole).toFixed(4)) : null; }
 function average(values) { const valid = values.filter((value) => Number.isFinite(value)); return valid.length ? Number((valid.reduce((sum, value) => sum + value, 0) / valid.length).toFixed(2)) : null; }
@@ -22,6 +23,8 @@ export function buildOperationalScorecard({ alerts = [], cases = [], actionPlans
     return Number.isFinite(start) && Number.isFinite(end) && end >= start ? (end - start) / 60000 : null;
   }).filter((value) => value !== null);
   const averageDecisionTime = decisionTimes.length ? Number((decisionTimes.reduce((sum, value) => sum + value, 0) / decisionTimes.length).toFixed(2)) : null;
+  const detectionTimes = alerts.map((item) => durationMinutes(item.payload?.observedAt, item.payload?.detectedAt || item.detectedAt)).filter((value) => value !== null);
+  const explanationTimes = actionPlans.map((item) => durationMinutes(item.detectedAt, item.explainedAt)).filter((value) => value !== null);
 
   return {
     schemaVersion: '1.0.0-local',
@@ -48,7 +51,7 @@ export function buildOperationalScorecard({ alerts = [], cases = [], actionPlans
       meanForecastErrorUsd: average(outcomeErrors),
       evidenceRequired: ['cliente piloto', 'baseline externo', 'tiempo de decisión', 'costo evitado validado', 'willingness-to-pay'],
     },
-    timing: { timeToDetectionMinutes: null, timeToExplanationMinutes: null, timeToDecisionMinutes: averageDecisionTime, decisionsObserved: decisionTimes.length, note: averageDecisionTime === null ? 'Se habilita al aprobar planes con timestamps comparables.' : 'Tiempo medio local desde creación del plan hasta aprobación humana; detección y explicación requieren timestamps de fuente y revisión.' },
+    timing: { timeToDetectionMinutes: averageDuration(detectionTimes), timeToExplanationMinutes: averageDuration(explanationTimes), timeToDecisionMinutes: averageDecisionTime, detectionsObserved: detectionTimes.length, explanationsObserved: explanationTimes.length, decisionsObserved: decisionTimes.length, note: 'Métricas calculadas sólo cuando existen timestamps explícitos y comparables: observedAt -> detectedAt, detectedAt -> explainedAt y createdAt -> decisionAt.' },
     disclaimer: 'Scorecard operativo local; no constituye evidencia comercial, regulatoria ni de precisión predictiva.',
   };
 }

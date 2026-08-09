@@ -6,6 +6,7 @@ import { buildActionPlan } from './playbooks.js';
 import { validateActionPlanPatch } from './actionPlanWorkflow.js';
 import { attachDecisionEvidence } from './decisionEvidence.js';
 import { buildEvidence } from './evidenceClassification.js';
+import { normalizeOptionalTimestamp, durationMinutes, averageDuration } from './timing.js';
 
 const file = process.env.ACTION_PLANS_FILE || resolve(dirname(fileURLToPath(import.meta.url)), '..', 'storage', 'action-plans.json');
 export const DEFAULT_ORGANIZATION_ID = 'nashadi-demo';
@@ -41,7 +42,9 @@ export function getActionPlan(id, organizationId = DEFAULT_ORGANIZATION_ID) { re
 export function createActionPlan(input, actor = 'operator', organizationId = DEFAULT_ORGANIZATION_ID) {
   const plan = attachDecisionEvidence(buildActionPlan(input), input);
   const createdAt = new Date().toISOString();
-  const saved = { ...plan, id: `AP-${randomUUID().slice(0, 8).toUpperCase()}`, organizationId, context: { vertical: input.vertical ? String(input.vertical).slice(0, 120) : 'unclassified', region: input.region ? String(input.region).slice(0, 120) : 'global', horizonHours: Number.isFinite(Number(input.horizonHours)) ? Math.max(0, Number(input.horizonHours)) : null }, createdBy: actor, createdAt, updatedAt: createdAt, statusHistory: [{ status: plan.status, at: createdAt, actor }] };
+  const detectedAt = normalizeOptionalTimestamp(input.detectedAt, 'detectedAt');
+  const explainedAt = normalizeOptionalTimestamp(input.explainedAt, 'explainedAt');
+  const saved = { ...plan, ...(detectedAt ? { detectedAt } : {}), ...(explainedAt ? { explainedAt } : {}), id: `AP-${randomUUID().slice(0, 8).toUpperCase()}`, organizationId, context: { vertical: input.vertical ? String(input.vertical).slice(0, 120) : 'unclassified', region: input.region ? String(input.region).slice(0, 120) : 'global', horizonHours: Number.isFinite(Number(input.horizonHours)) ? Math.max(0, Number(input.horizonHours)) : null }, createdBy: actor, createdAt, updatedAt: createdAt, statusHistory: [{ status: plan.status, at: createdAt, actor }] };
   plans.unshift(saved);
   persist();
   return clone(saved);
@@ -106,17 +109,12 @@ export function getActionPlanOutcomeMetrics(organizationId = DEFAULT_ORGANIZATIO
   return { organizationId, completedWithOutcome: completed.length, meanAbsoluteForecastErrorPct: errors.length ? Number((errors.reduce((sum, value) => sum + value, 0) / errors.length).toFixed(2)) : null, maxForecastErrorPct: errors.length ? Math.max(...errors) : null, disclaimer: 'Métrica local basada únicamente en outcomes registrados por operadores; no representa validación estadística suficiente.' };
 }
 
-function durationMinutes(start, end) {
-  const delta = Date.parse(end || '') - Date.parse(start || '');
-  return Number.isFinite(delta) && delta >= 0 ? delta / 60000 : null;
-}
-
 export function getActionPlanTimingMetrics(organizationId = DEFAULT_ORGANIZATION_ID) {
   const scoped = plans.filter((item) => item.organizationId === organizationId);
   const decisionTimes = scoped.map((item) => durationMinutes(item.createdAt, item.decisionAt)).filter((value) => value !== null);
   const assignmentTimes = scoped.map((item) => durationMinutes(item.createdAt, item.assignedAt)).filter((value) => value !== null);
-  const average = (values) => values.length ? Number((values.reduce((sum, value) => sum + value, 0) / values.length).toFixed(2)) : null;
-  return { organizationId, plansObserved: scoped.length, decisionsObserved: decisionTimes.length, assignmentsObserved: assignmentTimes.length, timeToDecisionMinutes: average(decisionTimes), timeToAssignmentMinutes: average(assignmentTimes), disclaimer: 'Métrica local basada en timestamps del ciclo de planes; no equivale a desempeño de piloto ni a una medición de detección externa.' };
+  const explanationTimes = scoped.map((item) => durationMinutes(item.detectedAt, item.explainedAt)).filter((value) => value !== null);
+  return { organizationId, plansObserved: scoped.length, decisionsObserved: decisionTimes.length, assignmentsObserved: assignmentTimes.length, explanationsObserved: explanationTimes.length, timeToDecisionMinutes: averageDuration(decisionTimes), timeToAssignmentMinutes: averageDuration(assignmentTimes), timeToExplanationMinutes: averageDuration(explanationTimes), disclaimer: 'Métrica local basada en timestamps del ciclo de planes; no equivale a desempeño de piloto ni a una medición de detección externa.' };
 }
 
 export function resetActionPlans() {

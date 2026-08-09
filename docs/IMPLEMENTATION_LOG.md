@@ -1,5 +1,15 @@
 # Implementation Log
 
+## Bloque: latencia operacional con timestamps explícitos (2026-08-09)
+
+- El contrato de eventos acepta y normaliza `detectedAt` como evidencia
+  opcional; el almacenamiento conserva ese dato en la alerta.
+- Los planes pueden conservar `detectedAt` y `explainedAt` para medir
+  `detectedAt -> explainedAt` sin inferir tiempos ausentes.
+- El scorecard calcula detección (`observedAt -> detectedAt`) y explicación
+  sólo con extremos válidos; cuando no hay evidencia, mantiene `null`.
+- La suite pasa con 85 pruebas backend.
+
 ## Bloque: auditoría del contrato UI de piloto (2026-08-09)
 
 - `npm run verify` ahora ejecuta un auditor estructural que comprueba que el

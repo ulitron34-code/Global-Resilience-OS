@@ -2,6 +2,18 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createActionPlan, getActionPlanTimingMetrics, resetActionPlans, updateActionPlan } from '../domain/actionPlanStore.js';
 import { buildOperationalScorecard } from '../domain/operationalScorecard.js';
+import { validateEventEnvelope } from '../domain/eventContract.js';
+
+const eventFixture = { externalId: 'timing-event', sourceId: 'licensed-source', eventType: 'port_delay', title: 'Port delay', severity: 'high', impactUsd: 100, observedAt: '2026-08-08T10:00:00Z', provenance: { licenseRef: 'contract-timing' } };
+
+test('event contract preserves an explicit detection timestamp', () => {
+  const event = validateEventEnvelope({ ...eventFixture, detectedAt: '2026-08-08T10:05:00-05:00' });
+  assert.equal(event.detectedAt, '2026-08-08T15:05:00.000Z');
+});
+
+test('event contract rejects an invalid optional detection timestamp', () => {
+  assert.throws(() => validateEventEnvelope({ ...eventFixture, detectedAt: 'not-a-date' }), /detectedAt/);
+});
 
 test('action plan lifecycle records approval and assignment timing', () => {
   resetActionPlans();
@@ -22,6 +34,7 @@ test('action plan lifecycle records approval and assignment timing', () => {
   assert.equal(metrics.assignmentsObserved, 1);
   assert.equal(typeof metrics.timeToDecisionMinutes, 'number');
   assert.equal(typeof metrics.timeToAssignmentMinutes, 'number');
+  assert.equal(metrics.timeToExplanationMinutes, null);
   resetActionPlans();
 });
 
@@ -33,6 +46,29 @@ test('operational scorecard exposes measured local decision time without inventi
   assert.equal(scorecard.timing.decisionsObserved, 1);
   assert.equal(scorecard.timing.timeToDetectionMinutes, null);
   assert.equal(scorecard.timing.timeToExplanationMinutes, null);
+});
+
+test('operational scorecard measures detection and explanation only with explicit timestamps', () => {
+  const scorecard = buildOperationalScorecard({
+    alerts: [{ severity: 'high', payload: { observedAt: '2026-08-08T10:00:00.000Z', detectedAt: '2026-08-08T10:05:00.000Z' } }],
+    actionPlans: [{ createdAt: '2026-08-08T10:00:00.000Z', detectedAt: '2026-08-08T10:05:00.000Z', explainedAt: '2026-08-08T10:15:00.000Z', decisionAt: '2026-08-08T10:30:00.000Z' }],
+  });
+  assert.equal(scorecard.timing.timeToDetectionMinutes, 5);
+  assert.equal(scorecard.timing.timeToExplanationMinutes, 10);
+  assert.equal(scorecard.timing.timeToDecisionMinutes, 30);
+  assert.equal(scorecard.timing.detectionsObserved, 1);
+  assert.equal(scorecard.timing.explanationsObserved, 1);
+});
+
+test('action plans preserve optional detection and explanation timestamps', () => {
+  resetActionPlans();
+  const plan = createActionPlan({ playbookId: 'port-congestion', detectedAt: '2026-08-08T10:05:00Z', explainedAt: '2026-08-08T10:15:00Z' }, 'timing-user', 'org-timing-evidence');
+  assert.equal(plan.detectedAt, '2026-08-08T10:05:00.000Z');
+  assert.equal(plan.explainedAt, '2026-08-08T10:15:00.000Z');
+  const metrics = getActionPlanTimingMetrics('org-timing-evidence');
+  assert.equal(metrics.timeToExplanationMinutes, 10);
+  assert.equal(metrics.explanationsObserved, 1);
+  resetActionPlans();
 });
 
 test('operational scorecard excludes demo and pending sources from readiness', () => {

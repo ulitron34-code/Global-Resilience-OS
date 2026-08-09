@@ -15,3 +15,8 @@ fuentes y revisión.
 
 El endpoint no inventa métricas faltantes. Declara la evidencia requerida para
 que el piloto pueda completarlas.
+
+Cuando existen timestamps explícitos, el scorecard calcula detección como
+`observedAt -> detectedAt` en la alerta y explicación como
+`detectedAt -> explainedAt` en el plan. Si falta cualquiera de los extremos,
+la métrica permanece en `null`; no se rellenan tiempos con estimaciones.

@@ -21,6 +21,9 @@
 ## Reglas
 
 - `externalId`, `sourceId`, `eventType`, `observedAt` y `title` son obligatorios.
+- `detectedAt` es opcional y sólo debe enviarse cuando la fuente o el sistema
+  conserve el instante explícito de detección; permite medir latencia sin
+  completar datos faltantes con estimaciones.
 - `severity` sólo acepta `low`, `medium`, `high` o `critical`.
 - `confidence` debe estar entre 0 y 1.
 - Los timestamps deben ser ISO-8601 UTC.

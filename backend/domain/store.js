@@ -619,7 +619,7 @@ export function ingestEvent(input, actor = 'connector', organizationId = DEFAULT
     createdAt: new Date().toISOString(),
     sourceIds: [source.id],
     evidenceClass: 'observed',
-    payload: { schemaVersion: input.schemaVersion, externalId: input.externalId, eventType: input.eventType, confidence: input.confidence, provenance: input.provenance, observedAt: input.observedAt, evidenceClass: 'observed', raw: input.payload || {} },
+    payload: { schemaVersion: input.schemaVersion, externalId: input.externalId, eventType: input.eventType, confidence: input.confidence, provenance: input.provenance, observedAt: input.observedAt, ...(input.detectedAt ? { detectedAt: input.detectedAt } : {}), evidenceClass: 'observed', raw: input.payload || {} },
   };
   state.alerts.unshift(alert);
   source.status = 'connected';
