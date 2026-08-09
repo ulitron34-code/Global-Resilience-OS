@@ -198,6 +198,12 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
   `organizationId` correcto y ausencia de filtración de fuentes.
 ## Bloque: snapshots y readiness tenant-scoped (2026-08-09)
 
+## Bloque: Executive Brief sin score fijo no calibrado (2026-08-09)
+
+- Executive Brief deja de pintar un `72/100` fijo en el frontend.
+- Cuando el backend devuelve `not_calibrated`, la vista muestra `N/D` y el
+  estado explícito, alineando la interfaz con el contrato de evidencia.
+
 ## Bloque: registro local de fuentes aprobado por intake (2026-08-09)
 
 - Una revisión `approved_local` puede crear una fuente tenant-scoped en estado
