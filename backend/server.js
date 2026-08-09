@@ -121,6 +121,20 @@ const SHARE_RATE_WINDOW_MS = 60_000;
 const SHARE_RATE_LIMIT = 60;
 const GLOBAL_RATE_LIMIT = Number(process.env.GLOBAL_RATE_LIMIT || (process.env.NODE_ENV === 'test' ? 1000 : 120));
 
+function purgeRateLimitMaps(now = Date.now()) {
+  if (requestCounts.size > 5000) {
+    for (const [key, entry] of requestCounts) {
+      if (now - entry.startedAt > 60_000) requestCounts.delete(key);
+    }
+  }
+  if (loginAttempts.size > 5000) {
+    for (const [key, entry] of loginAttempts) {
+      const lastAttemptAt = entry.lastAttemptAt || now;
+      if (now - lastAttemptAt > 60_000 && (!entry.blockedUntil || entry.blockedUntil <= now)) loginAttempts.delete(key);
+    }
+  }
+}
+
 function getOperationalRuntimeReadiness() {
   const base = getRuntimeReadiness();
   const persistence = getRemoteStoreStatus();
@@ -185,6 +199,7 @@ app.use((req, res, next) => {
   if (req.path.startsWith('/api/shares/')) return next();
   const key = req.ip || 'local';
   const now = Date.now();
+  purgeRateLimitMaps(now);
   const current = requestCounts.get(key) || { startedAt: now, count: 0 };
   if (now - current.startedAt > 60_000) { current.startedAt = now; current.count = 0; }
   current.count += 1;
@@ -212,6 +227,7 @@ app.post('/api/auth/login', (req, res) => {
   if (!session) {
     const nextAttempt = attempt || { failures: 0 };
     nextAttempt.failures += 1;
+    nextAttempt.lastAttemptAt = Date.now();
     if (nextAttempt.failures >= 5) nextAttempt.blockedUntil = Date.now() + 60_000;
     loginAttempts.set(attemptKey, nextAttempt);
     return res.status(401).json({ error: 'Credenciales invalidas' });
