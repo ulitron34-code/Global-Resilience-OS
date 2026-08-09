@@ -3,10 +3,10 @@
 ## Estado confirmado
 
 - GitHub: `main` sincronizado hasta `649d297`; el commit local siguiente queda pendiente de push si la conexión falla.
-- Supabase: migraciones `001_initial_schema.sql` y `002_enterprise_extensions.sql` aplicadas.
-- Supabase: 13 tablas principales verificadas.
+- Supabase: migraciones `001_initial_schema.sql`, `002_enterprise_extensions.sql` y `003_platform_snapshots.sql` aplicadas.
+- Supabase: tablas principales y `platform_snapshots` verificadas; RLS activo con 3 políticas de organización.
 - Vercel: interfaz pública activa y mini-backend conectado.
-- Render: servicio configurado con `AUTH_REQUIRED=true`, acciones externas deshabilitadas y datos ilustrativos.
+- Render: servicio configurado con `AUTH_REQUIRED=true`, acciones externas deshabilitadas y datos ilustrativos; la activación final del adaptador remoto queda pendiente de redeploy.
 
 ## Variables de Render
 
@@ -18,10 +18,10 @@ CORS_ORIGIN=https://global-resilience-os.vercel.app
 SUPABASE_URL=https://mhcpgjubmltcezxoysng.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=<clave privada de Supabase>
 SUPABASE_TIMEOUT_MS=5000
-PERSISTENCE_MODE=local-file
+PERSISTENCE_MODE=supabase  # activar en Render despues de la validacion RLS y el redeploy
 ```
 
-`SUPABASE_SERVICE_ROLE_KEY` no debe colocarse en Vercel ni exponerse al navegador. Mantener `PERSISTENCE_MODE=local-file` hasta que se active el adaptador de persistencia transaccional; el endpoint `/api/runtime/supabase/check` permite validar conectividad sin cambiar el origen de datos.
+`SUPABASE_SERVICE_ROLE_KEY` no debe colocarse en Vercel ni exponerse al navegador. El backend ya contiene el adaptador de persistencia transaccional y el endpoint `/api/runtime/supabase/persistence` para verificar su estado después del redeploy.
 
 ## Validación posterior al redeploy
 
@@ -33,7 +33,7 @@ PERSISTENCE_MODE=local-file
 
 ## Criterio para activar persistencia remota
 
-No activar `PERSISTENCE_MODE=supabase` hasta contar con:
+No considerar cerrado el cambio a `PERSISTENCE_MODE=supabase` hasta contar con:
 
 - adaptador transaccional para las escrituras del dominio;
 - pruebas de aislamiento entre dos organizaciones;

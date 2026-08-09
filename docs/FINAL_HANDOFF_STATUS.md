@@ -28,11 +28,11 @@ La base local de Global Resilience OS queda implementada y verificable para cont
 ## Actualización del tramo externo
 
 - GitHub ya tiene la rama `main` sincronizada hasta `016192c`.
-- Supabase ya tiene las dos migraciones aplicadas y 13 tablas principales verificadas.
+- Supabase ya tiene tres migraciones aplicadas, 13 tablas principales y `platform_snapshots` verificada con RLS.
 - Vercel está sirviendo la interfaz pública con el mini-backend conectado.
 - El backend incluye `/api/runtime/supabase` y `/api/runtime/supabase/check` para validar configuración y conectividad sin exponer secretos.
 - Render todavía requiere confirmar variables privadas y redeploy.
-- La persistencia productiva sigue deliberadamente desactivada: el adaptador transaccional Supabase y sus pruebas de aislamiento son el siguiente bloque.
+- El adaptador transaccional Supabase ya está implementado y validado localmente; falta confirmar su activación efectiva en Render y ejecutar la prueba RLS con dos organizaciones.
 
 ## Pendientes externos deliberados
 

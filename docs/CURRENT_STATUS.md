@@ -3,10 +3,10 @@
 ## Corte externo actual — 2026-08-08
 
 - GitHub: `main` sincronizado hasta `016192c`.
-- Supabase: proyecto real configurado; migraciones base y enterprise/RLS aplicadas; 13 tablas principales verificadas.
+- Supabase: proyecto real configurado; migraciones base, enterprise/RLS y `003_platform_snapshots.sql` aplicadas; `platform_snapshots` verificada con RLS y 3 políticas.
 - Vercel: sitio público activo y mini-backend conectado.
 - Render: blueprint preparado, pero las variables privadas y el redeploy final deben verificarse desde el dashboard.
-- Persistencia: el backend todavía opera con archivo local; Supabase está listo como infraestructura y health check, no como adaptador transaccional activo.
+- Persistencia: el adaptador transaccional de snapshots Supabase ya está implementado y probado localmente; Render conserva `local-file` hasta completar el redeploy de activación.
 
 La copia local ya no es únicamente la demo inicial. Incluye un núcleo
 operativo verificable con casos, Impact Graph temporal, escenarios,
