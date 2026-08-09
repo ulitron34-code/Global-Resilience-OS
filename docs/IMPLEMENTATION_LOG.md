@@ -217,6 +217,15 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
 - La prueba de piloto confirma la separación entre cobertura operativa local y
   cobertura apta para producción.
 
+## Bloque: scorecard operativo sin fuentes demo o pendientes (2026-08-09)
+
+- El scorecard considera readiness de fuentes sólo cuando el registro está
+  conectado y no pertenece a la semilla `*-demo`.
+- Las fuentes `pending_external` se reportan separadamente en
+  `product.sources.pendingExternal` y no elevan la tasa de readiness.
+- Se añadió una prueba para evitar que una fuente demo conectada localmente se
+  interprete como fuente productiva.
+
 ## Bloque: Executive Brief sin score fijo no calibrado (2026-08-09)
 
 - Executive Brief deja de pintar un `72/100` fijo en el frontend.

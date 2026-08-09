@@ -7,7 +7,7 @@ export function buildOperationalScorecard({ alerts = [], cases = [], actionPlans
   const closedCases = cases.filter((item) => item.status === 'closed');
   const documentedActions = actionPlans.filter((item) => item.status === 'completed' && item.outcome);
   const outcomeErrors = documentedActions.map((item) => Math.abs(Number(item.forecast?.lossIfWaitUsd || 0) - Number(item.outcome.actualLossUsd || 0))).filter(Number.isFinite);
-  const freshSources = sources.filter((item) => item.status !== 'demo' && item.status !== 'error' && item.status !== 'stale');
+  const freshSources = sources.filter((item) => item.status === 'connected' && !String(item.id || '').endsWith('-demo'));
   const overdueCases = cases.filter((item) => item.status !== 'closed' && Number.isFinite(Date.parse(item.createdAt)) && Number.isFinite(Number(item.slaMinutes)) && Date.parse(item.createdAt) + Number(item.slaMinutes) * 60000 < referenceTime);
   const modelErrors = calibrationFixtures.map((item) => Math.abs(Number(item.predictedImpactUsd) - Number(item.observedImpactUsd))).filter(Number.isFinite);
   const incidentsOpen = incidents.filter((item) => !['closed', 'resolved'].includes(item.status));
@@ -27,7 +27,7 @@ export function buildOperationalScorecard({ alerts = [], cases = [], actionPlans
       alerts: { total: alerts.length, material: materialAlerts.length, withSourceAndProvenance: sourcedAlerts.length, provenanceCoverage: ratio(sourcedAlerts.length, alerts.length) },
       cases: { total: cases.length, closed: closedCases.length, closureRate: ratio(closedCases.length, cases.length), overdue: overdueCases.length },
       actions: { completed: documentedActions.length, documentedRate: ratio(documentedActions.length, actionPlans.length), outcomesWithEvidence: documentedActions.filter((item) => item.outcome.evidenceRef).length },
-      sources: { total: sources.length, freshOrHealthy: freshSources.length, readinessRate: ratio(freshSources.length, sources.length) },
+      sources: { total: sources.length, freshOrHealthy: freshSources.length, readinessRate: ratio(freshSources.length, sources.length), pendingExternal: sources.filter((item) => item.status === 'pending_external').length },
       deadLetters: { total: deadLetters.length, unresolved: deadLetters.filter((item) => item.status !== 'resolved').length },
       incidents: { total: incidents.length, open: incidentsOpen.length },
     },

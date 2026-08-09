@@ -34,3 +34,18 @@ test('operational scorecard exposes measured local decision time without inventi
   assert.equal(scorecard.timing.timeToDetectionMinutes, null);
   assert.equal(scorecard.timing.timeToExplanationMinutes, null);
 });
+
+test('operational scorecard excludes demo and pending sources from readiness', () => {
+  const scorecard = buildOperationalScorecard({
+    sources: [
+      { id: 'ais-demo', status: 'connected' },
+      { id: 'licensed-source', status: 'connected' },
+      { id: 'intake-source', status: 'pending_external' },
+      { id: 'failed-source', status: 'error' },
+    ],
+  });
+  assert.equal(scorecard.product.sources.total, 4);
+  assert.equal(scorecard.product.sources.freshOrHealthy, 1);
+  assert.equal(scorecard.product.sources.pendingExternal, 1);
+  assert.equal(scorecard.product.sources.readinessRate, 0.25);
+});

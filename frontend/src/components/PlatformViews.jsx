@@ -49,9 +49,9 @@ export function NetworkExposureView({ onScenario }) {
           <div className="flex-1 min-h-[420px]"><WorldMap /></div>
         </div>
         <div className="flex flex-col gap-4">
-          <ExposureCard label="Suez / Mar Rojo" value="$3.6M" score="86/100" tone="alert" />
-          <ExposureCard label="Estrecho de Ormuz" value="$2.8M" score="64/100" tone="alert" />
-          <ExposureCard label="Malaca" value="$1.1M" score="42/100" tone="signal" />
+          <ExposureCard label="Suez / Mar Rojo" value="$3.6M" score="NO CALIBRADO" tone="alert" />
+          <ExposureCard label="Estrecho de Ormuz" value="$2.8M" score="NO CALIBRADO" tone="alert" />
+          <ExposureCard label="Malaca" value="$1.1M" score="NO CALIBRADO" tone="signal" />
           <div className="bg-panel border border-line rounded-lg p-4">
             <div className="font-mono text-[10px] uppercase tracking-widest text-ink-dim">Fuentes de decisión</div>
             {sources.map((source) => <SourceRow key={source.id} label={source.name} status={source.status} latency={source.latencySeconds} />)}
@@ -436,7 +436,7 @@ function DeadLetterPanel() {
 }
 
 function SectionIntro({ eyebrow, title, description, action, onAction }) { return <div className="flex flex-col md:flex-row md:items-end justify-between gap-4"><div><div className="font-mono text-[10px] uppercase tracking-widest text-signal mb-2">{eyebrow}</div><h1 className="font-display text-2xl md:text-3xl font-bold tracking-tight text-ink">{title}</h1><p className="text-sm text-ink-muted mt-2 max-w-2xl leading-relaxed">{description}</p></div>{action && <button onClick={onAction} className="shrink-0 flex items-center gap-2 bg-signal text-void rounded px-4 py-2.5 text-xs font-semibold hover:bg-signal/80">{action}<ArrowRight size={14} /></button>}</div>; }
-function ExposureCard({ label, value, score, tone }) { return <div className="bg-panel border border-line rounded-lg p-4"><div className="flex justify-between gap-2"><span className="text-sm text-ink">{label}</span><span className={`font-mono text-[10px] ${tone === 'alert' ? 'text-alert' : 'text-signal'}`}>{score}</span></div><div className="font-display text-2xl font-bold text-alert mt-2">{value}</div><div className="text-[11px] text-ink-muted mt-1">pérdida potencial · próximas 72h</div></div>; }
+function ExposureCard({ label, value, score, tone }) { return <div className="bg-panel border border-line rounded-lg p-4"><div className="flex justify-between gap-2"><span className="text-sm text-ink">{label}</span><span className={`font-mono text-[10px] ${tone === 'alert' ? 'text-alert' : 'text-signal'}`}>{score}</span></div><div className="font-display text-2xl font-bold text-alert mt-2">{value}</div><div className="text-[11px] text-ink-muted mt-1">pérdida potencial ilustrativa · próximas 72h</div></div>; }
 function SourceRow({ label, status, latency }) { return <div className="flex items-center justify-between gap-2 border-t border-line/60 py-2 text-xs"><span className="text-ink-muted">{label}</span><span className="font-mono text-[10px] text-signal">{status}{latency ? ` · ${latency}s` : ''}</span></div>; }
 function CaseRow({ item, selected, onClick }) { return <button onClick={onClick} className={`w-full grid grid-cols-[65px_1fr_90px_60px_70px] gap-2 items-center border-b border-line/60 px-4 py-3 text-xs text-left ${selected ? 'bg-signal/10' : 'hover:bg-raised'}`}><span className="font-mono text-ink-dim">{item.id}</span><span className="text-ink">{item.title}</span><span className="text-ink-muted flex items-center gap-1"><UserRound size={12} />{item.owner}</span><span className="font-mono text-alert flex items-center gap-1"><Clock3 size={11} />{formatSla(item.slaMinutes)}</span><span className="text-right font-semibold text-alert">{formatUsd(item.impactUsd)}<small className="block font-mono text-[9px] text-ink-dim">{item.priority}</small></span></button>; }
 function Metric({ label, value }) { return <div className="bg-void border border-line rounded p-3"><div className="font-mono text-[9px] uppercase tracking-widest text-ink-dim">{label}</div><div className="font-display text-lg font-semibold text-ink mt-1">{value}</div></div>; }
