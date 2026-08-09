@@ -328,6 +328,10 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
   de backup/restore con control de rol.
 # 2026-08-09 - Elegibilidad de calibracion historica
 
+- La ingesta batch en produccion ahora reutiliza el gate de fuente productiva:
+  conexion activa, clasificacion no ilustrativa, licencia activa y ficha
+  contractual completa antes de aceptar cualquier evento.
+
 - Se centralizo el filtro de fixtures historicos elegibles.
 - Fixtures completas cuyo `sourceId` es demo o contiene `demo` ya no entran en benchmark ni backtesting.
 - La calibracion conserva los registros cargados, pero sus metricas solo usan evidencia historica no ilustrativa con procedencia.
@@ -357,7 +361,7 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
   las fuentes ilustrativas se reportan aparte para no degradar ni inflar la
   lectura operativa.
 - La auditoria de cobertura y el estado actual fueron sincronizados con la
-  evidencia vigente de 75 pruebas backend pasando, incluyendo los casos de
+  evidencia vigente de 77 pruebas backend pasando, incluyendo los casos de
   evidencia de decision enlazada a fuentes ilustrativas y productivas.
 - La elegibilidad de calibracion, benchmark, backtesting y scorecard reutiliza
   la misma clasificacion de fuentes ilustrativas, incluyendo `sourceId`,
@@ -390,7 +394,7 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
   `organizationId`; se evita mezclar solicitudes y errores de distintos tenants
   en el panel de operación.
 - Se sincronizaron los documentos de handoff y readiness con la evidencia actual
-  de 75 pruebas, build reproducible y release gate PASS; las cifras previas se
+  de 77 pruebas, build reproducible y release gate PASS; las cifras previas se
   conservaron únicamente como historial.
 - El paquete de decisión ahora calcula escenarios, auditoría y comentarios con
   aislamiento por organización; se eliminó el conteo global de escenarios.

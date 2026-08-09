@@ -1,5 +1,8 @@
 # Ingesta batch local
 
+En `APP_MODE=production`, cada fuente debe estar conectada, no ser ilustrativa
+y conservar licencia activa con ficha contractual completa.
+
 `POST /api/ingest/batch` acepta entre 1 y 100 eventos con el mismo contrato de
 ingesta individual.
 

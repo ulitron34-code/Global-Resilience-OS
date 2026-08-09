@@ -683,7 +683,8 @@ app.patch('/api/incidents/:id', authIfConfigured, roleIfConfigured('admin', 'ris
 app.get('/api/security/posture', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => { const organizationId = req.user?.organizationId || DEFAULT_ORGANIZATION_ID; return res.json(buildSecurityPosture({ runtime: getRuntimeReadiness(), audit: getAuditIntegrity(), tenancy: { organizationId }, snapshot: getLocalSnapshot(organizationId) })); });
 app.post('/api/ingest/batch', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => {
   try {
-    const validation = validateBatchInput(req.body || {}, listSources(req.user?.organizationId || DEFAULT_ORGANIZATION_ID), { production: process.env.APP_MODE === 'production' });
+    const organizationId = req.user?.organizationId || DEFAULT_ORGANIZATION_ID;
+    const validation = validateBatchInput(req.body || {}, listSources(organizationId), { production: process.env.APP_MODE === 'production', catalog: listDataCatalogForOrganization(organizationId) });
     if (validation.mode === 'dry_run' || !validation.readyToCommit) return res.status(validation.mode === 'dry_run' ? 200 : 422).json(validation);
     const results = validation.items.map((item) => { try { const result = ingestEvent(item.event, req.user?.email || 'connector', req.user?.organizationId || DEFAULT_ORGANIZATION_ID); return { index: item.index, externalId: item.externalId, status: result.created ? 'created' : 'duplicate', alertId: result.alert.id }; } catch (error) { return { index: item.index, externalId: item.externalId, status: 'error', error: error.message }; } });
     res.status(201).json({ ...validation, results, counts: { ...validation.counts, created: results.filter((item) => item.status === 'created').length, duplicates: results.filter((item) => item.status === 'duplicate').length, errors: results.filter((item) => item.status === 'error').length } });
