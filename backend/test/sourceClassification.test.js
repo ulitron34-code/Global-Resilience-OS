@@ -6,6 +6,7 @@ import { buildOperationalScorecard } from '../domain/operationalScorecard.js';
 test('clasifica como ilustrativa una fuente demo aunque el id parezca productivo', () => {
   assert.equal(isIllustrativeSource({ id: 'provider-001', status: 'demo' }), true);
   assert.equal(isIllustrativeSource({ id: 'provider-001', coverage: 'illustrative_global' }), true);
+  assert.equal(isIllustrativeSource({ sourceId: 'provider-001', coverage: 'illustrative_routes' }), true);
   assert.equal(isProductiveConnectedSource({ id: 'provider-001', status: 'demo' }), false);
   assert.equal(isProductiveConnectedSource({ id: 'provider-001', status: 'connected', name: 'Licensed feed' }), true);
 });

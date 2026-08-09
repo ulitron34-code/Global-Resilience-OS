@@ -322,7 +322,7 @@ function getCalibrationOverviewLegacy(modelId, organizationId = DEFAULT_ORGANIZA
 }
 export function getCalibrationOverview(modelId, organizationId = DEFAULT_ORGANIZATION_ID) {
   const overview = getCalibrationOverviewLegacy(modelId, organizationId);
-  const excludedIllustrativeFixtureCount = (overview.fixtures || []).filter((fixture) => fixture?.evidenceStatus === 'complete' && String(fixture?.sourceId || '').toLowerCase().includes('demo')).length;
+  const excludedIllustrativeFixtureCount = (overview.fixtures || []).filter((fixture) => getCalibrationEligibility(fixture).reason === 'illustrative_source').length;
   return { ...overview, excludedIllustrativeFixtureCount };
 }
 export function recordCalibrationFixtures(input, actor = 'operator', organizationId = DEFAULT_ORGANIZATION_ID) {

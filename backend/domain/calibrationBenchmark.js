@@ -1,9 +1,9 @@
-import { filterEligibleCalibrationFixtures } from './calibrationEligibility.js';
+import { filterEligibleCalibrationFixtures, getCalibrationEligibility } from './calibrationEligibility.js';
 
 export function benchmarkCalibration(overview) {
   const inputFixtures = Array.isArray(overview?.fixtures) ? overview.fixtures : [];
   const fixtures = filterEligibleCalibrationFixtures(inputFixtures);
-  const excludedIllustrativeFixtureCount = inputFixtures.filter((fixture) => fixture?.evidenceStatus === 'complete' && String(fixture?.sourceId || '').toLowerCase().includes('demo')).length;
+  const excludedIllustrativeFixtureCount = inputFixtures.filter((fixture) => getCalibrationEligibility(fixture).reason === 'illustrative_source').length;
   if (!fixtures.length) {
     return {
       scope: 'local-platform', status: 'insufficient_sample', fixtureCount: 0,

@@ -1,4 +1,4 @@
-import { filterEligibleCalibrationFixtures } from './calibrationEligibility.js';
+import { filterEligibleCalibrationFixtures, getCalibrationEligibility } from './calibrationEligibility.js';
 import { isProductiveConnectedSource } from './sourceClassification.js';
 
 function ratio(part, whole) { return whole ? Number((part / whole).toFixed(4)) : null; }
@@ -38,7 +38,7 @@ export function buildOperationalScorecard({ alerts = [], cases = [], actionPlans
     models: {
       calibrationFixtures: calibrationFixtures.length,
       eligibleCalibrationFixtures: eligibleCalibrationFixtures.length,
-      excludedIllustrativeCalibrationFixtures: calibrationFixtures.filter((item) => item?.evidenceStatus === 'complete' && String(item?.sourceId || '').toLowerCase().includes('demo')).length,
+      excludedIllustrativeCalibrationFixtures: calibrationFixtures.filter((item) => getCalibrationEligibility(item).reason === 'illustrative_source').length,
       meanAbsoluteErrorUsd: average(modelErrors),
       abstentionReady: eligibleCalibrationFixtures.length >= 3,
       disclaimer: 'Las métricas locales no prueban precisión de mercado; requieren eventos históricos licenciados y revisión experta.',
