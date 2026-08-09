@@ -10,27 +10,31 @@ import AlertQueue from './components/AlertQueue';
 import PlatformNav from './components/PlatformNav';
 import ContextBar from './components/ContextBar';
 import { CasesView, ExecutiveBriefView, NetworkExposureView, OperationsView, ScenarioLabView } from './components/PlatformViews';
+import DecisionRoom from './components/DecisionRoom';
 import { useAppStore } from './store/useAppStore';
 import { useSessionStore } from './store/useSessionStore';
 
 export default function App() {
+  const shareToken = window.location.pathname.match(/^\/share\/([^/]+)$/)?.[1];
   const [activeSection, setActiveSection] = useState('command-center');
   const [context, setContext] = useState({ vertical: 'Oil & Gas', region: 'global', horizon: '72' });
   const initBackendCheck = useAppStore((s) => s.initBackendCheck);
   const user = useSessionStore((s) => s.user);
 
   useEffect(() => {
-    initBackendCheck();
+    if (!shareToken) initBackendCheck();
     const openCases = () => setActiveSection('cases');
     window.addEventListener('open-cases', openCases);
     return () => window.removeEventListener('open-cases', openCases);
-  }, [initBackendCheck]);
+  }, [initBackendCheck, shareToken]);
 
   useEffect(() => {
     if (user?.role === 'viewer' && activeSection === 'operations') setActiveSection('command-center');
   }, [user, activeSection]);
 
   const goToScenario = () => setActiveSection('scenario-lab');
+
+  if (shareToken) return <DecisionRoom token={shareToken} />;
 
   return (
     <div className="min-h-screen bg-void flex flex-col">

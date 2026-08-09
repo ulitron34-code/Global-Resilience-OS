@@ -28,13 +28,13 @@ test('decision share API creates, serves and revokes a read-only package', async
   assert.equal(listResponse.status, 200);
   assert.equal((await listResponse.json())[0].id, created.share.id);
 
-  const sharedResponse = await fetch(`${baseUrl}${created.path}`);
+  const sharedResponse = await fetch(`${baseUrl}${created.apiPath}`);
   assert.equal(sharedResponse.status, 200);
   assert.equal(sharedResponse.headers.get('cache-control'), 'no-store');
   assert.equal((await sharedResponse.json()).package.case.id, 'RS-0827');
 
   const revokeResponse = await fetch(`${baseUrl}/api/cases/RS-0827/shares/${created.share.id}/revoke`, { method: 'POST' });
   assert.equal(revokeResponse.status, 200);
-  const revokedResponse = await fetch(`${baseUrl}${created.path}`);
+  const revokedResponse = await fetch(`${baseUrl}${created.apiPath}`);
   assert.equal(revokedResponse.status, 404);
 });

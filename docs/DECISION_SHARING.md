@@ -13,6 +13,9 @@ analista comparta un paquete de decisión con un revisor o cliente piloto.
   auditable e idempotente.
 - `GET /api/shares/:token` devuelve el paquete en modo solo lectura, incrementa
   el contador de accesos y no se puede cachear.
+- La URL para usuarios es `/share/<token>`; Vercel la reescribe al shell de la
+  SPA y `DecisionRoom` consulta el endpoint API sin mostrar la aplicación
+  operativa ni habilitar mutaciones.
 
 ## Límites deliberados
 

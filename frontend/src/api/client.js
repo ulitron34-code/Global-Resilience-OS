@@ -488,6 +488,10 @@ export async function revokeDecisionShare(caseId, shareId) {
   return fetchWithTimeout(`${BACKEND_URL}/api/cases/${caseId}/shares/${shareId}/revoke`, { method: 'POST' });
 }
 
+export async function getSharedDecisionPackage(token) {
+  return fetchWithTimeout(`${BACKEND_URL}/api/shares/${encodeURIComponent(token)}`);
+}
+
 export async function downloadLocalSnapshot() {
   const token = localStorage.getItem('resilience_token');
   const response = await fetch(`${BACKEND_URL}/api/ops/snapshot`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });

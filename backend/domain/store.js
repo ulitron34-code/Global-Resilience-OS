@@ -336,7 +336,7 @@ export function createDecisionShare(caseId, input = {}, actor = 'operator') {
   state.decisionShares.unshift(share);
   auditLog.unshift({ id: `AUD-${String(auditLog.length + 1).padStart(4, '0')}`, entityType: 'decision_share', entityId: share.id, action: 'decision_share_created', actor, message: `Enlace de decisión creado para ${caseId}; expira ${expiresAt}.`, createdAt });
   persistState(state, auditLog, notifications, comments, webhooks, webhookDeliveries, jobRuns);
-  return { share: publicDecisionShare(share), token, path: `/api/shares/${token}`, disclaimer: 'El token se muestra una sola vez; guárdalo de forma segura.' };
+  return { share: publicDecisionShare(share), token, path: `/share/${token}`, apiPath: `/api/shares/${token}`, disclaimer: 'El token se muestra una sola vez; guárdalo de forma segura.' };
 }
 export function revokeDecisionShare(caseId, shareId, actor = 'operator') {
   const share = state.decisionShares.find((item) => item.id === shareId && item.caseId === caseId);

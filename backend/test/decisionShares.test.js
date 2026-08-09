@@ -12,7 +12,8 @@ test('decision share is read-only, expiring metadata hides the token hash and re
   resetLocalDemo('test');
   const created = createDecisionShare('RS-0827', { expiresInHours: 2, audience: 'cliente piloto' }, 'analyst@test');
   assert.ok(created.token);
-  assert.match(created.path, /^\/api\/shares\/[A-Za-z0-9_-]{40,}$/);
+  assert.match(created.path, /^\/share\/[A-Za-z0-9_-]{40,}$/);
+  assert.match(created.apiPath, /^\/api\/shares\/[A-Za-z0-9_-]{40,}$/);
   assert.equal(created.share.audience, 'cliente piloto');
   assert.equal(created.share.tokenHash, undefined);
 
