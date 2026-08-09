@@ -8,6 +8,7 @@
     "test": "npm --prefix backend test",
     "lint": "npm --prefix frontend run lint",
     "build": "node scripts/build-frontend.js",
+    "check:supabase": "node scripts/local-supabase-schema-check.js",
     "verify": "node scripts/local-release-evidence.js",
     "verify:install": "node scripts/local-installation-check.js",
     "start": "npm --prefix backend start",
