@@ -9,7 +9,7 @@ function check(id, phase, required, evidence) {
 }
 
 const phases = {
-  'phase-0': ['docs/PRODUCT_REQUIREMENTS.md', 'docs/DATA_REQUIREMENTS.md', 'docs/PILOT_READINESS.md'],
+  'phase-0': ['docs/PRODUCT_REQUIREMENTS.md', 'docs/DATA_REQUIREMENTS.md', 'docs/PILOT_READINESS.md', 'docs/COMMERCIAL_WEDGE.md'],
   'phase-1': ['backend/server.js', 'backend/test', 'backend/.env.example', 'frontend/.env.example', 'docs/THREAT_MODEL.md', 'docs/RELEASE_CHECKLIST.md', 'scripts/local-smoke-test.js', 'scripts/local-installation-check.js', 'package.json'],
   'phase-2': ['backend/domain/eventContract.js', 'backend/domain/dataCatalog.js', 'backend/domain/batchIngestion.js', 'backend/domain/connectors.js', 'docs/DATA_CONTRACTS.md', 'docs/CONNECTOR_CONTRACTS.md', 'docs/SOURCE_HEALTH_SWEEP.md'],
   'phase-3': ['backend/domain/impactGraph.js', 'backend/domain/entityResolution.js', 'backend/domain/evidenceClassification.js', 'backend/domain/calibrationBenchmark.js', 'backend/domain/backtesting.js', 'backend/domain/sensitivityAnalysis.js', 'backend/domain/uncertainty.js', 'docs/TEMPORAL_IMPACT_GRAPH.md', 'docs/BACKTESTING.md'],
@@ -29,6 +29,7 @@ for (const [phase, paths] of Object.entries(phases)) {
 const runtime = readFileSync(file('backend/config/runtimeConfig.js'), 'utf8');
 const server = readFileSync(file('backend/server.js'), 'utf8');
 const connectors = readFileSync(file('backend/domain/connectors.js'), 'utf8');
+const pilotKit = readFileSync(file('backend/domain/pilotKit.js'), 'utf8');
 const readiness = readFileSync(file('backend/domain/enterpriseReadiness.js'), 'utf8');
 const gitignore = readFileSync(file('.gitignore'), 'utf8');
 check('safety:external-actions', 'safety', runtime.includes('externalActionsDisabledByDefault') && runtime.includes('ALLOW_EXTERNAL_ACTIONS'), 'external actions guarded by runtime configuration');
@@ -36,6 +37,7 @@ check('safety:dry-run-connectors', 'safety', connectors.includes('dry_run_only')
 check('safety:enterprise-separation', 'safety', readiness.includes('externalChecks') && readiness.includes('proceed_to_external_gates'), 'local and external readiness are separated');
 check('safety:api-readiness', 'safety', server.includes('/api/readiness/enterprise'), 'enterprise readiness endpoint is exposed');
 check('safety:portable-state', 'safety', gitignore.includes('backend/storage/state.json') && gitignore.includes('backend/storage/action-plans.json'), 'mutable local state excluded from portable copy');
+check('phase-0:commercial-wedge-gates', 'phase-0', pilotKit.includes('interviewCount >= 5') && pilotKit.includes('urgentInterviewCount >= 2') && pilotKit.includes('dataAccessEvidenceCount > 0'), 'pilot readiness enforces interview, urgency and data-access evidence');
 
 const failed = checks.filter((item) => item.status === 'fail');
 const byPhase = Object.fromEntries(Object.keys(phases).map((phase) => {

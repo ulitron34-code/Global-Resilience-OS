@@ -12,6 +12,8 @@ infraestructura o validación externa; esos bloqueos permanecen registrados en
 ## Resultado esperado
 
 - `gate: PASS` significa que todos los artefactos locales requeridos existen.
+- La Fase 0 también verifica `COMMERCIAL_WEDGE.md` y que el pilot readiness
+  conserve los subgates de cinco entrevistas, urgencia y acceso a datos.
 - `localPlanArtifacts` resume cada fase y su cobertura.
 - `safety` confirma acciones externas desactivadas por defecto, conectores
   `dry_run_only`, separación local/externa y exclusión del estado mutable.
