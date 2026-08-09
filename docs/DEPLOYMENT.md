@@ -68,7 +68,7 @@ PORT=4000
 ## Checklist antes de mostrar a un inversionista
 
 - [ ] `npm run build` corre sin errores
-- [ ] Probar en modo standalone (sin backend corriendo) — debe funcionar igual
+- [x] Probar el artefacto standalone sin backend: `node scripts/standalone-artifact-check.js`
 - [ ] Probar exportación de PDF
 - [ ] Revisar que el disclaimer "Demo — datos ilustrativos" sea visible
 - [ ] Probar en el navegador/laptop específico que llevarás a la reunión, no solo en tu máquina de desarrollo

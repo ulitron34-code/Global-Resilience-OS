@@ -12,6 +12,7 @@ const checks = [
   { id: 'backend-tests', command: npmCommand, args: [...npmPrefix, 'test'], cwd: 'backend' },
   { id: 'frontend-lint', command: npmCommand, args: [...npmPrefix, 'run', 'lint'], cwd: 'frontend' },
   { id: 'frontend-build', command: npmCommand, args: [...npmPrefix, 'run', 'build'], cwd: 'frontend' },
+  { id: 'standalone-artifact', command: process.execPath, args: ['scripts/standalone-artifact-check.js'] },
   { id: 'smoke', command: process.execPath, args: ['scripts/local-smoke-test.js'] },
   { id: 'performance', command: process.execPath, args: ['scripts/local-performance-check.js'] },
   { id: 'portable-audit', command: process.execPath, args: ['scripts/local-portable-audit.js'] },

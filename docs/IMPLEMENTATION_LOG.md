@@ -129,3 +129,12 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
 - La prueba API verifica que las respuestas incluyan los controles principales.
 - El control queda documentado como hardening local; TLS, WAF y políticas del
   proveedor siguen siendo parte del despliegue externo.
+## Bloque: standalone artifact gate (2026-08-09)
+
+- Se añadió `scripts/standalone-artifact-check.js` para servir `frontend/dist`
+  con HTTP local y comprobar que el HTML y al menos un asset responden sin
+  backend.
+- El gate quedó integrado en `scripts/local-release-evidence.js` y la checklist
+  ahora conserva la evidencia de standalone.
+- La verificación manual del botón PDF continúa separada porque requiere un
+  navegador real; el componente ya usa jsPDF y genera el archivo localmente.
