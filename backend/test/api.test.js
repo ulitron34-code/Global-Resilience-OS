@@ -135,6 +135,8 @@ describe('Global Resilience OS API', () => {
     const readiness = await fetch(`${baseUrl}/api/health/readiness`);
     assert.equal(readiness.status, 200);
     const readinessBody = await readiness.json();
+    assert.equal(readinessBody.checks.persistence, true);
+    assert.equal(readinessBody.persistence.enabled, false);
     assert.equal(readinessBody.checks.dataQuality, true);
     assert.equal(readinessBody.checks.auditIntegrity, true);
     const runtimeReadiness = await fetch(`${baseUrl}/api/runtime/readiness`);

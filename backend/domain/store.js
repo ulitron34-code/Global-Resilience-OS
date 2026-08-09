@@ -562,8 +562,10 @@ export function getReadiness() {
   const quality = getDataQualityReport();
   const audit = getAuditIntegrity();
   const sourceHealth = getSourceHealthOverview();
-  const checks = { persistence: true, sourceRegistry: sources.length > 0, auth: true, dataQuality: quality.ready, auditIntegrity: audit.valid, sourceHealth: sourceHealth.ready };
-  return { ready: Object.values(checks).every(Boolean), checks, sources, checkedAt: new Date().toISOString() };
+  const persistence = getRemotePersistenceStatus();
+  const persistenceReady = !persistence.enabled || (persistence.state === 'ready' && Boolean(persistence.organizationId));
+  const checks = { persistence: persistenceReady, sourceRegistry: sources.length > 0, auth: true, dataQuality: quality.ready, auditIntegrity: audit.valid, sourceHealth: sourceHealth.ready };
+  return { ready: Object.values(checks).every(Boolean), checks, persistence: { enabled: persistence.enabled, state: persistence.state, organizationId: persistence.organizationId, lastError: persistence.lastError }, sources, checkedAt: new Date().toISOString() };
 }
 
 export function getLocalSnapshot() {
