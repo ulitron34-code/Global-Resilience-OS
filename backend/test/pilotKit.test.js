@@ -11,13 +11,13 @@ const technicalInputs = {
   tenancy: { organizationId: 'org-test' },
 };
 
-const interviewEvidence = [1, 2, 3, 4, 5].map((index) => ({ stage: 'interview', role: `Role ${index}`, summary: `Decision critica documentada ${index}` }));
+const interviewEvidence = [1, 2, 3, 4, 5].map((index) => ({ stage: 'interview', role: `Role ${index}`, summary: `Decision critica documentada ${index}`, urgencyScore: index <= 2 ? 5 : 3 }));
 
 test('pilot readiness remains blocked without customer and historical evidence', () => {
   const result = buildPilotReadiness(technicalInputs);
   assert.equal(result.technicalReady, true);
   assert.equal(result.customerReady, false);
-  assert.deepEqual(result.evidenceCounts, { interviews: 0, customerReviews: 0, economicEvidence: 0, successCriteria: 0, verifiedHistoricalEvents: 0 });
+  assert.deepEqual(result.evidenceCounts, { interviews: 0, urgentInterviews: 0, dataAccessEvidence: 0, customerReviews: 0, economicEvidence: 0, successCriteria: 0, verifiedHistoricalEvents: 0 });
 });
 
 test('pilot readiness requires structured value and success evidence', () => {
@@ -25,6 +25,7 @@ test('pilot readiness requires structured value and success evidence', () => {
     { stage: 'pilot_review', evidence: 'Cliente reviso el criterio.', evidenceType: 'general' },
     { stage: 'pilot_review', evidence: 'Rango de costo evitado documentado.', evidenceType: 'economic_value' },
     { stage: 'pilot_review', evidence: 'Baseline y umbral definidos.', evidenceType: 'success_criteria' },
+    { stage: 'interview', evidence: 'Fuentes autorizables y responsable identificados.', evidenceType: 'data_access' },
   ];
   const historicalFixtures = [
     { id: 'evt-1', sourceId: 'licensed-ais', provenance: 'contract-1', evidenceStatus: 'complete' },
@@ -36,6 +37,7 @@ test('pilot readiness requires structured value and success evidence', () => {
   assert.equal(result.status, 'customer_ready_for_gate_review');
   assert.equal(result.evidenceCounts.economicEvidence, 1);
   assert.equal(result.evidenceCounts.successCriteria, 1);
+  assert.equal(result.evidenceCounts.dataAccessEvidence, 1);
 });
 
 test('pilot readiness requires five structured interviews before customer gate', () => {
@@ -49,6 +51,21 @@ test('pilot readiness requires five structured interviews before customer gate',
     ],
   });
   assert.equal(result.checks.find((check) => check.id === 'interview_threshold').pass, false);
+  assert.equal(result.customerReady, false);
+});
+
+test('pilot readiness requires urgent problems and data access evidence', () => {
+  const result = buildPilotReadiness({
+    ...technicalInputs,
+    pilotFeedback: [...interviewEvidence.map((item) => ({ ...item, urgencyScore: 3 })), { stage: 'pilot_review', evidence: 'Review documentada.', evidenceType: 'general' }],
+    historicalFixtures: [
+      { id: 'evt-1', sourceId: 'licensed-ais', provenance: 'contract-1', evidenceStatus: 'complete' },
+      { id: 'evt-2', sourceId: 'licensed-cables', provenance: 'contract-2', evidenceStatus: 'complete' },
+      { id: 'evt-3', sourceId: 'licensed-ports', provenance: 'contract-3', evidenceStatus: 'complete' },
+    ],
+  });
+  assert.equal(result.checks.find((check) => check.id === 'urgent_problems').pass, false);
+  assert.equal(result.checks.find((check) => check.id === 'data_access').pass, false);
   assert.equal(result.customerReady, false);
 });
 

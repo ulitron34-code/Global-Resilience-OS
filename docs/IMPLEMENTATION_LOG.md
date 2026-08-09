@@ -1,5 +1,10 @@
 # Implementation Log
 
+## Correccion: subgates de urgencia y acceso a datos del piloto (2026-08-09)
+
+- El readiness exige dos entrevistas con urgencia alta y evidencia de acceso a
+  datos, además de las cinco entrevistas estructuradas.
+
 ## CorrecciÃ³n: gate de cinco entrevistas del piloto (2026-08-09)
 
 - El readiness del piloto ahora exige cinco entrevistas estructuradas antes de
@@ -379,7 +384,7 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
   las fuentes ilustrativas se reportan aparte para no degradar ni inflar la
   lectura operativa.
 - La auditoria de cobertura y el estado actual fueron sincronizados con la
-  evidencia vigente de 80 pruebas backend pasando, incluyendo los casos de
+  evidencia vigente de 81 pruebas backend pasando, incluyendo los casos de
   evidencia de decision enlazada a fuentes ilustrativas y productivas.
 - La elegibilidad de calibracion, benchmark, backtesting y scorecard reutiliza
   la misma clasificacion de fuentes ilustrativas, incluyendo `sourceId`,
@@ -412,7 +417,7 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
   `organizationId`; se evita mezclar solicitudes y errores de distintos tenants
   en el panel de operación.
 - Se sincronizaron los documentos de handoff y readiness con la evidencia actual
-  de 80 pruebas, build reproducible y release gate PASS; las cifras previas se
+  de 81 pruebas, build reproducible y release gate PASS; las cifras previas se
   conservaron únicamente como historial.
 - El paquete de decisión ahora calcula escenarios, auditoría y comentarios con
   aislamiento por organización; se eliminó el conteo global de escenarios.
