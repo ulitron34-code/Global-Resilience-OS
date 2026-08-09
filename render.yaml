@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: global-resilience-api
+    runtime: node
+    rootDir: backend
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: APP_MODE
+        value: staging
+      - key: DATA_MODE
+        value: illustrative
+      - key: AUTH_REQUIRED
+        value: "true"
+      - key: ALLOW_EXTERNAL_ACTIONS
+        value: "false"
+      - key: AUTH_SECRET
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
+      - key: DATA_FILE
+        value: /tmp/global-resilience-state.json

@@ -56,6 +56,11 @@ Fecha de auditoria: 8 de agosto de 2026.
   expiración, revocación y auditoría de accesos; queda documentada la migración
   futura a Supabase/RLS para producción.
 
+## Capacidad adicional preparada para el handoff
+
+- Blueprint de Render para backend de staging con healthcheck, `npm ci`,
+  autenticación obligatoria, CORS explícito y acciones externas deshabilitadas.
+
 ## Pendientes que no deben simularse localmente
 
 1. Datos licenciados de cables, AIS, comercio y proveedores.

@@ -83,6 +83,14 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
 - La aprobación local conserva `activationStatus: blocked_external`; no activa
   fuentes ni simula licencia o integración productiva.
 - Snapshots, reset local y auditoría incluyen la cola de revisiones.
+## Bloque: Render staging blueprint (2026-08-09)
+
+- Se añadió `render.yaml` con raíz `backend`, `npm ci`, `npm start` y healthcheck.
+- El entorno queda declarado como staging, con autenticación obligatoria y
+  acciones externas deshabilitadas por defecto.
+- `AUTH_SECRET` y `CORS_ORIGIN` se dejan como valores externos no versionados;
+  el almacenamiento efímero se marca explícitamente como temporal.
+
 ## Bloque: Decision sharing local (2026-08-09)
 
 - Se añadieron enlaces temporales de solo lectura para paquetes de decisión.
