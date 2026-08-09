@@ -26,6 +26,8 @@ function localFallback(value, error) {
     const failure = new Error('El backend es obligatorio y no esta disponible.');
     failure.cause = error;
     failure.code = 'BACKEND_REQUIRED';
+    failure.status = error?.status || null;
+    failure.requestId = error?.requestId || null;
     throw failure;
   }
   return value;
@@ -41,7 +43,9 @@ async function fetchWithTimeout(url, options = {}, timeout = BACKEND_TIMEOUT_MS)
     const res = await fetch(url, { ...options, headers, signal: controller.signal });
     clearTimeout(id);
     if (!res.ok) {
-      const error = new Error(`HTTP ${res.status}`);
+      let payload = null;
+      try { payload = await res.json(); } catch { /* respuestas no JSON */ }
+      const error = new Error(payload?.error || `HTTP ${res.status}`);
       error.status = res.status;
       error.requestId = res.headers.get('x-request-id') || null;
       throw error;
