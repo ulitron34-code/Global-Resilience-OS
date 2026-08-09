@@ -356,3 +356,5 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
 - La cobertura del piloto usa como denominador solo las fuentes productivas;
   las fuentes ilustrativas se reportan aparte para no degradar ni inflar la
   lectura operativa.
+- La auditoria de cobertura y el estado actual fueron sincronizados con la
+  evidencia vigente de 68 pruebas backend pasando.
