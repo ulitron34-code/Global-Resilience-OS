@@ -111,3 +111,8 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
   revocación y rechazo de tokens inválidos.
 - Sigue bloqueado para producción hasta migrar a Supabase/RLS, añadir política
   de privacidad, rate limit específico y revisar campos compartibles.
+## Bloque: lifecycle timing del Action OS (2026-08-09)
+
+- Los planes ahora conservan `statusHistory`, `assignedAt`, `decisionAt`, `executionStartedAt` y `completedAt`.
+- `GET /api/action-plans/timing` y `GET /api/metrics/scorecard` exponen el tiempo local de asignación y decisión cuando existe evidencia temporal.
+- Detección y explicación permanecen pendientes hasta recibir timestamps comparables de fuentes y revisión.

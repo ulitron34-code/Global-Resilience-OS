@@ -12,6 +12,13 @@ export function buildOperationalScorecard({ alerts = [], cases = [], actionPlans
   const modelErrors = calibrationFixtures.map((item) => Math.abs(Number(item.predictedImpactUsd) - Number(item.observedImpactUsd))).filter(Number.isFinite);
   const incidentsOpen = incidents.filter((item) => !['closed', 'resolved'].includes(item.status));
 
+  const decisionTimes = actionPlans.map((item) => {
+    const start = Date.parse(item.createdAt || '');
+    const end = Date.parse(item.decisionAt || '');
+    return Number.isFinite(start) && Number.isFinite(end) && end >= start ? (end - start) / 60000 : null;
+  }).filter((value) => value !== null);
+  const averageDecisionTime = decisionTimes.length ? Number((decisionTimes.reduce((sum, value) => sum + value, 0) / decisionTimes.length).toFixed(2)) : null;
+
   return {
     schemaVersion: '1.0.0-local',
     generatedAt: new Date(referenceTime).toISOString(),
@@ -35,7 +42,7 @@ export function buildOperationalScorecard({ alerts = [], cases = [], actionPlans
       meanForecastErrorUsd: average(outcomeErrors),
       evidenceRequired: ['cliente piloto', 'baseline externo', 'tiempo de decisión', 'costo evitado validado', 'willingness-to-pay'],
     },
-    timing: { timeToDetectionMinutes: null, timeToExplanationMinutes: null, timeToDecisionMinutes: null, note: 'Se habilita cuando las fuentes y decisiones reales aporten timestamps comparables.' },
+    timing: { timeToDetectionMinutes: null, timeToExplanationMinutes: null, timeToDecisionMinutes: averageDecisionTime, decisionsObserved: decisionTimes.length, note: averageDecisionTime === null ? 'Se habilita al aprobar planes con timestamps comparables.' : 'Tiempo medio local desde creación del plan hasta aprobación humana; detección y explicación requieren timestamps de fuente y revisión.' },
     disclaimer: 'Scorecard operativo local; no constituye evidencia comercial, regulatoria ni de precisión predictiva.',
   };
 }

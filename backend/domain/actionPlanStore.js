@@ -22,6 +22,14 @@ function load() {
 function persist() { if (isTest) return; mkdirSync(dirname(file), { recursive: true }); writeFileSync(file, JSON.stringify(plans, null, 2), 'utf8'); }
 function clone(value) { return structuredClone(value); }
 
+function appendLifecycleEvent(item, status, actor, at = new Date().toISOString()) {
+  if (!Array.isArray(item.statusHistory)) item.statusHistory = [{ status: item.status, at: item.createdAt || at, actor: item.createdBy || 'system' }];
+  if (item.statusHistory.at(-1)?.status !== status) item.statusHistory.push({ status, at, actor });
+  if (status === 'approved' && !item.decisionAt) item.decisionAt = at;
+  if (status === 'in_execution' && !item.executionStartedAt) item.executionStartedAt = at;
+  if (status === 'completed' && !item.completedAt) item.completedAt = at;
+}
+
 export function listActionPlans(filters = {}) {
   const organizationId = filters.organizationId || DEFAULT_ORGANIZATION_ID;
   const items = plans.filter((item) => item.organizationId === organizationId && (!filters.caseId || item.caseId === filters.caseId) && (!filters.status || item.status === filters.status));
@@ -32,7 +40,8 @@ export function getActionPlan(id, organizationId = DEFAULT_ORGANIZATION_ID) { re
 
 export function createActionPlan(input, actor = 'operator', organizationId = DEFAULT_ORGANIZATION_ID) {
   const plan = attachDecisionEvidence(buildActionPlan(input), input);
-  const saved = { ...plan, id: `AP-${randomUUID().slice(0, 8).toUpperCase()}`, organizationId, context: { vertical: input.vertical ? String(input.vertical).slice(0, 120) : 'unclassified', region: input.region ? String(input.region).slice(0, 120) : 'global', horizonHours: Number.isFinite(Number(input.horizonHours)) ? Math.max(0, Number(input.horizonHours)) : null }, createdBy: actor, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+  const createdAt = new Date().toISOString();
+  const saved = { ...plan, id: `AP-${randomUUID().slice(0, 8).toUpperCase()}`, organizationId, context: { vertical: input.vertical ? String(input.vertical).slice(0, 120) : 'unclassified', region: input.region ? String(input.region).slice(0, 120) : 'global', horizonHours: Number.isFinite(Number(input.horizonHours)) ? Math.max(0, Number(input.horizonHours)) : null }, createdBy: actor, createdAt, updatedAt: createdAt, statusHistory: [{ status: plan.status, at: createdAt, actor }] };
   plans.unshift(saved);
   persist();
   return clone(saved);
@@ -44,9 +53,13 @@ export function updateActionPlan(id, patch = {}, actor = 'operator', organizatio
   const allowed = ['status', 'humanApproval', 'owner', 'outcome'];
   const workflow = validateActionPlanPatch(item, patch);
   const changes = {};
+  const previousStatus = item.status;
+  const updatedAt = new Date().toISOString();
   for (const field of allowed) if (patch[field] !== undefined) { item[field] = String(patch[field]).trim(); changes[field] = item[field]; }
   if (patch.status !== undefined) item.status = workflow.nextStatus;
-  if (Object.keys(changes).length) { item.updatedAt = new Date().toISOString(); item.updatedBy = actor; persist(); }
+  if (item.status !== previousStatus) appendLifecycleEvent(item, item.status, actor, updatedAt);
+  if (patch.owner !== undefined && patch.owner !== null && !item.assignedAt) item.assignedAt = updatedAt;
+  if (Object.keys(changes).length) { item.updatedAt = updatedAt; item.updatedBy = actor; persist(); }
   return clone(item);
 }
 
@@ -71,6 +84,7 @@ export function recordActionPlanOutcome(id, input = {}, actor = 'operator', orga
   item.updatedAt = new Date().toISOString();
   item.updatedBy = actor;
   item.outcomeRecordedAt = item.updatedAt;
+  appendLifecycleEvent(item, 'completed', actor, item.updatedAt);
   item.outcomeEvidenceRecord = buildEvidence({
     evidenceClass: 'observed',
     sourceIds: [evidenceRef],
@@ -90,6 +104,19 @@ export function getActionPlanOutcomeMetrics(organizationId = DEFAULT_ORGANIZATIO
   const completed = plans.filter((item) => item.organizationId === organizationId && item.status === 'completed' && Number.isFinite(item.forecastErrorPct));
   const errors = completed.map((item) => item.forecastErrorPct);
   return { organizationId, completedWithOutcome: completed.length, meanAbsoluteForecastErrorPct: errors.length ? Number((errors.reduce((sum, value) => sum + value, 0) / errors.length).toFixed(2)) : null, maxForecastErrorPct: errors.length ? Math.max(...errors) : null, disclaimer: 'Métrica local basada únicamente en outcomes registrados por operadores; no representa validación estadística suficiente.' };
+}
+
+function durationMinutes(start, end) {
+  const delta = Date.parse(end || '') - Date.parse(start || '');
+  return Number.isFinite(delta) && delta >= 0 ? delta / 60000 : null;
+}
+
+export function getActionPlanTimingMetrics(organizationId = DEFAULT_ORGANIZATION_ID) {
+  const scoped = plans.filter((item) => item.organizationId === organizationId);
+  const decisionTimes = scoped.map((item) => durationMinutes(item.createdAt, item.decisionAt)).filter((value) => value !== null);
+  const assignmentTimes = scoped.map((item) => durationMinutes(item.createdAt, item.assignedAt)).filter((value) => value !== null);
+  const average = (values) => values.length ? Number((values.reduce((sum, value) => sum + value, 0) / values.length).toFixed(2)) : null;
+  return { organizationId, plansObserved: scoped.length, decisionsObserved: decisionTimes.length, assignmentsObserved: assignmentTimes.length, timeToDecisionMinutes: average(decisionTimes), timeToAssignmentMinutes: average(assignmentTimes), disclaimer: 'Métrica local basada en timestamps del ciclo de planes; no equivale a desempeño de piloto ni a una medición de detección externa.' };
 }
 
 export function resetActionPlans() {

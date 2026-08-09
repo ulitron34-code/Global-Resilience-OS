@@ -95,6 +95,7 @@ El endpoint `POST /api/webhooks/deliveries/process` ejecuta el worker HTTP local
 - `GET /api/action-plans` y `GET /api/action-plans/:id` - consulta planes guardados localmente.
 - `POST /api/action-plans` - guarda un plan como artefacto local versionado.
 - `PATCH /api/action-plans/:id` - actualiza estado de aprobación, owner u outcome.
+- `GET /api/action-plans/timing` - expone tiempos locales de asignación y decisión a partir del historial de estados; no inventa tiempos de detección o explicación sin timestamps de fuente.
 - Las transiciones de planes son controladas: `draft_for_human_approval` requiere aprobación humana explícita antes de `approved`; `completed` requiere `outcome` verificable.
 - `GET /api/tenancy/context` - expone la organización activa y el límite local de aislamiento.
 - `POST /api/entities/resolve` - normaliza y resuelve aliases locales de cables, verticales y chokepoints.

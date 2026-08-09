@@ -8,17 +8,17 @@ La base local de Global Resilience OS queda implementada y verificable para cont
 
 ## Evidencia ejecutada
 
-- Backend: `npm.cmd test` — 42 pruebas correctas.
+- Backend: `npm.cmd test` — 44 pruebas correctas.
 - Frontend: `npm.cmd run lint` y `npm.cmd run build` — correctos.
 - Smoke end-to-end local: `LOCAL SMOKE TEST: PASS`.
 - Release evidence: `npm.cmd run verify` — PASS.
-- Rendimiento local: 60 solicitudes, 0 errores, p95 87.67 ms.
+- Rendimiento local: 60 solicitudes, 0 errores, p95 152.79 ms.
 - Auditoría portable: 0 hallazgos.
 - Dependencias de producción backend/frontend: 0 vulnerabilidades reportadas.
 - Reproducibilidad: manifests, lockfiles, `.env.example`, exclusiones y entrypoints: PASS.
 - Instalación limpia: backend y frontend aceptan `npm ci --dry-run`.
 - Auditoría ejecutable del Plan Maestro: fases 0–7 y salvaguardas locales: PASS.
-- OpenAPI: 133 rutas Express con 133 operaciones documentadas, sin faltantes ni duplicados.
+- OpenAPI: 134 rutas Express con 134 operaciones documentadas, sin faltantes ni duplicados.
 - Paquete de piloto exportable disponible en `GET /api/pilots/package` y en Operations.
 - Enterprise Readiness disponible en `GET /api/readiness/enterprise`.
 - Decision Room disponible en `/share/<token>`, con expiración, revocación, hash de token y auditoría de accesos.

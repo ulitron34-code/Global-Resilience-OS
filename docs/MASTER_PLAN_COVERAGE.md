@@ -74,10 +74,10 @@ Fecha de auditoria: 8 de agosto de 2026.
 
 ## Gates de aceptacion local
 
-- Backend: 42 pruebas pasando.
+- Backend: 44 pruebas pasando.
 - Frontend: lint y build de produccion pasando.
 - Smoke local: PASS.
-- OpenAPI: JSON valido; 133 rutas documentadas, sin faltantes ni duplicados.
+- OpenAPI: JSON valido; 134 rutas documentadas, sin faltantes ni duplicados.
 - Source health sweep: endpoint, smoke test y panel Operations verificados.
 - Pilot readiness: gates técnicos, guía de entrevistas, métricas locales y evidencia faltante.
 - Incident response: runbook, registro, triage, timeline y smoke test verificados.
@@ -98,3 +98,9 @@ con fuentes observadas, modelos inferidos y supuestos de escenario.
 El estado `implementada localmente` no equivale a listo para vender como sistema
 enterprise ni a cumplimiento regulatorio. El cambio de estado requiere la evidencia
 externa indicada en cada fila.
+## Bloque local adicional: métricas temporales del ciclo de decisión
+
+Los planes de acción ya conservan historial de estados y timestamps de
+asignación/aprobación. El scorecard y `GET /api/action-plans/timing` exponen el
+tiempo local a decisión sin inventar detección o explicación cuando no existen
+timestamps comparables de fuentes.

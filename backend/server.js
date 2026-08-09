@@ -7,7 +7,7 @@ import { computeImpact } from './engine/impactEngine.js';
 import { validateSimulationInput } from './validation.js';
 import { buildImpactGraph, getImpactPaths } from './domain/impactGraph.js';
 import { buildActionPlan, getPlaybook, listPlaybooks } from './domain/playbooks.js';
-import { DEFAULT_ORGANIZATION_ID, createActionPlan, getActionPlan, getActionPlanOutcomeMetrics, getAnonymousSectorBenchmark, listActionPlans, recordActionPlanOutcome, resetActionPlans, updateActionPlan } from './domain/actionPlanStore.js';
+import { DEFAULT_ORGANIZATION_ID, createActionPlan, getActionPlan, getActionPlanOutcomeMetrics, getActionPlanTimingMetrics, getAnonymousSectorBenchmark, listActionPlans, recordActionPlanOutcome, resetActionPlans, updateActionPlan } from './domain/actionPlanStore.js';
 import { resolveEntity } from './domain/entityResolution.js';
 import { listDataCatalog, getDataCatalogReadiness, validateSourceIntake } from './domain/dataCatalog.js';
 import { getRuntimeReadiness } from './config/runtimeConfig.js';
@@ -302,6 +302,7 @@ app.get('/api/tenancy/context', authIfConfigured, (req, res) => res.json({
 }));
 app.get('/api/action-plans', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(listActionPlans({ organizationId: req.user?.organizationId || DEFAULT_ORGANIZATION_ID, caseId: req.query.caseId, status: req.query.status, limit: req.query.limit })));
 app.get('/api/action-plans/metrics', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(getActionPlanOutcomeMetrics(req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
+app.get('/api/action-plans/timing', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(getActionPlanTimingMetrics(req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
 app.get('/api/benchmarks/sectors', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(getAnonymousSectorBenchmark(Math.max(3, Math.min(20, Number(req.query.minCohort) || 3)))));
 app.post('/api/network/cooperative/preview', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(buildCooperativeIncidentPreview({ alerts: listAlerts({ limit: 200 }), minCohort: req.body?.minCohort, consent: req.body?.consent })));
 app.post('/api/assistant/suggestion', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => {
