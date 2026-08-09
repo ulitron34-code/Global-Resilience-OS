@@ -1,5 +1,10 @@
 # Implementation Log
 
+## Bloque: auditoría del contrato UI de piloto (2026-08-09)
+
+- `npm run verify` ahora ejecuta un auditor estructural que comprueba que el
+  panel de Pilot Readiness conserva los campos y la conexión API de evidencia.
+
 ## Bloque: captura UI de evidencia del piloto (2026-08-09)
 
 - El panel de Pilot Readiness ahora permite registrar etapa, tipo de evidencia,

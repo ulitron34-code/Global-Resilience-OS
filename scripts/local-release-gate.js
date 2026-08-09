@@ -25,7 +25,7 @@ const requiredFiles = [
   'scripts/local-reproducibility-check.js', 'docs/REPRODUCIBILITY_CHECK.md',
   'scripts/local-supabase-schema-check.js', 'docs/SUPABASE_SCHEMA_AUDIT.md',
   'backend/domain/enterpriseReadiness.js', 'docs/ENTERPRISE_READINESS.md',
-  'scripts/local-plan-audit.js', 'docs/LOCAL_PLAN_AUDIT.md', 'docs/CURRENT_STATUS.md',
+  'scripts/local-plan-audit.js', 'docs/LOCAL_PLAN_AUDIT.md', 'docs/UI_CONTRACT_AUDIT.md', 'scripts/local-ui-contract-audit.js', 'docs/CURRENT_STATUS.md',
   'scripts/local-openapi-route-audit.js', 'docs/OPENAPI_ROUTE_AUDIT.md',
 ];
 for (const relative of requiredFiles) check(`file:${relative}`, existsSync(file(relative)), 'required local artifact');

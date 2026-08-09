@@ -19,6 +19,7 @@ const checks = [
   { id: 'smoke', command: process.execPath, args: ['scripts/local-smoke-test.js'] },
   { id: 'performance', command: process.execPath, args: ['scripts/local-performance-check.js'] },
   { id: 'portable-audit', command: process.execPath, args: ['scripts/local-portable-audit.js'] },
+  { id: 'ui-contract-audit', command: process.execPath, args: ['scripts/local-ui-contract-audit.js'] },
   { id: 'installation-check', command: process.execPath, args: ['scripts/local-installation-check.js'] },
   { id: 'reproducibility', command: process.execPath, args: ['scripts/local-reproducibility-check.js'] },
   { id: 'supabase-schema-audit', command: process.execPath, args: ['scripts/local-supabase-schema-check.js'] },
