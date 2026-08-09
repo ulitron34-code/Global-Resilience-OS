@@ -307,7 +307,8 @@ app.get('/api/runtime/config-contract', (req, res) => { const contract = getEnvi
 app.get('/api/readiness/enterprise', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => {
   const modelGovernance = listModels().map((model) => { const calibration = getCalibrationOverview(model.id); return buildModelGovernance(model, getModelValidationReport(), calibration, benchmarkCalibration(calibration)); });
   const runtime = getOperationalRuntimeReadiness();
-  res.json(buildEnterpriseReadiness({ runtime, environmentContract: getEnvironmentContract(), security: buildSecurityPosture({ runtime, audit: getAuditIntegrity(), tenancy: { organizationId: DEFAULT_ORGANIZATION_ID }, snapshot: getLocalSnapshot() }), catalog: getDataCatalogReadiness(), modelGovernance, actionLibrary: getActionLibraryReadiness(), schemaAudit: true, releaseGate: true }));
+  const verified = process.env.LOCAL_RELEASE_GATE_VERIFIED === 'true';
+  res.json(buildEnterpriseReadiness({ runtime, environmentContract: getEnvironmentContract(), security: buildSecurityPosture({ runtime, audit: getAuditIntegrity(), tenancy: { organizationId: DEFAULT_ORGANIZATION_ID }, snapshot: getLocalSnapshot() }), catalog: getDataCatalogReadiness(), modelGovernance, actionLibrary: getActionLibraryReadiness(), schemaAudit: verified, releaseGate: verified }));
 });
 app.get('/api/data-catalog', (req, res) => res.json(listDataCatalog()));
 app.get('/api/data-catalog/readiness', (req, res) => res.json(getDataCatalogReadiness()));
