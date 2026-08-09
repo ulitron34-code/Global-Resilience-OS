@@ -130,6 +130,8 @@ app.use((req, res, next) => {
   res.setHeader('permissions-policy', 'camera=(), microphone=(), geolocation=()');
   res.setHeader('x-dns-prefetch-control', 'off');
   res.setHeader('cross-origin-resource-policy', 'same-origin');
+  res.setHeader('cross-origin-opener-policy', 'same-origin');
+  res.setHeader('content-security-policy', "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'");
   next();
 });
 

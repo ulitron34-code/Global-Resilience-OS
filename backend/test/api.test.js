@@ -43,6 +43,8 @@ describe('Global Resilience OS API', () => {
     assert.equal(healthBody.status, 'ok');
     assert.equal(healthBody.version, '0.9.0');
     assert.equal(response.headers.get('x-content-type-options'), 'nosniff');
+    assert.ok(response.headers.get('content-security-policy')?.includes("default-src 'none'"));
+    assert.equal(response.headers.get('cross-origin-opener-policy'), 'same-origin');
     assert.ok(response.headers.get('x-request-id'));
 
     const missing = await fetch(`${baseUrl}/api/does-not-exist`);

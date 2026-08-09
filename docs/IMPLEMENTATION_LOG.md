@@ -123,3 +123,9 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
 - Los excesos responden `429` con `Retry-After: 60`; los enlaces siguen sin
   almacenamiento en caché.
 - Una prueba API cubre el límite antes de alcanzar el límite global.
+## Bloque: HTTP security headers (2026-08-09)
+
+- Se añadieron CSP restrictiva y políticas de aislamiento COOP/CORP al backend.
+- La prueba API verifica que las respuestas incluyan los controles principales.
+- El control queda documentado como hardening local; TLS, WAF y políticas del
+  proveedor siguen siendo parte del despliegue externo.
