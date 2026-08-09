@@ -23,3 +23,13 @@ services:
         sync: false
       - key: DATA_FILE
         value: /tmp/global-resilience-state.json
+      - key: SUPABASE_URL
+        value: https://mhcpgjubmltcezxoysng.supabase.co
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_ORGANIZATION_SLUG
+        value: global-resilience-pilot
+      - key: SUPABASE_TIMEOUT_MS
+        value: "5000"
+      - key: PERSISTENCE_MODE
+        value: supabase

@@ -10,6 +10,7 @@ export function getEnvironmentContract(env = process.env) {
     { id: 'cors', label: 'CORS explícito en producción', pass: !production || Boolean(env.CORS_ORIGIN), evidence: production ? (env.CORS_ORIGIN ? 'configurado' : 'ausente') : 'no requerido en demo' },
     { id: 'external_actions', label: 'Acciones externas desactivadas por defecto', pass: !bool(env.ALLOW_EXTERNAL_ACTIONS), evidence: bool(env.ALLOW_EXTERNAL_ACTIONS) ? 'habilitadas explícitamente' : 'deshabilitadas' },
     { id: 'persistence', label: 'Ruta de persistencia declarada', pass: Boolean(env.DATA_FILE || 'backend/storage/state.json'), evidence: env.DATA_FILE || 'backend/storage/state.json' },
+    { id: 'remote_persistence', label: 'Persistencia remota enterprise configurada', pass: !production || (env.PERSISTENCE_MODE === 'supabase' && Boolean(env.SUPABASE_SERVICE_ROLE_KEY) && Boolean(env.SUPABASE_ORGANIZATION_SLUG)), evidence: production ? 'Supabase + clave de servidor + organización' : 'no requerido en demo/staging' },
   ];
   return { schemaVersion: '1.0.0-local', generatedAt: new Date().toISOString(), mode, production, ready: checks.every((item) => item.pass), checks, disclaimer: 'Contrato de configuración local; no sustituye secretos gestionados, IAM ni controles del proveedor de infraestructura.' };
 }

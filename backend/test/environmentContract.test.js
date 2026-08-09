@@ -16,8 +16,15 @@ test('environment contract rejects incomplete production configuration', () => {
 });
 
 test('environment contract accepts production controls without exposing secrets', () => {
-  const result = getEnvironmentContract({ APP_MODE: 'production', DATA_MODE: 'licensed', AUTH_REQUIRED: 'true', AUTH_SECRET: 'x'.repeat(48), CORS_ORIGIN: 'https://app.example', ALLOW_EXTERNAL_ACTIONS: 'false', DATA_FILE: 'postgres' });
+  const result = getEnvironmentContract({ APP_MODE: 'production', DATA_MODE: 'licensed', AUTH_REQUIRED: 'true', AUTH_SECRET: 'x'.repeat(48), CORS_ORIGIN: 'https://app.example', ALLOW_EXTERNAL_ACTIONS: 'false', DATA_FILE: 'postgres', PERSISTENCE_MODE: 'supabase', SUPABASE_SERVICE_ROLE_KEY: 'service-role-placeholder', SUPABASE_ORGANIZATION_SLUG: 'pilot-org' });
   assert.equal(result.ready, true);
-  assert.equal(JSON.stringify(result).includes('xxxx'), false);
+  assert.equal(JSON.stringify(result).includes('service-role-placeholder'), false);
   assert.equal(result.checks.find((item) => item.id === 'auth').evidence, 'AUTH_REQUIRED + secret >= 32');
+  assert.equal(result.checks.find((item) => item.id === 'remote_persistence').pass, true);
+});
+
+test('environment contract rejects production without remote tenant persistence', () => {
+  const result = getEnvironmentContract({ APP_MODE: 'production', DATA_MODE: 'licensed', AUTH_REQUIRED: 'true', AUTH_SECRET: 'x'.repeat(48), CORS_ORIGIN: 'https://app.example', ALLOW_EXTERNAL_ACTIONS: 'false', DATA_FILE: 'postgres' });
+  assert.equal(result.ready, false);
+  assert.equal(result.checks.find((item) => item.id === 'remote_persistence').pass, false);
 });
