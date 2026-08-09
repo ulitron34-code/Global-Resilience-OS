@@ -24,8 +24,9 @@ export function evaluateDataQuality({ catalog = [], sources = [], now = new Date
 export function validateDataRecord(record = {}, source = {}) {
   const missing = REQUIRED_FIELDS.filter((field) => record[field] === undefined || record[field] === null || record[field] === '');
   const sourcePresent = Boolean(source?.id);
-  const licensePass = sourcePresent && Boolean(record.provenance?.licenseRef) && source.licenseStatus === 'active';
+  const sourceClassificationPass = sourcePresent && !isIllustrativeSource(source);
+  const licensePass = sourceClassificationPass && Boolean(record.provenance?.licenseRef) && source.licenseStatus === 'active';
   const observedAt = Date.parse(record.observedAt);
   const freshnessPass = sourcePresent && Number.isFinite(observedAt) && (!source.refreshSlaHours || (Date.now() - observedAt) / 3600000 <= source.refreshSlaHours);
-  return { valid: missing.length === 0 && sourcePresent && licensePass && freshnessPass, missing, checks: { source: sourcePresent, license: licensePass, freshness: freshnessPass }, decision: missing.length || !sourcePresent || !licensePass || !freshnessPass ? 'abstain' : 'allow', disclaimer: 'Validacion local de contrato y calidad; no prueba exactitud ni derechos de uso.' };
+  return { valid: missing.length === 0 && sourcePresent && sourceClassificationPass && licensePass && freshnessPass, missing, checks: { source: sourcePresent, sourceClassification: sourceClassificationPass, license: licensePass, freshness: freshnessPass }, decision: missing.length || !sourcePresent || !sourceClassificationPass || !licensePass || !freshnessPass ? 'abstain' : 'allow', disclaimer: 'Validacion local de contrato y calidad; no prueba exactitud ni derechos de uso.' };
 }

@@ -363,3 +363,5 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
   cobertura y clase declarada; se eliminaron filtros duplicados por sufijo.
 - El data quality gate tambien reutiliza esa clasificacion para bloquear una
   fuente ilustrativa aunque su identificador parezca productivo.
+- El preview de alta y la validacion de cada registro aplican el mismo bloqueo;
+  una licencia declarada no convierte datos ilustrativos en evidencia operativa.

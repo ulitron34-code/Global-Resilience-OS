@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { evaluateDataQuality } from '../domain/dataQualityGate.js';
+import { evaluateDataQuality, validateDataRecord } from '../domain/dataQualityGate.js';
 
 const license = {
   contractRef: 'contract-001',
@@ -30,4 +30,11 @@ test('data quality accepts a connected productive source with fresh contractual 
   });
   assert.equal(result.ready, true);
   assert.equal(result.checks[0].status, 'pass');
+});
+
+test('record validation abstains for an illustrative source despite active license metadata', () => {
+  const result = validateDataRecord({ sourceId: 'provider-003', observedAt: new Date().toISOString(), confidence: 0.9, provenance: { licenseRef: 'contract-003' } }, { id: 'provider-003', status: 'demo', licenseStatus: 'active', refreshSlaHours: 24 });
+  assert.equal(result.valid, false);
+  assert.equal(result.checks.sourceClassification, false);
+  assert.equal(result.decision, 'abstain');
 });

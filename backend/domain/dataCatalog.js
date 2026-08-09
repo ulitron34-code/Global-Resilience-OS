@@ -1,3 +1,5 @@
+import { isIllustrativeSource } from './sourceClassification.js';
+
 const CATALOG = [
   { id: 'cables-demo', name: 'Base de cables submarinos', domain: 'subsea_infrastructure', coverage: 'illustrative_routes', sourceClass: 'demo_seed', licenseStatus: 'not_for_production', refreshSlaHours: null, requiredFor: ['impact_graph', 'scenario_engine'], license: { contractRef: null, territory: [], allowedFields: [], retentionDays: null, redistribution: 'blocked', attribution: null, renewalContact: null } },
   { id: 'ais-demo', name: 'AIS / vessel tracking', domain: 'maritime', coverage: 'demo_events', sourceClass: 'licensed_feed_placeholder', licenseStatus: 'verification_required', refreshSlaHours: 1, requiredFor: ['maritime_alerts', 'chokepoint_exposure'], license: { contractRef: null, territory: [], allowedFields: [], retentionDays: null, redistribution: 'blocked', attribution: null, renewalContact: null } },
@@ -35,7 +37,7 @@ export function validateSourceIntake(input = {}) {
   const checks = [
     { id: 'identity', label: 'Identidad de fuente', pass: Boolean(candidate.id && candidate.name && candidate.domain), evidence: 'id, name y domain requeridos' },
     { id: 'unique_id', label: 'ID no colisiona con catálogo', pass: Boolean(candidate.id) && !CATALOG.some((item) => item.id === candidate.id), evidence: 'La fuente no debe reemplazar una entrada existente' },
-    { id: 'non_demo_coverage', label: 'Cobertura no ilustrativa', pass: Boolean(candidate.coverage) && !/demo|illustrative/i.test(candidate.coverage), evidence: 'La cobertura debe describir datos autorizados' },
+    { id: 'non_demo_coverage', label: 'Cobertura no ilustrativa', pass: Boolean(candidate.coverage) && !isIllustrativeSource(candidate), evidence: 'La cobertura debe describir datos autorizados' },
     { id: 'active_license', label: 'Licencia activa declarada', pass: candidate.licenseStatus === 'active', evidence: 'licenseStatus debe ser active' },
     { id: 'license_metadata', label: 'Ficha contractual completa', pass: hasCompleteLicenseMetadata(candidate), evidence: getMissingLicenseFields(candidate).length ? `Faltan: ${getMissingLicenseFields(candidate).join(', ')}` : 'Metadatos contractuales completos' },
     { id: 'retention', label: 'Retención válida', pass: Number.isFinite(Number(license.retentionDays)) && Number(license.retentionDays) >= 0, evidence: 'retentionDays debe ser un número no negativo' },
