@@ -7,7 +7,7 @@
   "scripts": {
     "test": "npm --prefix backend test",
     "lint": "npm --prefix frontend run lint",
-    "build": "npm --prefix frontend run build",
+    "build": "node scripts/build-frontend.js",
     "verify": "node scripts/local-release-evidence.js",
     "verify:install": "node scripts/local-installation-check.js",
     "start": "npm --prefix backend start",

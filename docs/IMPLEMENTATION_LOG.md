@@ -138,3 +138,10 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
   ahora conserva la evidencia de standalone.
 - La verificación manual del botón PDF continúa separada porque requiere un
   navegador real; el componente ya usa jsPDF y genera el archivo localmente.
+## Bloque: build raíz reproducible (2026-08-09)
+
+- `npm run build` ahora entra al directorio `frontend` mediante
+  `scripts/build-frontend.js`, evitando el fallo de esbuild provocado por
+  `npm --prefix` en Windows.
+- El orquestador ejecuta el build real, no sólo la existencia de `dist`.
+- `npm run build`, `npm run verify` y el gate standalone quedaron verificados.

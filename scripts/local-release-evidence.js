@@ -11,7 +11,7 @@ const npmPrefix = npmCommand === process.execPath ? [npmCli] : [];
 const checks = [
   { id: 'backend-tests', command: npmCommand, args: [...npmPrefix, 'test'], cwd: 'backend' },
   { id: 'frontend-lint', command: npmCommand, args: [...npmPrefix, 'run', 'lint'], cwd: 'frontend' },
-  { id: 'frontend-build', command: npmCommand, args: [...npmPrefix, 'run', 'build'], cwd: 'frontend' },
+  { id: 'frontend-build', command: process.execPath, args: ['scripts/build-frontend.js'] },
   { id: 'standalone-artifact', command: process.execPath, args: ['scripts/standalone-artifact-check.js'] },
   { id: 'smoke', command: process.execPath, args: ['scripts/local-smoke-test.js'] },
   { id: 'performance', command: process.execPath, args: ['scripts/local-performance-check.js'] },
@@ -28,11 +28,6 @@ const checks = [
 const results = [];
 for (const check of checks) {
   const cwd = resolve(root, check.cwd || '.');
-  if (process.platform === 'win32' && check.id === 'frontend-build') {
-    const artifact = existsSync(resolve(root, 'frontend/dist/index.html')) && existsSync(resolve(root, 'frontend/dist/assets'));
-    results.push({ id: check.id, status: artifact ? 'pass' : 'fail', exitCode: artifact ? 0 : 1, error: null, mode: 'artifact_check_windows', outputTail: artifact ? 'dist/index.html y dist/assets presentes; el build directo npm.cmd run build fue verificado fuera del subproceso Node.' : 'No existe un artefacto dist verificable.' });
-    continue;
-  }
   const maxAttempts = process.platform === 'win32' && check.id === 'performance' ? 2 : 1;
   let result;
   let attempts = 0;
