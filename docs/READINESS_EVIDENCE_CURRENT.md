@@ -1,8 +1,12 @@
 # Evidencia actual de readiness
 
-Fecha de corte: 2026-08-08.
+Fecha de corte: 2026-08-09.
 
 ## Verificaciones ejecutadas
+
+El corte vigente es de 75 pruebas backend PASS, lint y build frontend PASS, y
+`npm.cmd run verify` PASS. Las cifras anteriores de este archivo son
+históricas y no representan el estado actual.
 
 - Backend: `npm.cmd test` — 51 pruebas correctas.
 - Frontend: `npm.cmd run lint` — correcto.

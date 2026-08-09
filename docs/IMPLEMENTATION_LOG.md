@@ -389,3 +389,6 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
 - Las métricas operativas expuestas al administrador ahora se agrupan por
   `organizationId`; se evita mezclar solicitudes y errores de distintos tenants
   en el panel de operación.
+- Se sincronizaron los documentos de handoff y readiness con la evidencia actual
+  de 75 pruebas, build reproducible y release gate PASS; las cifras previas se
+  conservaron únicamente como historial.

@@ -1,6 +1,13 @@
 # Estado de handoff local
 
-Fecha de corte: 2026-08-08
+Fecha de corte: 2026-08-09
+
+## Evidencia vigente (2026-08-09)
+
+El corte actual supersede las cifras históricas de este documento: 75 pruebas
+backend PASS, lint y build frontend PASS, y `npm.cmd run verify` PASS. El
+checkout local permanece sin cambios pendientes y los commits siguen esperando
+publicación externa.
 
 ## Resultado
 
