@@ -207,6 +207,9 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
 - La ingesta exige coincidencia de tenant y `status: connected`, por lo que una
   fuente pendiente no puede generar eventos hasta el alta externa.
 - La cobertura sube a 55 pruebas y el nuevo endpoint queda en OpenAPI local.
+- La prueba API protegida recorre el flujo completo: crear revisiÃ³n, aprobar,
+  registrar, comprobar estado `pending_external` y verificar aislamiento entre
+  tenant A y tenant B.
 
 - `GET /api/ops/snapshot` ahora exporta únicamente el estado de la
   organización autenticada e incluye `organizationId` en el artefacto.
