@@ -36,6 +36,8 @@ Fecha de auditoria: 8 de agosto de 2026.
 - Control plane normalizado para notificaciones, webhooks, entregas y jobs en
   `docs/supabase/005_control_plane_extensions.sql`.
 - Adaptador de snapshots Supabase con timeout, fallback y escritura en cola.
+- Proyección determinista del control plane para backfill normalizado, con
+  validación de tenant, claves foráneas y ausencia de secretos planos.
 - CI preparado para Node 20/22 con permisos de solo lectura.
 - OpenAPI completo: 137 rutas documentadas, sin faltantes ni duplicados.
 
