@@ -594,6 +594,8 @@ describe('Global Resilience OS API', () => {
     const pilotJsonBody = await pilotJson.json();
     assert.equal(pilotJsonBody.integrity.algorithm, 'sha256');
     assert.equal(verifyPackageIntegrity(pilotJsonBody), true);
+    assert.equal(pilotJsonBody.decisionContext.valueCase.status, 'not_ready');
+    assert.equal(pilotJsonBody.decisionContext.modelProfile.model.decision, 'abstain_for_production');
     const capacity = await fetch(`${baseUrl}/api/capacity/marketplace?category=connectivity`);
     assert.equal(capacity.status, 200);
     const capacityBody = await capacity.json();
@@ -629,6 +631,8 @@ describe('Global Resilience OS API', () => {
     assert.match(pilotMarkdownBody, /Integridad: sha256/);
     assert.match(pilotMarkdownBody, /Plan de medicion/);
     assert.match(pilotMarkdownBody, /Gate: go/);
+    assert.match(pilotMarkdownBody, /Contexto de decisi/);
+    assert.match(pilotMarkdownBody, /willingness-to-pay validado: NO/);
     assert.equal(markdownPackage.headers.get('content-type'), 'text/markdown; charset=utf-8');
     const markdownBody = await markdownPackage.text();
     assert.match(markdownBody, /Paquete de decisión/);

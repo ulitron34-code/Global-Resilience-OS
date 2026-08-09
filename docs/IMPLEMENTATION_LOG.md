@@ -533,3 +533,7 @@ Se incorporó un catálogo local de perfiles de decisión por región y vertical
 ## Bloque: caso económico de piloto con gate de evidencia (2026-08-09)
 
 Se añadió `POST /api/pilots/value-case` y su panel operativo. Calcula exposición anual, valor protegido, valor neto de primer año, relación beneficio/costo y payback bajo supuestos declarados. Si no hay al menos dos referencias verificables, conserva `status=not_ready`; nunca afirma costo evitado ni willingness-to-pay.
+
+## Bloque: contexto de decisión en el paquete de piloto (2026-08-09)
+
+El paquete JSON y Markdown de piloto ahora conserva el perfil regional/vertical aplicado y el estado del caso económico. Así el handoff mantiene visibles la abstención del modelo y que el willingness-to-pay todavía no está validado.

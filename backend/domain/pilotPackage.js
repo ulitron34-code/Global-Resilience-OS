@@ -10,6 +10,7 @@ export function pilotPackageToMarkdown(packet = {}) {
   const feedback = Array.isArray(packet.feedback) ? packet.feedback : [];
   const measurementPlan = packet.measurementPlan || {};
   const measurementMetrics = Array.isArray(measurementPlan.metrics) ? measurementPlan.metrics : [];
+  const decisionContext = packet.decisionContext || {};
   const passed = checks.filter((item) => item.pass).length;
   const lines = [
     '# Paquete de preparacion de piloto', '',
@@ -41,6 +42,10 @@ export function pilotPackageToMarkdown(packet = {}) {
     `- Gate: ${safe(measurementPlan.gate?.status, 'not_ready')}`,
     `- **Metricas requeridas aprobadas:** ${safe(measurementPlan.gate?.passed, '0')}/${safe(measurementPlan.gate?.totalRequired, '0')}`,
     measurementMetrics.length ? measurementMetrics.map((item) => `- ${safe(item.label, item.id)}: baseline=${safe(item.baseline, 'sin baseline')} · objetivo=${safe(item.target, 'sin objetivo')} · actual=${safe(item.actual, 'sin resultado')} · estado=${safe(item.status, 'sin evaluar')} · evidencia=${safe(item.evidenceRef, 'faltante')}`).join('\n') : '- Sin plan de medicion registrado.', '',
+    '## Contexto de decisión', '',
+    `- Perfil regional: ${safe(decisionContext.modelProfile?.region?.label, 'Global')} · vertical: ${safe(decisionContext.modelProfile?.vertical?.label, 'No clasificada')}`,
+    `- Perfil de modelo: ${safe(decisionContext.modelProfile?.model?.decision, 'abstain_for_production')}`,
+    `- Caso económico: ${safe(decisionContext.valueCase?.status, 'not_ready')} · willingness-to-pay validado: ${decisionContext.valueCase?.gates?.willingnessToPayValidated ? 'SI' : 'NO'}`, '',
     '## Scorecard', '',
     `- Alertas: ${safe(scorecard.alerts?.total, '0')}`,
     `- Casos: ${safe(scorecard.cases?.total, '0')}`,
