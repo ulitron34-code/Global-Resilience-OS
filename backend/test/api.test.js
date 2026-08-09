@@ -584,6 +584,17 @@ describe('Global Resilience OS API', () => {
     const pilotJsonBody = await pilotJson.json();
     assert.equal(pilotJsonBody.integrity.algorithm, 'sha256');
     assert.equal(verifyPackageIntegrity(pilotJsonBody), true);
+    const measurementPlan = await fetch(`${baseUrl}/api/pilots/measurement-plan`);
+    assert.equal(measurementPlan.status, 200);
+    assert.equal((await measurementPlan.json()).status, 'not_ready');
+    const savedMeasurementPlan = await fetch(`${baseUrl}/api/pilots/measurement-plan`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ metrics: [
+      { id: 'time_to_explain_minutes', baseline: 120, target: 60, actual: 45, evidenceRef: 'OBS-API-1', evidenceClass: 'observed' },
+      { id: 'time_to_decision_minutes', baseline: 90, target: 45, actual: 40, evidenceRef: 'OBS-API-2', evidenceClass: 'observed' },
+      { id: 'evidence_completeness_pct', baseline: 40, target: 90, actual: 95, evidenceRef: 'OBS-API-3', evidenceClass: 'observed' },
+      { id: 'action_documentation_pct', baseline: 20, target: 80, actual: 82, evidenceRef: 'OBS-API-4', evidenceClass: 'observed' },
+    ] }) });
+    assert.equal(savedMeasurementPlan.status, 201);
+    assert.equal((await savedMeasurementPlan.json()).status, 'go');
     const markdownPackage = await fetch(`${baseUrl}/api/cases/RS-0827/decision-package?format=markdown`);
     assert.equal(markdownPackage.status, 200);
     const pilotMarkdown = await fetch(`${baseUrl}/api/pilots/package?format=markdown`);
@@ -594,6 +605,8 @@ describe('Global Resilience OS API', () => {
     assert.match(pilotMarkdownBody, /Organizacion: nashadi-demo/);
     assert.match(pilotMarkdownBody, /Evidencia externa requerida: SI/);
     assert.match(pilotMarkdownBody, /Integridad: sha256/);
+    assert.match(pilotMarkdownBody, /Plan de medicion/);
+    assert.match(pilotMarkdownBody, /Gate: go/);
     assert.equal(markdownPackage.headers.get('content-type'), 'text/markdown; charset=utf-8');
     const markdownBody = await markdownPackage.text();
     assert.match(markdownBody, /Paquete de decisión/);

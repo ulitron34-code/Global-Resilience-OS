@@ -9,6 +9,7 @@ import { buildControlPlaneProjection, validateControlPlaneProjection } from './c
 import { getCalibrationEligibility, filterEligibleCalibrationFixtures } from './calibrationEligibility.js';
 import { isIllustrativeSource } from './sourceClassification.js';
 import { evaluateProductiveSource } from './sourceReadiness.js';
+import { buildDefaultPilotMeasurementPlan, evaluatePilotMeasurementPlan, normalizePilotMeasurementPlan } from './pilotMeasurement.js';
 
 const now = new Date().toISOString();
 const DEFAULT_ORGANIZATION_ID = 'nashadi-demo';
@@ -46,7 +47,7 @@ const initialAuditLog = [
   { id: 'AUD-0001', entityType: 'case', entityId: 'RS-0827', action: 'case_opened', actor: 'system', message: 'Umbral de impacto mayor a $2M activado.', createdAt: now },
 ];
 const restored = await restoreState(structuredClone(seed));
-const state = { alerts: normalizeTenantCollection(restored.alerts), cases: normalizeTenantCollection(restored.cases), scenarios: normalizeTenantCollection(restored.scenarios), sources: normalizeTenantCollection(restored.sources), deadLetters: normalizeTenantCollection(restored.deadLetters || []), calibrationFixtures: normalizeTenantCollection(restored.calibrationFixtures || []), pilotFeedback: normalizeTenantCollection(restored.pilotFeedback || []), incidents: normalizeTenantCollection(restored.incidents || []), sourceIntakeReviews: normalizeTenantCollection(restored.sourceIntakeReviews || []), decisionShares: normalizeTenantCollection(restored.decisionShares || []) };
+const state = { alerts: normalizeTenantCollection(restored.alerts), cases: normalizeTenantCollection(restored.cases), scenarios: normalizeTenantCollection(restored.scenarios), sources: normalizeTenantCollection(restored.sources), deadLetters: normalizeTenantCollection(restored.deadLetters || []), calibrationFixtures: normalizeTenantCollection(restored.calibrationFixtures || []), pilotFeedback: normalizeTenantCollection(restored.pilotFeedback || []), pilotMeasurementPlans: normalizeTenantCollection(restored.pilotMeasurementPlans || []), incidents: normalizeTenantCollection(restored.incidents || []), sourceIntakeReviews: normalizeTenantCollection(restored.sourceIntakeReviews || []), decisionShares: normalizeTenantCollection(restored.decisionShares || []) };
 const auditLog = restored.auditLog || initialAuditLog;
 const notifications = normalizeTenantCollection(restored.notifications || [
   { id: 'NOT-0001', type: 'critical_alert', title: 'SMW-5 requiere atención', message: 'Existe una alerta crítica abierta en Suez / Mar Rojo.', read: false, createdAt: now },
@@ -237,6 +238,20 @@ export function registerSourceFromIntakeReview(id, actor = 'operator', organizat
   return { review: clone(item), source: clone(source) };
 }
 export function listPilotFeedback(organizationId = DEFAULT_ORGANIZATION_ID) { return clone(state.pilotFeedback.filter((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId)); }
+export function getPilotMeasurementPlan(organizationId = DEFAULT_ORGANIZATION_ID) {
+  const saved = state.pilotMeasurementPlans.find((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId);
+  return clone(evaluatePilotMeasurementPlan(saved || buildDefaultPilotMeasurementPlan(organizationId)));
+}
+export function savePilotMeasurementPlan(input, actor = 'operator', organizationId = DEFAULT_ORGANIZATION_ID) {
+  const existing = state.pilotMeasurementPlans.find((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId);
+  const normalized = normalizePilotMeasurementPlan({ ...input, id: existing?.id || input?.id, version: existing?.version || input?.version }, organizationId, actor);
+  const index = state.pilotMeasurementPlans.findIndex((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId);
+  if (index >= 0) state.pilotMeasurementPlans[index] = normalized;
+  else state.pilotMeasurementPlans.unshift(normalized);
+  auditLog.unshift({ id: `AUD-${String(auditLog.length + 1).padStart(4, '0')}`, entityType: 'pilot_measurement_plan', entityId: normalized.id, action: 'pilot_measurement_plan_saved', actor, message: `Plan de medición de piloto ${normalized.id} actualizado.`, createdAt: normalized.updatedAt, organizationId });
+  persistState(state, auditLog, notifications, comments, webhooks, webhookDeliveries, jobRuns);
+  return clone(evaluatePilotMeasurementPlan(normalized));
+}
 export function recordPilotFeedback(input, actor = 'operator', organizationId = DEFAULT_ORGANIZATION_ID) {
   const item = { id: `PFB-${randomBytes(4).toString('hex').toUpperCase()}`, organizationId, ...input, createdAt: new Date().toISOString(), createdBy: actor };
   state.pilotFeedback.unshift(item);
@@ -428,7 +443,7 @@ export function getDecisionPackageByShareToken(token) {
 }
 function auditBelongsToOrganization(item, organizationId) {
   if (item?.organizationId) return item.organizationId === organizationId;
-  const collections = [state.alerts, state.cases, state.scenarios, state.sources, state.incidents, state.sourceIntakeReviews, state.calibrationFixtures, state.pilotFeedback, state.decisionShares];
+  const collections = [state.alerts, state.cases, state.scenarios, state.sources, state.incidents, state.sourceIntakeReviews, state.calibrationFixtures, state.pilotFeedback, state.pilotMeasurementPlans, state.decisionShares];
   const entity = collections.flat().find((candidate) => candidate.id === item.entityId);
   return entity ? (entity.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId : organizationId === DEFAULT_ORGANIZATION_ID;
 }
@@ -660,6 +675,7 @@ export function resetLocalDemo(actor = 'admin') {
   state.deadLetters = [];
   state.calibrationFixtures = [];
   state.pilotFeedback = [];
+  state.pilotMeasurementPlans = [];
   state.incidents = [];
   state.sourceIntakeReviews = [];
   state.decisionShares = [];
@@ -677,7 +693,7 @@ export function restoreLocalSnapshot(snapshot, actor = 'admin', organizationId =
   if (snapshot?.organizationId && snapshot.organizationId !== organizationId) throw new Error('Snapshot pertenece a otra organizaciÃ³n');
   if (!snapshot?.organizationId && organizationId !== DEFAULT_ORGANIZATION_ID) throw new Error('Snapshot legacy sÃ³lo puede restaurarse en el tenant demo');
   const candidate = snapshot?.state;
-  const collections = ['alerts', 'cases', 'scenarios', 'sources', 'deadLetters', 'calibrationFixtures', 'pilotFeedback', 'incidents', 'sourceIntakeReviews', 'decisionShares'];
+  const collections = ['alerts', 'cases', 'scenarios', 'sources', 'deadLetters', 'calibrationFixtures', 'pilotFeedback', 'pilotMeasurementPlans', 'incidents', 'sourceIntakeReviews', 'decisionShares'];
   if (!candidate || collections.some((key) => !Array.isArray(candidate[key]))) throw new Error('Snapshot inválido: faltan colecciones principales');
   if ([...collections, 'auditLog', 'notifications', 'comments', 'webhooks', 'webhookDeliveries', 'jobRuns'].some((key) => {
     const value = key === 'auditLog' || key === 'notifications' || key === 'comments' || key === 'webhooks' || key === 'webhookDeliveries' || key === 'jobRuns' ? snapshot[key] : candidate[key];

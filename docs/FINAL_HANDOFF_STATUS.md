@@ -1,6 +1,6 @@
 # Estado de handoff local
 
-Actualización vigente: la suite local alcanza 86 pruebas backend PASS tras
+Actualización vigente: la suite local alcanza 89 pruebas backend PASS tras
 incorporar latencias opcionales de detección y explicación.
 
 Fecha de corte: 2026-08-09
@@ -68,5 +68,5 @@ pública de solo lectura.
 El estado local PASS no equivale a producción enterprise ni a cumplimiento
 regulatorio. Cada pendiente externo requiere evidencia verificable antes de
 comercializar la plataforma.
-Nota de corte vigente: usar 86 pruebas backend PASS; las cifras anteriores
+Nota de corte vigente: usar 89 pruebas backend PASS; las cifras anteriores
 son históricas y no representan el estado actual.

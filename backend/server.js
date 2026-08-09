@@ -99,6 +99,8 @@ import {
   listDeadLetters,
   retryDeadLetter,
   updateCase,
+  getPilotMeasurementPlan,
+  savePilotMeasurementPlan,
   listPilotFeedback,
   recordPilotFeedback,
   listSourceIntakeReviews,
@@ -645,6 +647,8 @@ app.get('/api/pilots/readiness', authIfConfigured, roleIfConfigured('admin', 'ri
 });
 app.get('/api/pilots/interview-guide', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(getPilotInterviewGuide()));
 app.get('/api/pilots/metrics', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => { const organizationId = req.user?.organizationId || DEFAULT_ORGANIZATION_ID; return res.json(buildPilotMetrics({ cases: listCases({ limit: 200, organizationId }), actionPlans: listActionPlans({ limit: 200, organizationId }), sourceHealth: getSourceHealthOverview(Date.now(), organizationId), notifications: listNotifications(false, organizationId) })); });
+app.get('/api/pilots/measurement-plan', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(getPilotMeasurementPlan(req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
+app.post('/api/pilots/measurement-plan', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => { try { res.status(201).json(savePilotMeasurementPlan(req.body || {}, req.user?.email || 'operator', req.user?.organizationId || DEFAULT_ORGANIZATION_ID)); } catch (error) { res.status(400).json({ error: error.message }); } });
 app.use('/api/pilots/package', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res, next) => {
   if (!['markdown', 'md'].includes(String(req.query.format || '').toLowerCase())) return next();
   const organizationId = req.user?.organizationId || DEFAULT_ORGANIZATION_ID;
@@ -658,7 +662,7 @@ app.use('/api/pilots/package', authIfConfigured, roleIfConfigured('admin', 'risk
   const actionPlans = listActionPlans({ limit: 200, organizationId });
   const metrics = buildPilotMetrics({ cases, actionPlans, sourceHealth, notifications: listNotifications(false, organizationId) });
   const scorecard = buildOperationalScorecard({ alerts: listAlerts({ limit: 200, organizationId }), cases, actionPlans, sources: listSources(organizationId), deadLetters: listDeadLetters(undefined, organizationId), incidents: listIncidents({ organizationId }), calibrationFixtures: getCalibrationOverview(undefined, organizationId).fixtures || [] });
-  const packet = attachPackageIntegrity({ schemaVersion: '1.0.0-local', generatedAt: new Date().toISOString(), organizationId, packageMetadata: { packageType: 'pilot-readiness', organizationId, externalEvidenceRequired: true }, readiness, interviewGuide: getPilotInterviewGuide(), metrics, scorecard, feedback: listPilotFeedback(organizationId), nextActions: buildPilotNextActions(readiness), disclaimer: 'Paquete local de preparación; no demuestra valor comercial ni sustituye validación con cliente.' });
+  const packet = attachPackageIntegrity({ schemaVersion: '1.0.0-local', generatedAt: new Date().toISOString(), organizationId, packageMetadata: { packageType: 'pilot-readiness', organizationId, externalEvidenceRequired: true }, readiness, measurementPlan: getPilotMeasurementPlan(organizationId), interviewGuide: getPilotInterviewGuide(), metrics, scorecard, feedback: listPilotFeedback(organizationId), nextActions: buildPilotNextActions(readiness), disclaimer: 'Paquete local de preparación; no demuestra valor comercial ni sustituye validación con cliente.' });
   return res.type('text/markdown').set('Content-Disposition', 'attachment; filename="global-resilience-pilot-package.md"').send(pilotPackageToMarkdown(packet));
 });
 app.get('/api/pilots/package', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => {
@@ -673,7 +677,7 @@ app.get('/api/pilots/package', authIfConfigured, roleIfConfigured('admin', 'risk
   const actionPlans = listActionPlans({ limit: 200, organizationId });
   const metrics = buildPilotMetrics({ cases, actionPlans, sourceHealth, notifications: listNotifications(false, organizationId) });
   const scorecard = buildOperationalScorecard({ alerts: listAlerts({ limit: 200, organizationId }), cases, actionPlans, sources: listSources(organizationId), deadLetters: listDeadLetters(undefined, organizationId), incidents: listIncidents({ organizationId }), calibrationFixtures: getCalibrationOverview(undefined, organizationId).fixtures || [] });
-  res.json(attachPackageIntegrity({ schemaVersion: '1.0.0-local', generatedAt: new Date().toISOString(), organizationId, packageMetadata: { packageType: 'pilot-readiness', organizationId, externalEvidenceRequired: true }, readiness, interviewGuide: getPilotInterviewGuide(), metrics, scorecard, feedback: listPilotFeedback(organizationId), nextActions: buildPilotNextActions(readiness), disclaimer: 'Paquete local de preparación; no demuestra valor comercial ni sustituye validación con cliente.' }));
+  res.json(attachPackageIntegrity({ schemaVersion: '1.0.0-local', generatedAt: new Date().toISOString(), organizationId, packageMetadata: { packageType: 'pilot-readiness', organizationId, externalEvidenceRequired: true }, readiness, measurementPlan: getPilotMeasurementPlan(organizationId), interviewGuide: getPilotInterviewGuide(), metrics, scorecard, feedback: listPilotFeedback(organizationId), nextActions: buildPilotNextActions(readiness), disclaimer: 'Paquete local de preparación; no demuestra valor comercial ni sustituye validación con cliente.' }));
 });
 app.get('/api/pilots/feedback', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(listPilotFeedback(req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
 app.post('/api/pilots/feedback', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => { try { res.status(201).json(recordPilotFeedback(normalizePilotFeedback(req.body || {}), req.user?.email || 'operator', req.user?.organizationId || DEFAULT_ORGANIZATION_ID)); } catch (error) { res.status(400).json({ error: error.message }); } });

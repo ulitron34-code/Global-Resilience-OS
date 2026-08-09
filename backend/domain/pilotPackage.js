@@ -8,6 +8,8 @@ export function pilotPackageToMarkdown(packet = {}) {
   const scorecard = packet.scorecard || {};
   const checks = Array.isArray(readiness.checks) ? readiness.checks : [];
   const feedback = Array.isArray(packet.feedback) ? packet.feedback : [];
+  const measurementPlan = packet.measurementPlan || {};
+  const measurementMetrics = Array.isArray(measurementPlan.metrics) ? measurementPlan.metrics : [];
   const passed = checks.filter((item) => item.pass).length;
   const lines = [
     '# Paquete de preparacion de piloto', '',
@@ -35,6 +37,10 @@ export function pilotPackageToMarkdown(packet = {}) {
     '## Entrevistas y feedback', '',
     `- Registros de feedback: ${feedback.length}`,
     feedback.length ? feedback.map((item) => `- ${safe(item.stage)} · ${safe(item.role)} · tipo=${safe(item.evidenceType, 'general')}: ${safe(item.summary)} | evidencia: ${safe(item.evidence, 'sin evidencia')}`).join('\n') : '- No hay feedback registrado.', '',
+    '## Plan de medicion y go/no-go', '',
+    `- Gate: ${safe(measurementPlan.gate?.status, 'not_ready')}`,
+    `- **Metricas requeridas aprobadas:** ${safe(measurementPlan.gate?.passed, '0')}/${safe(measurementPlan.gate?.totalRequired, '0')}`,
+    measurementMetrics.length ? measurementMetrics.map((item) => `- ${safe(item.label, item.id)}: baseline=${safe(item.baseline, 'sin baseline')} · objetivo=${safe(item.target, 'sin objetivo')} · actual=${safe(item.actual, 'sin resultado')} · estado=${safe(item.status, 'sin evaluar')} · evidencia=${safe(item.evidenceRef, 'faltante')}`).join('\n') : '- Sin plan de medicion registrado.', '',
     '## Scorecard', '',
     `- Alertas: ${safe(scorecard.alerts?.total, '0')}`,
     `- Casos: ${safe(scorecard.cases?.total, '0')}`,

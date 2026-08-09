@@ -373,6 +373,14 @@ export async function getPilotMetrics() {
   try { return await fetchWithTimeout(`${BACKEND_URL}/api/pilots/metrics`); } catch (error) { return localFallback({ metrics: {}, missingEvidence: [], error: error.message }, error); }
 }
 
+export async function getPilotMeasurementPlan() {
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/pilots/measurement-plan`); } catch (error) { return localFallback({ status: 'not_ready', metrics: [], gate: { status: 'not_ready' }, error: error.message }, error); }
+}
+
+export async function savePilotMeasurementPlan(input) {
+  return fetchWithTimeout(`${BACKEND_URL}/api/pilots/measurement-plan`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(input) });
+}
+
 export async function getPilotPackage() { return fetchWithTimeout(`${BACKEND_URL}/api/pilots/package`); }
 export async function downloadPilotPackage(format = 'json') {
   const normalized = format === 'md' ? 'markdown' : format;

@@ -9,6 +9,8 @@ que ya existe un cliente, un baseline de mercado o datos licenciados.
 - `GET /api/pilots/interview-guide`: guía de cinco secciones con preguntas y evidencia.
 - `GET /api/pilots/metrics`: métricas operativas locales y evidencia faltante.
 - `GET/POST /api/pilots/feedback`: feedback estructurado con auditoría local.
+- `GET/POST /api/pilots/measurement-plan`: baseline, objetivo, resultado,
+  evidencia observada y gate local `go`/`no_go`/`not_ready` por organización.
 
 `GET /api/pilots/package?format=json|markdown` exporta el paquete consolidado de preparación de piloto.
 
@@ -28,3 +30,12 @@ siendo requerida; la exportación Markdown conserva esos metadatos.
 Las exportaciones incluyen además una huella `sha256` con canonicalización
 `sorted-json-v1`; sirve para detectar modificaciones posteriores del paquete,
 pero no sustituye firma criptográfica gestionada ni validación legal.
+
+## Ledger de valor
+
+El plan de medición evita que el piloto se evalúe por cantidad de alertas. Las
+métricas requeridas son tiempo para explicar, tiempo para decidir, completitud
+de procedencia y acciones documentadas. Cada resultado necesita baseline,
+objetivo, valor observado y `evidenceRef`; sin esos cuatro elementos el gate
+permanece `not_ready`. El estado `go` sólo significa que las métricas locales
+cumplen sus objetivos, no que exista todavía un caso comercial validado.
