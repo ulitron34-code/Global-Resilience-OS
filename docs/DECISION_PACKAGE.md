@@ -10,6 +10,7 @@ La exportacion local de un caso conserva ahora una vista integrada de:
 - perfil contrafactual de recuperacion;
 - mapa de evidencia regulatoria;
 - cadena de evidencia con fuentes observadas, modelos inferidos y escenarios asumidos;
+- escenarios, auditoria y comentarios acotados a la organizacion del caso;
 - capacidades y descargos del paquete.
 
 Cada escenario expone `evidenceClass` (`observed`, `inferred` o `assumed`) y un

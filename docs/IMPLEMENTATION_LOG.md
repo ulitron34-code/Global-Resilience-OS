@@ -392,3 +392,5 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
 - Se sincronizaron los documentos de handoff y readiness con la evidencia actual
   de 75 pruebas, build reproducible y release gate PASS; las cifras previas se
   conservaron únicamente como historial.
+- El paquete de decisión ahora calcula escenarios, auditoría y comentarios con
+  aislamiento por organización; se eliminó el conteo global de escenarios.

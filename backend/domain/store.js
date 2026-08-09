@@ -357,6 +357,9 @@ export function getDecisionPackage(caseId, organizationId = DEFAULT_ORGANIZATION
   if (!caseItem) return null;
   const alert = state.alerts.find((item) => item.id === caseItem.alertId && (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId) || null;
   const sourceIds = new Set(alert?.sourceIds || []);
+  const scenarios = state.scenarios.filter((scenario) => (scenario.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId).map((scenario) => ({ ...scenario, evidenceClass: scenario.evidenceClass || 'assumed', evidence: scenario.evidence || buildEvidence({ evidenceClass: 'assumed', sourceIds: [], modelId: 'impact-cascade', modelVersion: '0.5.0', assumptions: scenario.assumptions || [], inferred: ['scenario_economics'] }) }));
+  const scopedAudit = auditLog.filter((entry) => (entry.entityId === caseId || entry.entityId === caseItem.alertId) && auditBelongsToOrganization(entry, organizationId));
+  const scopedComments = comments.filter((comment) => comment.caseId === caseId && (comment.organizationId || organizationId) === organizationId);
   return clone({
     schemaVersion: 1,
     packageType: 'local-decision-package',
@@ -366,10 +369,10 @@ export function getDecisionPackage(caseId, organizationId = DEFAULT_ORGANIZATION
     alert,
     sources: state.sources.filter((source) => sourceIds.has(source.id) && (source.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId),
     modelRegistry: listModels(),
-    scenarios: state.scenarios.filter((scenario) => (scenario.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId).map((scenario) => ({ ...scenario, evidenceClass: scenario.evidenceClass || 'assumed', evidence: scenario.evidence || buildEvidence({ evidenceClass: 'assumed', sourceIds: [], modelId: 'impact-cascade', modelVersion: '0.5.0', assumptions: scenario.assumptions || [], inferred: ['scenario_economics'] }) })),
-    evidenceChain: { observedSourceIds: [...sourceIds], inferredModelIds: listModels().map((model) => `${model.id}@${model.version}`), assumedScenarioCount: state.scenarios.length },
-    audit: auditLog.filter((entry) => entry.entityId === caseId || entry.entityId === caseItem.alertId),
-    comments: comments.filter((comment) => comment.caseId === caseId),
+    scenarios,
+    evidenceChain: { observedSourceIds: [...sourceIds], inferredModelIds: listModels().map((model) => `${model.id}@${model.version}`), assumedScenarioCount: scenarios.length },
+    audit: scopedAudit,
+    comments: scopedComments,
   });
 }
 function publicDecisionShare(share) {

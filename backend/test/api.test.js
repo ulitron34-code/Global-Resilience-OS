@@ -575,6 +575,7 @@ describe('Global Resilience OS API', () => {
     assert.equal(packageBody.actionPlanEvidenceSummary.productionEligible, 0);
     assert.ok(Array.isArray(packageBody.evidenceChain.observedSourceIds));
     assert.ok(Number.isInteger(packageBody.evidenceChain.assumedScenarioCount));
+    assert.equal(packageBody.evidenceChain.assumedScenarioCount, packageBody.scenarios.length);
     const markdownPackage = await fetch(`${baseUrl}/api/cases/RS-0827/decision-package?format=markdown`);
     assert.equal(markdownPackage.status, 200);
     const pilotMarkdown = await fetch(`${baseUrl}/api/pilots/package?format=markdown`);
