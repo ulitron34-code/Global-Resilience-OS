@@ -179,3 +179,11 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
   la lectura legible Markdown.
 - La exportación Markdown conserva estado, prioridad, responsable, cadena de
   evidencia, número de planes y descargo de no ejecución externa.
+## Bloque: aislamiento tenant del registro de fuentes (2026-08-09)
+
+- El registro local, el detalle de fuente, el health/freshness, la procedencia y
+  los reportes de calidad ahora reciben y aplican `organizationId`.
+- Las rutas operativas de fuentes y calidad requieren autenticación/rol cuando
+  `AUTH_REQUIRED=true` y no exponen fuentes del tenant demo a otra organización.
+- Se añadió cobertura API de dos organizaciones para confirmar respuesta vacía,
+  `organizationId` correcto y ausencia de filtración de fuentes.

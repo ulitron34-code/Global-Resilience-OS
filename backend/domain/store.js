@@ -170,7 +170,7 @@ export function compareScenarios(ids = [], organizationId = DEFAULT_ORGANIZATION
   const baseline = decorated[0];
   return { scenarios: clone(decorated), baselineId: baseline.id, deltas: decorated.map((item) => ({ id: item.id, lossVsBaselineUsd: item.lossIfWaitUsd - baseline.lossIfWaitUsd, mitigationCostVsBaselineUsd: item.mitigationCostUsd - baseline.mitigationCostUsd, protectedValueVsBaselineUsd: item.protectedValueUsd - baseline.protectedValueUsd })) };
 }
-export function listSources() { return clone(state.sources); }
+export function listSources(organizationId = DEFAULT_ORGANIZATION_ID) { return clone(state.sources.filter((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId)); }
 export function listSourceIntakeReviews(filters = {}) {
   const organizationId = filters.organizationId || DEFAULT_ORGANIZATION_ID;
   const items = state.sourceIntakeReviews.filter((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId && (!filters.status || item.status === filters.status));
@@ -211,7 +211,7 @@ export function recordPilotFeedback(input, actor = 'operator', organizationId = 
   persistState(state, auditLog, notifications, comments, webhooks, webhookDeliveries, jobRuns);
   return clone(item);
 }
-export function getSource(id) { return clone(state.sources.find((item) => item.id === id) ?? null); }
+export function getSource(id, organizationId = DEFAULT_ORGANIZATION_ID) { return clone(state.sources.find((item) => item.id === id && (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId) ?? null); }
 export function listIncidents(filters = {}) { const organizationId = filters.organizationId || DEFAULT_ORGANIZATION_ID; return clone(state.incidents.filter((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId && (!filters.status || item.status === filters.status) && (!filters.severity || item.severity === filters.severity)).slice(0, Math.min(Math.max(Number(filters.limit) || 100, 1), 200))); }
 export function createIncident(input, actor = 'operator', organizationId = DEFAULT_ORGANIZATION_ID) {
   const normalized = normalizeIncidentInput(input);
@@ -240,9 +240,9 @@ export function updateIncident(id, input, actor = 'operator', organizationId = D
   persistState(state, auditLog, notifications, comments, webhooks, webhookDeliveries, jobRuns);
   return clone(item);
 }
-export function getSourceHealthOverview(referenceTime = Date.now()) {
+export function getSourceHealthOverview(referenceTime = Date.now(), organizationId = DEFAULT_ORGANIZATION_ID) {
   const catalogMap = new Map(listDataCatalog().map((item) => [item.id, item]));
-  const sources = state.sources.map((source) => {
+  const sources = listSources(organizationId).map((source) => {
     const catalog = catalogMap.get(source.id) || {};
     const ageMinutes = source.lastEventAt ? Math.max(0, Math.round((referenceTime - Date.parse(source.lastEventAt)) / 60_000)) : null;
     let health = source.status === 'demo' ? 'demo' : 'unknown';
@@ -658,9 +658,9 @@ export function getComplianceReadiness() {
   return { ready: controls.every((control) => !['pending_external', 'illustrative_only'].includes(control.status)), scope: 'local-demo', disclaimer: 'No constituye certificación SOC 2, ISO 27001 ni compliance legal.', controls, checkedAt: new Date().toISOString() };
 }
 
-export function getProvenanceOverview() {
+export function getProvenanceOverview(organizationId = DEFAULT_ORGANIZATION_ID) {
   const catalogMap = new Map(listDataCatalog().map((item) => [item.id, item]));
-  const sourceRecords = state.sources.map((source) => {
+  const sourceRecords = listSources(organizationId).map((source) => {
     const catalog = catalogMap.get(source.id) || {};
     return {
       id: source.id,
@@ -678,7 +678,7 @@ export function getProvenanceOverview() {
     };
   });
   const modelRecords = listModels().map((model) => ({ id: model.id, version: model.version, status: model.status, assumptions: model.assumptions, limitations: model.limitations, validationStatus: 'not_calibrated_with_historical_data' }));
-  return { scope: 'local-platform', generatedAt: new Date().toISOString(), disclaimer: 'El registro documenta procedencia y supuestos locales; no prueba derechos de uso ni exactitud de mercado.', sources: sourceRecords, models: modelRecords, ready: sourceRecords.length > 0 && modelRecords.length > 0 };
+  return { scope: 'local-platform', organizationId, generatedAt: new Date().toISOString(), disclaimer: 'El registro documenta procedencia y supuestos locales; no prueba derechos de uso ni exactitud de mercado.', sources: sourceRecords, models: modelRecords, ready: sourceRecords.length > 0 && modelRecords.length > 0 };
 }
 
 export function getRetentionOverview(referenceTime = Date.now()) {
@@ -694,21 +694,25 @@ export function getRetentionOverview(referenceTime = Date.now()) {
   return { scope: 'local-platform', policyVersion: 'local-retention-v1', retentionDays, cutoffAt: new Date(cutoffMs).toISOString(), dryRun: true, deletionEnabled: false, collections: summary, disclaimer: 'Vista previa no destructiva. El borrado y la retención legal requieren política aprobada y almacenamiento productivo.' };
 }
 
-export function getDataQualityReport() {
-  const sourceIds = new Set(state.sources.map((source) => source.id));
-  const externalIds = state.alerts.map((alert) => alert.payload?.externalId).filter(Boolean);
+export function getDataQualityReport(organizationId = DEFAULT_ORGANIZATION_ID) {
+  const sources = listSources(organizationId);
+  const alerts = state.alerts.filter((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId);
+  const cases = state.cases.filter((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId);
+  const scenarios = state.scenarios.filter((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId);
+  const sourceIds = new Set(sources.map((source) => source.id));
+  const externalIds = alerts.map((alert) => alert.payload?.externalId).filter(Boolean);
   const duplicateExternalIds = [...new Set(externalIds.filter((id, index) => externalIds.indexOf(id) !== index))];
-  const orphanAlerts = state.alerts.filter((alert) => !Array.isArray(alert.sourceIds) || alert.sourceIds.some((id) => !sourceIds.has(id))).map((alert) => alert.id);
-  const orphanCases = state.cases.filter((item) => item.alertId && !state.alerts.some((alert) => alert.id === item.alertId)).map((item) => item.id);
-  const invalidScenarios = state.scenarios.filter((item) => !Number.isFinite(Number(item.confidence)) || Number(item.confidence) < 0 || Number(item.confidence) > 1 || Number(item.lossIfWaitUsd) < 0).map((item) => item.id);
+  const orphanAlerts = alerts.filter((alert) => !Array.isArray(alert.sourceIds) || alert.sourceIds.some((id) => !sourceIds.has(id))).map((alert) => alert.id);
+  const orphanCases = cases.filter((item) => item.alertId && !alerts.some((alert) => alert.id === item.alertId)).map((item) => item.id);
+  const invalidScenarios = scenarios.filter((item) => !Number.isFinite(Number(item.confidence)) || Number(item.confidence) < 0 || Number(item.confidence) > 1 || Number(item.lossIfWaitUsd) < 0).map((item) => item.id);
   const checks = [
     { id: 'source_references', label: 'Referencias de fuentes', status: orphanAlerts.length ? 'fail' : 'pass', count: orphanAlerts.length, details: orphanAlerts },
     { id: 'case_references', label: 'Referencias alerta -> caso', status: orphanCases.length ? 'fail' : 'pass', count: orphanCases.length, details: orphanCases },
     { id: 'event_deduplication', label: 'External IDs duplicados', status: duplicateExternalIds.length ? 'warn' : 'pass', count: duplicateExternalIds.length, details: duplicateExternalIds },
     { id: 'scenario_values', label: 'Valores de escenarios', status: invalidScenarios.length ? 'fail' : 'pass', count: invalidScenarios.length, details: invalidScenarios },
-    { id: 'source_registry', label: 'Registro de fuentes', status: state.sources.length ? 'pass' : 'fail', count: state.sources.length, details: [] },
+    { id: 'source_registry', label: 'Registro de fuentes', status: sources.length ? 'pass' : 'fail', count: sources.length, details: [] },
   ];
-  return { ready: checks.every((check) => check.status !== 'fail'), scope: 'local-platform', checkedAt: new Date().toISOString(), totals: { alerts: state.alerts.length, cases: state.cases.length, scenarios: state.scenarios.length, sources: state.sources.length, deadLetters: state.deadLetters.length }, checks };
+  return { ready: checks.every((check) => check.status !== 'fail'), scope: 'local-platform', organizationId, checkedAt: new Date().toISOString(), totals: { alerts: alerts.length, cases: cases.length, scenarios: scenarios.length, sources: sources.length, deadLetters: state.deadLetters.filter((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId).length }, checks };
 }
 
 export function getAuditIntegrity() {
@@ -740,7 +744,7 @@ export function runSlaSweep(actor = 'scheduler', organizationId = DEFAULT_ORGANI
 }
 
 export function runSourceHealthSweep(actor = 'scheduler', organizationId = DEFAULT_ORGANIZATION_ID) {
-  const overview = getSourceHealthOverview();
+  const overview = getSourceHealthOverview(Date.now(), organizationId);
   const actionable = overview.sources.filter((item) => ['stale', 'degraded', 'error'].includes(item.health));
   const created = [];
   for (const source of actionable) {

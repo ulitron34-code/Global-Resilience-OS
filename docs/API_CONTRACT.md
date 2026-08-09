@@ -13,7 +13,7 @@ El esquema OpenAPI resumido está en `docs/openapi.local.json`.
 - `POST /api/ops/control-plane/projection` — genera una proyección determinista y validada de notificaciones, webhooks, entregas y jobs para backfill hacia el esquema normalizado; requiere admin en modo protegido.
 - `GET /api/ops/metrics` — solicitudes, errores, latencia por ruta y memoria del proceso; requiere admin en modo protegido.
 - `GET /api/ops/sla` — estado de ventanas SLA por caso (`on_track`, `at_risk`, `overdue`, `closed`).
-- `GET /api/ops/source-health` — salud de fuentes por latencia, estado del conector y frescura del último evento.
+- `GET /api/ops/source-health` — salud de fuentes por latencia, estado del conector y frescura del último evento; aislada por tenant y protegida por rol en modo autenticado.
 - `GET /api/metrics/overview` — exposición, alertas, casos y fuentes.
 
 Los endpoints de alertas, casos y métricas aceptan `vertical` como filtro. Las alertas también aceptan `region`, `status` y `severity`. El frontend conserva este contexto en la barra superior y lo aplica a las vistas operativas.
@@ -107,7 +107,7 @@ El grafo y los planes actuales son locales y demo. No ejecutan acciones externas
 
 ## Gobernanza local
 
-- `GET /api/governance/provenance` — expone el linaje, clasificación, limitaciones y estado de licencia de fuentes y modelos locales.
+- `GET /api/governance/provenance` — expone el linaje, clasificación, limitaciones y estado de licencia de fuentes y modelos locales, aislados por tenant.
 - `GET /api/governance/retention` — genera una revisión de retención no destructiva; no elimina datos y deja la política legal para la fase productiva.
 - `GET /api/models/validation` — ejecuta invariantes locales del motor y declara explícitamente si existe calibración histórica (actualmente no).
 - `GET /api/models/calibration?modelId=...` — consulta métricas de error y fixtures registrados.

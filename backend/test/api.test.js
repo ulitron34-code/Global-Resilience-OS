@@ -419,6 +419,15 @@ describe('Global Resilience OS API', () => {
       const tenantAAlerts = await fetch(`${baseUrl}/api/alerts`, { headers: { authorization: `Bearer ${tenantA.token}` } });
       assert.equal(tenantAAlerts.status, 200);
       assert.equal((await tenantAAlerts.json()).some((alert) => alert.id === 'INC-0827'), false);
+      const tenantASources = await fetch(`${baseUrl}/api/sources`, { headers: { authorization: `Bearer ${tenantA.token}` } });
+      const tenantBSources = await fetch(`${baseUrl}/api/sources`, { headers: { authorization: `Bearer ${tenantB.token}` } });
+      assert.equal(tenantASources.status, 200);
+      assert.equal(tenantBSources.status, 200);
+      assert.deepEqual(await tenantASources.json(), []);
+      assert.deepEqual(await tenantBSources.json(), []);
+      const tenantBQuality = await fetch(`${baseUrl}/api/quality/report`, { headers: { authorization: `Bearer ${tenantB.token}` } });
+      assert.equal(tenantBQuality.status, 200);
+      assert.equal((await tenantBQuality.json()).organizationId, 'tenant-b-demo');
       const tenantBDefaultCase = await fetch(`${baseUrl}/api/cases/RS-0827`, { headers: { authorization: `Bearer ${tenantB.token}` } });
       assert.equal(tenantBDefaultCase.status, 404);
 
