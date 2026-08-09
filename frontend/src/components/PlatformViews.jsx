@@ -13,6 +13,7 @@ import ScenarioComparison from './ScenarioComparison';
 import ReadinessPanel from './ReadinessPanel';
 import CompliancePanel from './CompliancePanel';
 import ModelRegistryPanel from './ModelRegistryPanel';
+import ModelProfilesPanel from './ModelProfilesPanel';
 import ModelValidationPanel from './ModelValidationPanel';
 import RegulatoryEvidencePanel from './RegulatoryEvidencePanel';
 import RecoveryProfilePanel from './RecoveryProfilePanel';
@@ -213,6 +214,7 @@ export function OperationsView() {
     <IncidentResponsePanel />
     <SecurityPosturePanel />
     <ModelUncertaintyPanel />
+    <ModelProfilesPanel />
     <OperationalScorecardPanel />
     <CooperativeNetworkPanel />
     <AuditIntegrityPanel />

@@ -238,6 +238,10 @@ export async function getModels() {
   try { return await fetchWithTimeout(`${BACKEND_URL}/api/models`); } catch (error) { return localFallback([], error); }
 }
 
+export async function getModelProfiles({ vertical = '', region = 'global' } = {}) {
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/models/profiles?vertical=${encodeURIComponent(vertical)}&region=${encodeURIComponent(region)}`); } catch (error) { return localFallback({ selection: { vertical, region }, dataNeeds: [], readiness: { productionReady: false }, error: error.message }, error); }
+}
+
 export async function createScenario(input) {
   const data = await fetchWithTimeout(`${BACKEND_URL}/api/scenarios`, {
     method: 'POST',

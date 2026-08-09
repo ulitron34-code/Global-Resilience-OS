@@ -23,6 +23,7 @@ import { buildNotificationPolicy, getNotificationPolicyReadiness } from './domai
 import { evaluateDataQuality, validateDataRecord } from './domain/dataQualityGate.js';
 import { getSchema, getSchemaRegistryReadiness, listSchemas } from './domain/schemaRegistry.js';
 import { buildModelGovernance } from './domain/modelGovernance.js';
+import { getModelProfileReadiness, listModelProfiles } from './domain/modelProfiles.js';
 import { buildAssistiveSuggestion } from './domain/assistiveAgent.js';
 import { buildPilotMetrics, buildPilotNextActions, buildPilotReadiness, getPilotInterviewGuide, normalizePilotFeedback } from './domain/pilotKit.js';
 import { pilotPackageToMarkdown } from './domain/pilotPackage.js';
@@ -639,6 +640,7 @@ app.get('/api/sources/:id', (req, res) => {
   res.json(source);
 });
 app.get('/api/models', (req, res) => res.json(listModels()));
+app.get('/api/models/profiles', (req, res) => res.json({ ...listModelProfiles({ vertical: req.query.vertical, region: req.query.region }), readiness: getModelProfileReadiness() }));
 app.get('/api/models/validation', (req, res) => res.json(getModelValidationReport()));
 app.get('/api/models/calibration', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(getCalibrationOverview(req.query.modelId, req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
 app.get('/api/models/calibration/benchmark', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(benchmarkCalibration(getCalibrationOverview(req.query.modelId, req.user?.organizationId || DEFAULT_ORGANIZATION_ID))));

@@ -227,6 +227,13 @@ describe('Global Resilience OS API', () => {
     const models = await fetch(`${baseUrl}/api/models`);
     assert.equal(models.status, 200);
     assert.ok((await models.json()).some((model) => model.id === 'impact-cascade' && model.assumptions.length > 0));
+    const modelProfiles = await fetch(`${baseUrl}/api/models/profiles?region=latin-america&vertical=semiconductores`);
+    assert.equal(modelProfiles.status, 200);
+    const modelProfilesBody = await modelProfiles.json();
+    assert.equal(modelProfilesBody.selection.region, 'latin-america');
+    assert.equal(modelProfilesBody.selection.vertical, 'semiconductores');
+    assert.equal(modelProfilesBody.model.decision, 'abstain_for_production');
+    assert.ok(modelProfilesBody.dataNeeds.includes('BOM afectado'));
     const modelValidation = await fetch(`${baseUrl}/api/models/validation`);
     assert.equal(modelValidation.status, 200);
     const benchmark = await fetch(`${baseUrl}/api/models/calibration/benchmark`);

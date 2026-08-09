@@ -46,6 +46,7 @@ Los endpoints de alertas, casos y métricas aceptan `vertical` como filtro. Las 
 - `GET /api/scenarios` — escenarios guardados.
 - `GET /api/sources/:id` — detalle de una fuente.
 - `GET /api/models` — registro de modelos, versiones, supuestos y limitaciones.
+- `GET /api/models/profiles?region=...&vertical=...` — perfil local de contexto regional/vertical, datos requeridos y decisión explícita de abstención productiva.
 - `POST /api/scenarios` — crea un escenario validado.
 - `GET /api/briefs/latest` — brief ejecutivo generado desde el estado operativo del tenant autenticado; abstiene si no existe escenario.
 

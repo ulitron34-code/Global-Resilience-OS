@@ -162,6 +162,7 @@
     "/api/sources": { "get": { "summary": "List data sources", "responses": { "200": { "description": "Sources" } } } },
     "/api/sources/{id}": { "get": { "summary": "Get source detail", "parameters": [{ "$ref": "#/components/parameters/Id" }], "responses": { "200": { "description": "Source" }, "404": { "description": "Source not found" } } } },
     "/api/models": { "get": { "summary": "List registered models", "responses": { "200": { "description": "Models" } } } },
+    "/api/models/profiles": { "get": { "summary": "Perfil local regional y vertical", "parameters": [{ "name": "vertical", "in": "query", "schema": { "type": "string" } }, { "name": "region", "in": "query", "schema": { "type": "string" } }], "responses": { "200": { "description": "Lentes, datos requeridos y abstención de producción" } } } },
     "/api/notifications": { "get": { "summary": "List notifications", "responses": { "200": { "description": "Notifications" } } } },
     "/api/notifications/read-all": { "post": { "summary": "Mark notifications read", "security": [{ "bearerAuth": [] }], "responses": { "200": { "description": "Notifications updated" } } } },
     "/api/notifications/{id}/read": { "patch": { "summary": "Mark notification read", "parameters": [{ "$ref": "#/components/parameters/Id" }], "responses": { "200": { "description": "Notification updated" } } } },

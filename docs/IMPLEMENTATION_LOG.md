@@ -526,3 +526,6 @@ La suite vigente queda en 92 pruebas backend PASS.
   queda expuesto por `GET/POST /api/pilots/measurement-plan`.
 - Sin evidencia observada y `evidenceRef`, el gate permanece `not_ready`; el
   resultado local no se presenta como prueba de valor comercial.
+# Bloque: perfiles regionales y verticales (2026-08-09)
+
+Se incorporó un catálogo local de perfiles de decisión por región y vertical. Los perfiles hacen visibles los lentes de análisis y los datos que faltan para una especialización real; no generan predicciones ni activan acciones externas. La API `GET /api/models/profiles` y la vista de operaciones mantienen `decision=abstain_for_production` hasta contar con datos licenciados, fixtures históricos y revisión experta.
