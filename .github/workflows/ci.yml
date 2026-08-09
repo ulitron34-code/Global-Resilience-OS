@@ -6,6 +6,13 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: global-resilience-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -30,5 +37,7 @@ jobs:
       - name: Frontend build
         working-directory: frontend
         run: npm run build
+      - name: Supabase schema audit
+        run: npm run check:supabase
       - name: Local release evidence
         run: node scripts/local-release-evidence.js

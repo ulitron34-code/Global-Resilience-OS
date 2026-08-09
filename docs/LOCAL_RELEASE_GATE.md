@@ -14,3 +14,11 @@ Este gate es complementario a:
 
 No sustituye CI, RLS, revision de dependencias, backup/restore externo ni
 pruebas de seguridad de produccion.
+
+## CI remoto
+
+`.github/workflows/ci.yml` reproduce los controles esenciales en GitHub para
+Node 20 y Node 22: instala desde los lockfiles, ejecuta pruebas de backend,
+lint y build del frontend, audita el esquema local de Supabase y conserva la
+evidencia completa del release. El workflow usa permisos de solo lectura y
+cancelacion de ejecuciones obsoletas por rama.
