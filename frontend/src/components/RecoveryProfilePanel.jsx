@@ -1,0 +1,12 @@
+import { useState } from 'react';
+import { getRecoveryProfile } from '../api/client';
+
+function formatUsd(value) { const amount = Math.round(value || 0); if (amount >= 1000000) return `$${(amount / 1000000).toFixed(1)}M`; if (amount >= 1000) return `$${Math.round(amount / 1000)}K`; return `$${amount}`; }
+
+export default function RecoveryProfilePanel() {
+  const [profile, setProfile] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const generate = async () => { setBusy(true); setError(''); try { setProfile(await getRecoveryProfile({ cableId: 'seamewe3', severity: 'total', horizons: [24, 168, 720] })); } catch (err) { setError(err.message); } finally { setBusy(false); } };
+  return <div className="bg-panel border border-line rounded-lg p-4"><div className="flex flex-col md:flex-row md:items-end justify-between gap-3"><div><div className="font-mono text-[10px] uppercase tracking-widest text-signal">Effective resilience index</div><h2 className="font-display text-lg font-semibold text-ink mt-1">Recuperación y contrafactuales</h2><p className="text-xs text-ink-muted mt-2">Compara cuánto impacto puede evitar cada acción en 24 horas, 7 días y 30 días.</p></div><button type="button" onClick={generate} disabled={busy} className="bg-signal text-void rounded px-3 py-2 text-xs font-semibold disabled:opacity-50">{busy ? 'Calculando...' : 'Calcular perfil'}</button></div>{error && <div className="text-xs text-alert mt-3" role="alert">{error}</div>}{profile && <><div className="overflow-x-auto mt-4"><table className="w-full text-xs"><thead><tr className="border-b border-line text-left text-ink-dim"><th className="py-2">Opción</th>{profile.baseline.map((item) => <th key={item.horizonHours} className="py-2">{item.horizonHours >= 720 ? '30d' : item.horizonHours >= 168 ? '7d' : '24h'} evitado</th>)}</tr></thead><tbody>{profile.options.map((option) => <tr key={option.id} className="border-b border-line/60"><td className="py-2 text-ink">{option.label}<small className="block text-[10px] text-ink-dim">{option.responseHours}h · {formatUsd(option.costUsd)}</small></td>{option.results.map((result) => <td key={result.horizonHours} className="py-2 text-signal">{formatUsd(result.avoidedLossUsd)}<small className="block text-[10px] text-ink-dim">neto {formatUsd(result.netValueUsd)}</small></td>)}</tr>)}</tbody></table></div><div className="text-[10px] text-ink-dim mt-3">{profile.disclaimer}</div></>}</div>;
+}

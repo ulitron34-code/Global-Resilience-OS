@@ -1,0 +1,14 @@
+# Benchmark sectorial anonimizado
+
+`POST /api/network/cooperative/preview` prepara una previsualizaciÃ³n de seÃ±ales
+de incidentes anonimizada. Opera en `dry_run_only`, elimina identificadores y
+ubicaciones exactas, exige consentimiento explÃ­cito y retiene el paquete vacÃ­o
+si no se alcanza la cohorte mÃ­nima.
+
+`GET /api/benchmarks/sectors` agrega outcomes de planes por vertical y aplica una
+cohorte minima (`minCohort`, k-anonimato local). Cohortes menores se publican como
+`withheld` sin IDs, organizaciones ni métricas individuales.
+
+El benchmark es una semilla para la futura red cooperativa de incidentes. Antes de
+usarlo comercialmente se requieren gobernanza entre tenants, consentimiento,
+anonimizacion revisada, control de reidentificacion y suficiente muestra histórica.

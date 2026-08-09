@@ -1,0 +1,61 @@
+@import '@fontsource/space-grotesk/latin-500.css';
+@import '@fontsource/space-grotesk/latin-600.css';
+@import '@fontsource/space-grotesk/latin-700.css';
+@import '@fontsource/ibm-plex-sans/latin-400.css';
+@import '@fontsource/ibm-plex-sans/latin-500.css';
+@import '@fontsource/ibm-plex-sans/latin-600.css';
+@import '@fontsource/ibm-plex-mono/latin-400.css';
+@import '@fontsource/ibm-plex-mono/latin-500.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+  background: #0A1120;
+}
+
+body {
+  font-family: 'IBM Plex Sans', sans-serif;
+  color: #E7ECF5;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: rgba(45, 212, 191, 0.3);
+}
+
+/* Scrollbar técnico, discreto */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #0A1120; }
+::-webkit-scrollbar-thumb { background: #22334E; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #2DD4BF; }
+
+@media print {
+  body { background: white !important; }
+}
+
+:focus-visible {
+  outline: 2px solid #2DD4BF;
+  outline-offset: 2px;
+}
+
+.control {
+  width: 100%;
+  background: #0A1120;
+  border: 1px solid #22334E;
+  border-radius: 4px;
+  color: #E7ECF5;
+  padding: 7px 8px;
+  font-size: 12px;
+}
+
+.control:focus { border-color: rgba(45, 212, 191, 0.5); outline: none; }

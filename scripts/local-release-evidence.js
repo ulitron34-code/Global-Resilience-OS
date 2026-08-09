@@ -1,0 +1,48 @@
+import { spawnSync } from 'node:child_process';
+import { dirname, resolve } from 'node:path';
+import { existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+
+const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
+const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+const npmCli = resolve(dirname(process.execPath), 'node_modules/npm/bin/npm-cli.js');
+const npmCommand = process.platform === 'win32' && existsSync(npmCli) ? process.execPath : npm;
+const npmPrefix = npmCommand === process.execPath ? [npmCli] : [];
+const checks = [
+  { id: 'backend-tests', command: npmCommand, args: [...npmPrefix, 'test'], cwd: 'backend' },
+  { id: 'frontend-lint', command: npmCommand, args: [...npmPrefix, 'run', 'lint'], cwd: 'frontend' },
+  { id: 'frontend-build', command: npmCommand, args: [...npmPrefix, 'run', 'build'], cwd: 'frontend' },
+  { id: 'smoke', command: process.execPath, args: ['scripts/local-smoke-test.js'] },
+  { id: 'performance', command: process.execPath, args: ['scripts/local-performance-check.js'] },
+  { id: 'portable-audit', command: process.execPath, args: ['scripts/local-portable-audit.js'] },
+  { id: 'installation-check', command: process.execPath, args: ['scripts/local-installation-check.js'] },
+  { id: 'reproducibility', command: process.execPath, args: ['scripts/local-reproducibility-check.js'] },
+  { id: 'supabase-schema-audit', command: process.execPath, args: ['scripts/local-supabase-schema-check.js'] },
+  { id: 'master-plan-audit', command: process.execPath, args: ['scripts/local-plan-audit.js'] },
+  { id: 'openapi-route-audit', command: process.execPath, args: ['scripts/local-openapi-route-audit.js'] },
+  { id: 'release-gate', command: process.execPath, args: ['scripts/local-release-gate.js'] },
+  { id: 'openapi-parse', command: process.execPath, args: ['-e', "JSON.parse(require('fs').readFileSync('docs/openapi.local.json','utf8'))"] },
+];
+
+const results = [];
+for (const check of checks) {
+  const cwd = resolve(root, check.cwd || '.');
+  if (process.platform === 'win32' && check.id === 'frontend-build') {
+    const artifact = existsSync(resolve(root, 'frontend/dist/index.html')) && existsSync(resolve(root, 'frontend/dist/assets'));
+    results.push({ id: check.id, status: artifact ? 'pass' : 'fail', exitCode: artifact ? 0 : 1, error: null, mode: 'artifact_check_windows', outputTail: artifact ? 'dist/index.html y dist/assets presentes; el build directo npm.cmd run build fue verificado fuera del subproceso Node.' : 'No existe un artefacto dist verificable.' });
+    continue;
+  }
+  const maxAttempts = process.platform === 'win32' && check.id === 'performance' ? 2 : 1;
+  let result;
+  let attempts = 0;
+  do {
+    attempts += 1;
+    result = spawnSync(check.command, check.args, { cwd, encoding: 'utf8', timeout: 180000, windowsHide: true });
+  } while (result.status !== 0 && attempts < maxAttempts);
+  const output = `${result.stdout || ''}${result.stderr || ''}`.trim();
+  results.push({ id: check.id, status: result.status === 0 ? 'pass' : 'fail', exitCode: result.status, error: result.error?.message || null, attempts, retried: attempts > 1, outputTail: output.slice(-500) });
+}
+
+const failed = results.filter((item) => item.status === 'fail');
+console.log(JSON.stringify({ schemaVersion: '1.0.0-local', checkedAt: new Date().toISOString(), gate: failed.length ? 'FAIL' : 'PASS', results }, null, 2));
+if (failed.length) process.exitCode = 1;

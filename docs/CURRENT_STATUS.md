@@ -1,0 +1,35 @@
+# Estado actual de la plataforma
+
+La copia local ya no es únicamente la demo inicial. Incluye un núcleo
+operativo verificable con casos, Impact Graph temporal, escenarios,
+Scenario-to-Action, aprobaciones humanas, outcomes, auditoría, gobernanza,
+incertidumbre, backtesting, sensibilidad, ingesta batch, calidad y DLQ,
+incidentes, seguridad, cadena de evidencia, scorecard, paquete de piloto y Enterprise Readiness.
+
+## Lo que ya está listo localmente
+
+- Fases 0–5 del plan maestro: artefactos y gates locales implementados.
+- Preparación de las fases 6–7: piloto, métricas, roadmap y evidencia regulatoria.
+- Release evidence reproducible con backend, frontend, smoke, rendimiento,
+  auditoría portable, reproducibilidad, auditoría de esquema Supabase local,
+  auditoría del plan y release gate.
+- Acciones externas desactivadas por defecto y conectores en `dry_run_only`.
+- Punto de entrada raíz con `npm test`, `npm run lint`, `npm run build`, `npm run verify` y `npm run verify:install`.
+- Auditoría de instalación limpia con lockfiles aceptados por `npm ci --dry-run` en backend y frontend.
+
+## Lo que sigue fuera de la USB
+
+Estos puntos no deben simularse localmente: publicar en GitHub, crear y probar
+el proyecto Supabase real, desplegar en Vercel/hosting, activar proveedores de
+datos licenciados, configurar observabilidad externa y ejecutar un piloto con
+una organización real. El estado detallado de esos bloqueos está en
+`docs/ENTERPRISE_READINESS.md` y `docs/FINAL_HANDOFF_STATUS.md`.
+
+## Comandos de verificación
+
+```bash
+node scripts/local-plan-audit.js
+node scripts/local-release-evidence.js
+```
+
+Ambos deben terminar con `gate: PASS` antes de iniciar el tramo externo.
