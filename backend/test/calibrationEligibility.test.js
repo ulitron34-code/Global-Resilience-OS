@@ -9,6 +9,11 @@ test('excluye fixtures completas basadas en fuentes demo de calibracion y backte
     observedImpactUsd: 100, predictedImpactUsd: 90
   };
   const authorized = { ...demo, id: 'authorized-fixture', sourceId: 'historical-authorized' };
-  assert.equal(benchmarkCalibration({ fixtures: [demo, authorized] }).fixtureCount, 1);
-  assert.equal(buildBacktestReport([demo, authorized]).sample.eligible, 1);
+  const benchmark = benchmarkCalibration({ fixtures: [demo, authorized] });
+  const backtest = buildBacktestReport([demo, authorized]);
+  assert.equal(benchmark.fixtureCount, 1);
+  assert.equal(benchmark.inputFixtureCount, 2);
+  assert.equal(benchmark.excludedIllustrativeFixtureCount, 1);
+  assert.equal(backtest.sample.eligible, 1);
+  assert.equal(backtest.sample.excludedIllustrativeFixtureCount, 1);
 });

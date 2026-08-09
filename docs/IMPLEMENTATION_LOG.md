@@ -332,3 +332,6 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
 - Fixtures completas cuyo `sourceId` es demo o contiene `demo` ya no entran en benchmark ni backtesting.
 - La calibracion conserva los registros cargados, pero sus metricas solo usan evidencia historica no ilustrativa con procedencia.
 - Se agrego cobertura automatica para impedir que una fuente demo infle el tamano de muestra.
+- Benchmark y backtesting ahora reportan por separado el tamano de entrada y los
+  fixtures ilustrativos excluidos, haciendo visible cualquier abstencion por falta
+  de evidencia productiva.
