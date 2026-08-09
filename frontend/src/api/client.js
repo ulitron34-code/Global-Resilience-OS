@@ -21,6 +21,7 @@ export function getBackendUrl() {
 }
 
 function localFallback(value, error) {
+  setBackendStatus('offline');
   if (BACKEND_REQUIRED) {
     const failure = new Error('El backend es obligatorio y no esta disponible.');
     failure.cause = error;
@@ -214,9 +215,8 @@ export async function getOverviewMetrics(filters = {}) {
     const data = await fetchWithTimeout(`${BACKEND_URL}/api/metrics/overview${query.toString() ? `?${query}` : ''}`);
     setBackendStatus('online');
     return data;
-  } catch {
-    setBackendStatus('offline');
-    return null;
+  } catch (error) {
+    return localFallback(null, error);
   }
 }
 
@@ -225,14 +225,13 @@ export async function getSources() {
     const data = await fetchWithTimeout(`${BACKEND_URL}/api/sources`);
     setBackendStatus('online');
     return data;
-  } catch {
-    setBackendStatus('offline');
-    return [];
+  } catch (error) {
+    return localFallback([], error);
   }
 }
 
 export async function getModels() {
-  try { return await fetchWithTimeout(`${BACKEND_URL}/api/models`); } catch { return []; }
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/models`); } catch (error) { return localFallback([], error); }
 }
 
 export async function createScenario(input) {
@@ -268,7 +267,7 @@ export async function previewCooperativeNetwork(input = {}) {
 }
 
 export async function getDeadLetters(status = '') {
-  try { return await fetchWithTimeout(`${BACKEND_URL}/api/ingest/dead-letters${status ? `?status=${encodeURIComponent(status)}` : ''}`); } catch { return []; }
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/ingest/dead-letters${status ? `?status=${encodeURIComponent(status)}` : ''}`); } catch (error) { return localFallback([], error); }
 }
 
 export async function retryDeadLetter(id, payload) {
@@ -281,14 +280,13 @@ export async function getCaseAudit(caseId, filters = {}) {
     const data = await fetchWithTimeout(`${BACKEND_URL}/api/cases/${caseId}/audit${query.toString() ? `?${query}` : ''}`);
     setBackendStatus('online');
     return data;
-  } catch {
-    setBackendStatus('offline');
-    return [];
+  } catch (error) {
+    return localFallback([], error);
   }
 }
 
 export async function getScenarios() {
-  try { return await fetchWithTimeout(`${BACKEND_URL}/api/scenarios`); } catch { return []; }
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/scenarios`); } catch (error) { return localFallback([], error); }
 }
 
 export async function compareScenarios(ids) {
@@ -296,7 +294,7 @@ export async function compareScenarios(ids) {
 }
 
 export async function getNotifications(unread = false) {
-  try { return await fetchWithTimeout(`${BACKEND_URL}/api/notifications${unread ? '?unread=true' : ''}`); } catch { return []; }
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/notifications${unread ? '?unread=true' : ''}`); } catch (error) { return localFallback([], error); }
 }
 
 export async function markNotificationRead(id) {
@@ -312,7 +310,7 @@ export async function previewNotificationPolicy(input) {
 }
 
 export async function getCaseComments(caseId) {
-  try { return await fetchWithTimeout(`${BACKEND_URL}/api/cases/${caseId}/comments`); } catch { return []; }
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/cases/${caseId}/comments`); } catch (error) { return localFallback([], error); }
 }
 
 export async function addCaseComment(caseId, body) {
@@ -320,19 +318,19 @@ export async function addCaseComment(caseId, body) {
 }
 
 export async function getJobs() {
-  try { return await fetchWithTimeout(`${BACKEND_URL}/api/jobs`); } catch { return []; }
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/jobs`); } catch (error) { return localFallback([], error); }
 }
 
 export async function getReadiness() {
-  try { return await fetchWithTimeout(`${BACKEND_URL}/api/health/readiness`); } catch (error) { return { ready: false, error: error.message, checks: {} }; }
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/health/readiness`); } catch (error) { return localFallback({ ready: false, error: error.message, checks: {} }, error); }
 }
 
 export async function getComplianceReadiness() {
-  try { return await fetchWithTimeout(`${BACKEND_URL}/api/compliance/readiness`); } catch (error) { return { ready: false, disclaimer: error.message, controls: [] }; }
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/compliance/readiness`); } catch (error) { return localFallback({ ready: false, disclaimer: error.message, controls: [] }, error); }
 }
 
 export async function getRegulatoryFrameworks() {
-  try { return await fetchWithTimeout(`${BACKEND_URL}/api/regulatory/frameworks`); } catch { return []; }
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/regulatory/frameworks`); } catch (error) { return localFallback([], error); }
 }
 
 export async function buildRegulatoryEvidenceMap(input) {
@@ -344,19 +342,19 @@ export async function getRecoveryProfile(input) {
 }
 
 export async function getDataQualityReport() {
-  try { return await fetchWithTimeout(`${BACKEND_URL}/api/quality/report`); } catch (error) { return { ready: false, checks: [], error: error.message }; }
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/quality/report`); } catch (error) { return localFallback({ ready: false, checks: [], error: error.message }, error); }
 }
 
 export async function getAuditIntegrity() {
-  try { return await fetchWithTimeout(`${BACKEND_URL}/api/audit/integrity`); } catch (error) { return { valid: false, sealed: false, entries: 0, mismatches: [], error: error.message }; }
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/audit/integrity`); } catch (error) { return localFallback({ valid: false, sealed: false, entries: 0, mismatches: [], error: error.message }, error); }
 }
 
 export async function getSlaOverview(filters = {}) {
-  try { const query = new URLSearchParams(Object.entries(filters).filter(([, value]) => value)); return await fetchWithTimeout(`${BACKEND_URL}/api/ops/sla${query.toString() ? `?${query}` : ''}`); } catch (error) { return { ready: false, counts: {}, cases: [], error: error.message }; }
+  try { const query = new URLSearchParams(Object.entries(filters).filter(([, value]) => value)); return await fetchWithTimeout(`${BACKEND_URL}/api/ops/sla${query.toString() ? `?${query}` : ''}`); } catch (error) { return localFallback({ ready: false, counts: {}, cases: [], error: error.message }, error); }
 }
 
 export async function getSourceHealthOverview() {
-  try { return await fetchWithTimeout(`${BACKEND_URL}/api/ops/source-health`); } catch (error) { return { ready: false, counts: {}, sources: [], error: error.message }; }
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/ops/source-health`); } catch (error) { return localFallback({ ready: false, counts: {}, sources: [], error: error.message }, error); }
 }
 
 export async function runSourceHealthSweep() {
@@ -364,11 +362,11 @@ export async function runSourceHealthSweep() {
 }
 
 export async function getPilotReadiness() {
-  try { return await fetchWithTimeout(`${BACKEND_URL}/api/pilots/readiness`); } catch (error) { return { status: 'unavailable', checks: [], error: error.message }; }
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/pilots/readiness`); } catch (error) { return localFallback({ status: 'unavailable', checks: [], error: error.message }, error); }
 }
 
 export async function getPilotMetrics() {
-  try { return await fetchWithTimeout(`${BACKEND_URL}/api/pilots/metrics`); } catch (error) { return { metrics: {}, missingEvidence: [], error: error.message }; }
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/pilots/metrics`); } catch (error) { return localFallback({ metrics: {}, missingEvidence: [], error: error.message }, error); }
 }
 
 export async function getPilotPackage() { return fetchWithTimeout(`${BACKEND_URL}/api/pilots/package`); }
@@ -388,7 +386,7 @@ export async function downloadPilotPackage(format = 'json') {
 export async function getEnterpriseReadiness() { return fetchWithTimeout(`${BACKEND_URL}/api/readiness/enterprise`); }
 
 export async function getPilotFeedback() {
-  try { return await fetchWithTimeout(`${BACKEND_URL}/api/pilots/feedback`); } catch { return []; }
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/pilots/feedback`); } catch (error) { return localFallback([], error); }
 }
 
 export async function recordPilotFeedback(input) {
@@ -396,7 +394,7 @@ export async function recordPilotFeedback(input) {
 }
 
 export async function getIncidents() {
-  try { return await fetchWithTimeout(`${BACKEND_URL}/api/incidents`); } catch { return []; }
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/incidents`); } catch (error) { return localFallback([], error); }
 }
 
 export async function createIncident(input) {
@@ -408,7 +406,7 @@ export async function updateIncident(id, input) {
 }
 
 export async function getSecurityPosture() {
-  try { return await fetchWithTimeout(`${BACKEND_URL}/api/security/posture`); } catch (error) { return { status: 'unavailable', checks: [], counts: {}, error: error.message }; }
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/security/posture`); } catch (error) { return localFallback({ status: 'unavailable', checks: [], counts: {}, error: error.message }, error); }
 }
 
 export async function getModelSensitivity(input) {
@@ -420,15 +418,15 @@ export async function getModelUncertainty(input) {
 }
 
 export async function getProvenanceOverview() {
-  try { return await fetchWithTimeout(`${BACKEND_URL}/api/governance/provenance`); } catch (error) { return { ready: false, sources: [], models: [], error: error.message }; }
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/governance/provenance`); } catch (error) { return localFallback({ ready: false, sources: [], models: [], error: error.message }, error); }
 }
 
 export async function getModelValidationReport() {
-  try { return await fetchWithTimeout(`${BACKEND_URL}/api/models/validation`); } catch (error) { return { ready: false, tests: [], error: error.message }; }
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/models/validation`); } catch (error) { return localFallback({ ready: false, tests: [], error: error.message }, error); }
 }
 
 export async function getCalibrationOverview(modelId = '') {
-  try { return await fetchWithTimeout(`${BACKEND_URL}/api/models/calibration${modelId ? `?modelId=${encodeURIComponent(modelId)}` : ''}`); } catch (error) { return { fixtureCount: 0, status: 'unavailable', metrics: {}, fixtures: [], error: error.message }; }
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/models/calibration${modelId ? `?modelId=${encodeURIComponent(modelId)}` : ''}`); } catch (error) { return localFallback({ fixtureCount: 0, status: 'unavailable', metrics: {}, fixtures: [], error: error.message }, error); }
 }
 
 export async function recordCalibrationFixtures(input) {
@@ -436,7 +434,7 @@ export async function recordCalibrationFixtures(input) {
 }
 
 export async function getRetentionOverview() {
-  try { return await fetchWithTimeout(`${BACKEND_URL}/api/governance/retention`); } catch (error) { return { dryRun: true, collections: [], error: error.message }; }
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/governance/retention`); } catch (error) { return localFallback({ dryRun: true, collections: [], error: error.message }, error); }
 }
 
 export async function runDemoIngestionJob() {
@@ -450,7 +448,7 @@ export async function runSlaSweep() {
 }
 
 export async function getWebhooks() {
-  try { return await fetchWithTimeout(`${BACKEND_URL}/api/webhooks`); } catch { return []; }
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/webhooks`); } catch (error) { return localFallback([], error); }
 }
 
 export async function createWebhook(input) {
@@ -470,7 +468,7 @@ export async function processWebhookDeliveries({ limit = 20, dryRun = true } = {
 }
 
 export async function getWebhookDeliveries(id) {
-  try { return await fetchWithTimeout(`${BACKEND_URL}/api/webhooks/${id}/deliveries`); } catch { return []; }
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/webhooks/${id}/deliveries`); } catch (error) { return localFallback([], error); }
 }
 
 export async function downloadBrief(format = 'json') {
@@ -567,15 +565,15 @@ export async function resetLocalDemo() {
 }
 
 export async function getOperationalMetrics() {
-  try { return await fetchWithTimeout(`${BACKEND_URL}/api/ops/metrics`); } catch (error) { return { requests: 0, errors: 0, routes: [], error: error.message }; }
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/ops/metrics`); } catch (error) { return localFallback({ requests: 0, errors: 0, routes: [], error: error.message }, error); }
 }
 
 export async function getRuntimeReadiness() {
-  try { return await fetchWithTimeout(`${BACKEND_URL}/api/runtime/readiness`); } catch (error) { return { ready: false, checks: {}, config: {}, error: error.message }; }
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/runtime/readiness`); } catch (error) { return localFallback({ ready: false, checks: {}, config: {}, error: error.message }, error); }
 }
 
 export async function getDataCatalogReadiness() {
-  try { return await fetchWithTimeout(`${BACKEND_URL}/api/data-catalog/readiness`); } catch (error) { return { ready: false, checks: [], error: error.message }; }
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/data-catalog/readiness`); } catch (error) { return localFallback({ ready: false, checks: [], error: error.message }, error); }
 }
 
 export async function previewSourceIntake(input) {
@@ -584,7 +582,7 @@ export async function previewSourceIntake(input) {
 
 export async function getSourceIntakeReviews(filters = {}) {
   const query = new URLSearchParams(Object.entries(filters).filter(([, value]) => value));
-  try { return await fetchWithTimeout(`${BACKEND_URL}/api/data-catalog/intake-reviews${query.toString() ? `?${query}` : ''}`); } catch { return []; }
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/data-catalog/intake-reviews${query.toString() ? `?${query}` : ''}`); } catch (error) { return localFallback([], error); }
 }
 
 export async function createSourceIntakeReview(input) {
@@ -596,20 +594,20 @@ export async function updateSourceIntakeReview(id, input) {
 }
 
 export async function getDataQualityGate() {
-  try { return await fetchWithTimeout(`${BACKEND_URL}/api/data-quality/gate`); } catch (error) { return { ready: false, checks: [], error: error.message }; }
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/data-quality/gate`); } catch (error) { return localFallback({ ready: false, checks: [], error: error.message }, error); }
 }
 
 export async function getConnectorContractReadiness() {
-  try { return await fetchWithTimeout(`${BACKEND_URL}/api/connectors/readiness`); } catch (error) { return { ready: false, connectorCount: 0, checks: [], externalIntegrationReady: false, error: error.message }; }
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/connectors/readiness`); } catch (error) { return localFallback({ ready: false, connectorCount: 0, checks: [], externalIntegrationReady: false, error: error.message }, error); }
 }
 
 export async function getTenancyContext() {
-  try { return await fetchWithTimeout(`${BACKEND_URL}/api/tenancy/context`); } catch (error) { return { organizationId: 'unknown', isolation: 'unavailable', error: error.message }; }
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/tenancy/context`); } catch (error) { return localFallback({ organizationId: 'unknown', isolation: 'unavailable', error: error.message }, error); }
 }
 
 export async function getActionLibrary(filters = {}) {
   const query = new URLSearchParams(Object.entries(filters).filter(([, value]) => value));
-  try { return await fetchWithTimeout(`${BACKEND_URL}/api/actions/library${query.toString() ? `?${query}` : ''}`); } catch { return []; }
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/actions/library${query.toString() ? `?${query}` : ''}`); } catch (error) { return localFallback([], error); }
 }
 
 export async function recommendActions(input) {
@@ -625,12 +623,12 @@ export async function getImpactGraph(filters = {}) {
     const query = new URLSearchParams(Object.entries(filters).filter(([, value]) => value));
     return await fetchWithTimeout(`${BACKEND_URL}/api/graph${query.toString() ? `?${query}` : ''}`);
   } catch (error) {
-    return { nodes: [], edges: [], counts: {}, error: error.message, disclaimer: 'Grafo no disponible sin backend.' };
+    return localFallback({ nodes: [], edges: [], counts: {}, error: error.message, disclaimer: 'Grafo no disponible sin backend.' }, error);
   }
 }
 
 export async function getPlaybooks() {
-  try { return await fetchWithTimeout(`${BACKEND_URL}/api/playbooks`); } catch { return []; }
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/playbooks`); } catch (error) { return localFallback([], error); }
 }
 
 export async function previewActionPlan(input) {
@@ -639,7 +637,7 @@ export async function previewActionPlan(input) {
 
 export async function getActionPlans(filters = {}) {
   const query = new URLSearchParams(Object.entries(filters).filter(([, value]) => value !== undefined && value !== ''));
-  try { return await fetchWithTimeout(`${BACKEND_URL}/api/action-plans${query.toString() ? `?${query}` : ''}`); } catch { return []; }
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/action-plans${query.toString() ? `?${query}` : ''}`); } catch (error) { return localFallback([], error); }
 }
 
 export async function createActionPlan(input) {
