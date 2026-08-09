@@ -1,5 +1,12 @@
 # Implementation Log
 
+## Bloque: trazabilidad del paquete de piloto (2026-08-09)
+
+- Las exportaciones JSON y Markdown del piloto incluyen el tenant y metadatos
+  explícitos del artefacto.
+- El paquete declara que la evidencia externa sigue siendo requerida y la API
+  queda cubierta por la prueba de exportación del flujo principal.
+
 ## Bloque: preflight local de producción y tenant isolation (2026-08-09)
 
 - `npm.cmd run check:production-preflight` valida la matriz de configuración,

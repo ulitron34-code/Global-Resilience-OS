@@ -581,7 +581,10 @@ describe('Global Resilience OS API', () => {
     const pilotMarkdown = await fetch(`${baseUrl}/api/pilots/package?format=markdown`);
     assert.equal(pilotMarkdown.status, 200);
     assert.equal(pilotMarkdown.headers.get('content-type'), 'text/markdown; charset=utf-8');
-    assert.match(await pilotMarkdown.text(), /Paquete de preparaci/);
+    const pilotMarkdownBody = await pilotMarkdown.text();
+    assert.match(pilotMarkdownBody, /Paquete de preparaci/);
+    assert.match(pilotMarkdownBody, /Organizacion: nashadi-demo/);
+    assert.match(pilotMarkdownBody, /Evidencia externa requerida: SI/);
     assert.equal(markdownPackage.headers.get('content-type'), 'text/markdown; charset=utf-8');
     const markdownBody = await markdownPackage.text();
     assert.match(markdownBody, /Paquete de decisión/);

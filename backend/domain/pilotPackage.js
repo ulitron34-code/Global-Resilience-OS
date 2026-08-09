@@ -12,6 +12,9 @@ export function pilotPackageToMarkdown(packet = {}) {
   const lines = [
     '# Paquete de preparacion de piloto', '',
     `Generado: ${safe(packet.generatedAt)}`, '',
+    `Organizacion: ${safe(packet.organizationId)}`,
+    `Tipo de paquete: ${safe(packet.packageMetadata?.packageType, 'pilot-readiness')}`,
+    `Evidencia externa requerida: ${packet.packageMetadata?.externalEvidenceRequired ? 'SI' : 'NO'}`, '',
     '## Estado', '',
     `- **Estado:** ${safe(readiness.status)}`,
     `- **Readiness tecnico:** ${readiness.technicalReady ? 'PASS' : 'PENDIENTE'}`,

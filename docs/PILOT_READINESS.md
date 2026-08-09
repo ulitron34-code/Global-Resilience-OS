@@ -22,3 +22,6 @@ una sola revisión no es suficiente.
 un evento real autorizado, baseline histórico y criterio de valor aceptado por el
 cliente. Esta decisión es deliberada: el sistema no convierte fixtures demo en
 prueba comercial.
+El paquete de piloto incluye `organizationId` y `packageMetadata` para
+identificar el tenant, el tipo de artefacto y que la evidencia externa sigue
+siendo requerida; la exportación Markdown conserva esos metadatos.
