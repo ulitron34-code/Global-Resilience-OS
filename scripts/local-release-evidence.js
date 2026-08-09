@@ -13,7 +13,7 @@ const checks = [
   { id: 'frontend-lint', command: npmCommand, args: [...npmPrefix, 'run', 'lint'], cwd: 'frontend' },
   // Ejecutar el script raíz mediante npm conserva el entorno de lifecycle que
   // Vite/esbuild espera en Windows y evita errores de resolución intermitentes.
-  { id: 'frontend-build', command: process.platform === 'win32' ? (process.env.ComSpec || 'cmd.exe') : npm, args: process.platform === 'win32' ? ['/d', '/s', '/c', 'npm.cmd run build'] : ['run', 'build'] },
+  { id: 'frontend-build', command: npmCommand, args: [...npmPrefix, 'run', 'build'] },
   { id: 'standalone-artifact', command: process.execPath, args: ['scripts/standalone-artifact-check.js'] },
   { id: 'pdf-export', command: process.execPath, args: ['scripts/pdf-export-check.js'] },
   { id: 'smoke', command: process.execPath, args: ['scripts/local-smoke-test.js'] },
