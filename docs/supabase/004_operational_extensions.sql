@@ -75,6 +75,14 @@ create table if not exists public.incidents (
   unique (organization_id, external_id)
 );
 
+create or replace function public.current_app_role()
+returns text
+language sql
+stable
+as $$
+  select coalesce(auth.jwt() -> 'app_metadata' ->> 'role', 'viewer')
+$$;
+
 create index if not exists action_plan_events_org_plan_idx on public.action_plan_events(organization_id, action_plan_id, created_at desc);
 create index if not exists decision_shares_org_case_idx on public.decision_shares(organization_id, case_id, created_at desc);
 create index if not exists source_intake_reviews_org_status_idx on public.source_intake_reviews(organization_id, decision_status, updated_at desc);
@@ -98,3 +106,13 @@ create policy "members can read decision shares" on public.decision_shares for s
 create policy "members can read source intake reviews" on public.source_intake_reviews for select to authenticated using (organization_id = public.current_organization_id());
 create policy "members can read calibration fixtures" on public.calibration_fixtures for select to authenticated using (organization_id = public.current_organization_id());
 create policy "members can read incidents" on public.incidents for select to authenticated using (organization_id = public.current_organization_id());
+
+create policy "analysts can insert action plan events" on public.action_plan_events for insert to authenticated with check (organization_id = public.current_organization_id() and public.current_app_role() in ('admin', 'risk_analyst'));
+create policy "analysts can insert decision shares" on public.decision_shares for insert to authenticated with check (organization_id = public.current_organization_id() and public.current_app_role() in ('admin', 'risk_analyst'));
+create policy "analysts can update decision shares" on public.decision_shares for update to authenticated using (organization_id = public.current_organization_id() and public.current_app_role() in ('admin', 'risk_analyst')) with check (organization_id = public.current_organization_id() and public.current_app_role() in ('admin', 'risk_analyst'));
+create policy "analysts can insert source intake reviews" on public.source_intake_reviews for insert to authenticated with check (organization_id = public.current_organization_id() and public.current_app_role() in ('admin', 'risk_analyst'));
+create policy "analysts can update source intake reviews" on public.source_intake_reviews for update to authenticated using (organization_id = public.current_organization_id() and public.current_app_role() in ('admin', 'risk_analyst')) with check (organization_id = public.current_organization_id() and public.current_app_role() in ('admin', 'risk_analyst'));
+create policy "analysts can insert calibration fixtures" on public.calibration_fixtures for insert to authenticated with check (organization_id = public.current_organization_id() and public.current_app_role() in ('admin', 'risk_analyst'));
+create policy "analysts can update calibration fixtures" on public.calibration_fixtures for update to authenticated using (organization_id = public.current_organization_id() and public.current_app_role() in ('admin', 'risk_analyst')) with check (organization_id = public.current_organization_id() and public.current_app_role() in ('admin', 'risk_analyst'));
+create policy "analysts can insert incidents" on public.incidents for insert to authenticated with check (organization_id = public.current_organization_id() and public.current_app_role() in ('admin', 'risk_analyst'));
+create policy "analysts can update incidents" on public.incidents for update to authenticated using (organization_id = public.current_organization_id() and public.current_app_role() in ('admin', 'risk_analyst')) with check (organization_id = public.current_organization_id() and public.current_app_role() in ('admin', 'risk_analyst'));

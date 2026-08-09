@@ -12,6 +12,8 @@ multi-tenant:
 - `incidents`: ciclo de vida de incidentes operativos.
 
 Todas las tablas incluyen `organization_id`, indices operativos, RLS y una
-politica de lectura acotada a `current_organization_id()`. La migracion esta
+politica de lectura acotada a `current_organization_id()`. Las escrituras de
+las entidades operativas exigen rol `admin` o `risk_analyst` y vuelven a
+comprobar el tenant en `with check`. La migracion esta
 preparada localmente, pero debe ejecutarse en staging junto con la prueba de
 dos organizaciones antes de sustituir el snapshot o aceptar datos reales.
