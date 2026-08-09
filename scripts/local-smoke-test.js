@@ -153,6 +153,8 @@ try {
   check(runtimeReadiness.status === 200 && runtimeBody.checks.externalActionsDisabledByDefault, 'runtime readiness');
   const { response: configContract, body: configContractBody } = await request(baseUrl, '/api/runtime/config-contract');
   check(configContract.status === 200 && configContractBody.ready && configContractBody.checks.some((item) => item.id === 'external_actions' && item.pass), 'environment configuration contract');
+  const { response: supabasePersistence, body: supabasePersistenceBody } = await request(baseUrl, '/api/runtime/supabase/persistence');
+  check(supabasePersistence.status === 200 && supabasePersistenceBody.enabled === false && !Object.hasOwn(supabasePersistenceBody, 'serviceRoleKey'), 'Supabase persistence status does not expose credentials');
   const { response: enterpriseReadiness, body: enterpriseReadinessBody } = await request(baseUrl, '/api/readiness/enterprise', { headers: authHeaders });
   check(enterpriseReadiness.status === 200 && enterpriseReadinessBody.localReady && enterpriseReadinessBody.externalReady === false && enterpriseReadinessBody.decision === 'proceed_to_external_gates', 'enterprise readiness handoff');
   const { response: catalog } = await request(baseUrl, '/api/data-catalog/readiness');
