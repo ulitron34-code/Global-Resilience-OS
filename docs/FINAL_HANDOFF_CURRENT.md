@@ -1,6 +1,6 @@
 # Handoff actual de Global Resilience OS
 
-Fecha de corte: 2026-08-08.
+Fecha de corte: 2026-08-09.
 
 ## Estado local verificado
 
@@ -13,15 +13,16 @@ Fecha de corte: 2026-08-08.
   RLS y politicas de lectura PASS.
 - Smoke, artefacto standalone, exportacion PDF, rendimiento, reproducibilidad,
   instalacion limpia y auditoria portable PASS.
-- Working tree limpio en el commit `b7d80db`.
+- Working tree limpio en el commit `49f826a`.
 
 ## Implementado localmente
 
 El checkout contiene el nucleo de Impact Graph, escenarios, Action OS,
 evidencia auditable, aprobacion humana, outcomes, calibracion, abstencion,
 Decision Room, asistente suggestion-only, tenant context, rate limits,
-readiness empresarial, persistencia por snapshot y el esquema normalizado
-preparado en `docs/supabase/004_operational_extensions.sql`.
+readiness empresarial, persistencia por snapshot, webhooks, notificaciones y
+jobs aislados por tenant, y el esquema normalizado preparado en
+`docs/supabase/004_operational_extensions.sql`.
 
 ## Validacion externa aun requerida
 
