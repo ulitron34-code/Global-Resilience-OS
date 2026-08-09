@@ -351,3 +351,5 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
   unicamente del sufijo `-demo`.
 - Pilot Readiness ahora exige al menos una fuente no ilustrativa para superar
   el gate tecnico y reporta el conteo de fuentes productivas por separado.
+- El paquete de piloto ya no usa proximas acciones estaticas: las deriva de los
+  gates fallidos y entrega una secuencia de go/no-go cuando todos pasan.

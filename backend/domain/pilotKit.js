@@ -36,6 +36,26 @@ export function buildPilotReadiness({ runtime, catalog, sourceHealth, modelGover
   return { scope: 'local-pilot-preparation', status: customerReady ? 'customer_ready_for_gate_review' : technicalReady ? 'ready_for_customer_validation' : 'not_ready', technicalReady, customerReady, evidenceCounts: { interviews: interviewCount, customerReviews: customerReviewCount, economicEvidence: economicEvidenceCount, successCriteria: successCriteriaCount, verifiedHistoricalEvents: verifiedHistoricalCount }, checks, nextGate: customerReady ? 'aprobar go/no-go del piloto y documentar baseline' : 'entrevistas estructuradas + valor economico + criterio de exito + datos autorizados', disclaimer: 'Este readiness prepara un piloto; no prueba valor comercial, precision de mercado ni cumplimiento legal.' };
 }
 
+export function buildPilotNextActions(readiness = {}) {
+  const actionByCheck = {
+    runtime: 'Completar el contrato de runtime local y repetir la verificacion reproducible.',
+    data_quality: 'Completar licencia, cobertura y SLA de frescura del catalogo de datos.',
+    source_health: 'Registrar al menos una fuente productiva autorizada y observar su health en staging.',
+    model_abstention: 'Revisar gobernanza del modelo y conservar abstencion ante evidencia insuficiente.',
+    action_library: 'Completar el catalogo de acciones, prerrequisitos y evidencia de ejecucion.',
+    tenant_context: 'Configurar la organizacion del piloto antes de registrar evidencia operativa.',
+    customer_evidence: 'Registrar una revision piloto con evidencia textual del cliente.',
+    economic_value: 'Documentar costo evitado, tiempo recuperable o criterio de pago del caso de uso.',
+    success_criteria: 'Registrar baseline, metrica y umbral de go/no-go del piloto.',
+    historical_validation: 'Cargar al menos tres eventos historicos licenciados, completos y con procedencia.',
+  };
+  const pending = (Array.isArray(readiness.checks) ? readiness.checks : [])
+    .filter((check) => !check.pass)
+    .map((check) => actionByCheck[check.id] || `Resolver el gate local: ${check.label || check.id}.`);
+  if (pending.length) return pending;
+  return ['Aprobar el go/no-go del piloto con el sponsor.', 'Documentar baseline, criterio de exito y responsable de medicion.', 'Preparar la repeticion del gate en staging con datos reales.'];
+}
+
 export function getPilotInterviewGuide() {
   return { version: '1.0.0', objective: 'validar un wedge pagable antes de activar datos materiales', instructions: ['Registrar respuestas textuales y evidencia.', 'Separar hechos, hipotesis y solicitudes.', 'No prometer prediccion ni cumplimiento automatico.', 'Cerrar cada entrevista con un criterio de exito medible.'], evidenceTypes: EVIDENCE_TYPES, sections: INTERVIEW_SECTIONS };
 }

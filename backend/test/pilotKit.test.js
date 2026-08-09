@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildPilotMetrics, buildPilotReadiness, normalizePilotFeedback } from '../domain/pilotKit.js';
+import { buildPilotMetrics, buildPilotNextActions, buildPilotReadiness, normalizePilotFeedback } from '../domain/pilotKit.js';
 
 const technicalInputs = {
   runtime: { ready: true },
@@ -96,4 +96,17 @@ test('pilot readiness does not pass source gate with demo-only feeds', () => {
   });
   assert.equal(result.checks.find((check) => check.id === 'source_health').pass, false);
   assert.equal(result.technicalReady, false);
+});
+
+test('pilot next actions are derived from failed gates', () => {
+  const actions = buildPilotNextActions({ checks: [{ id: 'source_health', label: 'Fuentes', pass: false }, { id: 'economic_value', label: 'Valor', pass: true }] });
+  assert.deepEqual(actions, [
+    'Registrar al menos una fuente productiva autorizada y observar su health en staging.',
+  ]);
+});
+
+test('pilot next actions provide a go/no-go sequence when all gates pass', () => {
+  const actions = buildPilotNextActions({ checks: [{ id: 'runtime', label: 'Runtime', pass: true }] });
+  assert.equal(actions.length, 3);
+  assert.match(actions[0], /go\/no-go/);
 });
