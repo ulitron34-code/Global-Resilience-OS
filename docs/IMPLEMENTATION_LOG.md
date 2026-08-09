@@ -514,7 +514,7 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
   métricas separadas.
 - La UI conserva `—` cuando no hay evidencia y muestra la nota del scorecard;
   el auditor de contrato UI verifica estas claves.
-La suite vigente queda en 96 pruebas backend PASS.
+La suite vigente queda en 99 pruebas backend PASS.
 
 ## Bloque: integración del plan de medición al readiness (2026-08-09)
 
