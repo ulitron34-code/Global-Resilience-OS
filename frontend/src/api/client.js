@@ -474,6 +474,14 @@ export async function getSectorBenchmark(minCohort = 3) {
   try { return await fetchWithTimeout(`${BACKEND_URL}/api/benchmarks/sectors?minCohort=${encodeURIComponent(minCohort)}`); } catch (error) { return localFallback({ sectors: [], totals: { completedOutcomes: 0, publishedSectors: 0 }, readiness: { status: 'unavailable' }, evidencePolicy: { marketClaimAllowed: false }, error: error.message }, error); }
 }
 
+export async function getHistoricalBenchmarkPlan(modelId = '') {
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/models/benchmark-plan${modelId ? `?modelId=${encodeURIComponent(modelId)}` : ''}`); } catch (error) { return localFallback({ status: 'unavailable', targetEventCount: 10, minimumBacktestEventCount: 3, eligibleEventCount: 0, remainingTargetSlots: 10, filledEvents: [], gates: { productionClaim: 'abstain_until_licensed_review' }, error: error.message }, error); }
+}
+
+export async function getPlaybookReadiness() {
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/playbooks/readiness`); } catch (error) { return localFallback({ status: 'unavailable', requiredPlaybooksPerVertical: 5, verticals: [], externalExecution: 'blocked_until_human_approval', error: error.message }, error); }
+}
+
 export async function runDemoIngestionJob() {
   const data = await fetchWithTimeout(`${BACKEND_URL}/api/jobs/demo-ingest`, { method: 'POST' });
   setBackendStatus('online');

@@ -31,6 +31,7 @@ import EnterpriseReadinessPanel from './EnterpriseReadinessPanel';
 import EvidenceManifestPanel from './EvidenceManifestPanel';
 import CooperativeNetworkPanel from './CooperativeNetworkPanel';
 import SectorBenchmarkPanel from './SectorBenchmarkPanel';
+import ExecutionCoveragePanel from './ExecutionCoveragePanel';
 import { useSessionStore } from '../store/useSessionStore';
 
 export function NetworkExposureView({ onScenario }) {
@@ -224,6 +225,7 @@ export function OperationsView() {
     <OperationalScorecardPanel />
     <CooperativeNetworkPanel />
     <SectorBenchmarkPanel />
+    <ExecutionCoveragePanel />
     <AuditIntegrityPanel />
     <SlaPanel />
     <DeadLetterPanel />

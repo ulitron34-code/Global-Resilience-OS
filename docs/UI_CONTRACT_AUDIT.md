@@ -14,3 +14,6 @@ una entrevista real con un cliente.
 El mismo auditor verifica que `OperationalScorecardPanel` muestra las tres
 latencias del scorecard (`timeToDetectionMinutes`,
 `timeToExplanationMinutes` y `timeToDecisionMinutes`) y su nota de evidencia.
+
+Tambien verifica que Operations expone `ExecutionCoveragePanel`, con el
+objetivo de eventos historicos y la cobertura de playbooks por vertical inicial.
