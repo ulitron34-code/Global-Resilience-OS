@@ -10,6 +10,7 @@ import { getCalibrationEligibility, filterEligibleCalibrationFixtures } from './
 import { isIllustrativeSource } from './sourceClassification.js';
 import { evaluateProductiveSource } from './sourceReadiness.js';
 import { buildDefaultPilotMeasurementPlan, evaluatePilotMeasurementPlan, normalizePilotMeasurementPlan } from './pilotMeasurement.js';
+import { getCapacityOffer, listCapacityOffers, normalizeCapacityInquiry } from './capacityMarketplace.js';
 
 const now = new Date().toISOString();
 const DEFAULT_ORGANIZATION_ID = 'nashadi-demo';
@@ -47,7 +48,7 @@ const initialAuditLog = [
   { id: 'AUD-0001', entityType: 'case', entityId: 'RS-0827', action: 'case_opened', actor: 'system', message: 'Umbral de impacto mayor a $2M activado.', createdAt: now },
 ];
 const restored = await restoreState(structuredClone(seed));
-const state = { alerts: normalizeTenantCollection(restored.alerts), cases: normalizeTenantCollection(restored.cases), scenarios: normalizeTenantCollection(restored.scenarios), sources: normalizeTenantCollection(restored.sources), deadLetters: normalizeTenantCollection(restored.deadLetters || []), calibrationFixtures: normalizeTenantCollection(restored.calibrationFixtures || []), pilotFeedback: normalizeTenantCollection(restored.pilotFeedback || []), pilotMeasurementPlans: normalizeTenantCollection(restored.pilotMeasurementPlans || []), incidents: normalizeTenantCollection(restored.incidents || []), sourceIntakeReviews: normalizeTenantCollection(restored.sourceIntakeReviews || []), decisionShares: normalizeTenantCollection(restored.decisionShares || []) };
+const state = { alerts: normalizeTenantCollection(restored.alerts), cases: normalizeTenantCollection(restored.cases), scenarios: normalizeTenantCollection(restored.scenarios), sources: normalizeTenantCollection(restored.sources), deadLetters: normalizeTenantCollection(restored.deadLetters || []), calibrationFixtures: normalizeTenantCollection(restored.calibrationFixtures || []), pilotFeedback: normalizeTenantCollection(restored.pilotFeedback || []), pilotMeasurementPlans: normalizeTenantCollection(restored.pilotMeasurementPlans || []), capacityInquiries: normalizeTenantCollection(restored.capacityInquiries || []), incidents: normalizeTenantCollection(restored.incidents || []), sourceIntakeReviews: normalizeTenantCollection(restored.sourceIntakeReviews || []), decisionShares: normalizeTenantCollection(restored.decisionShares || []) };
 const auditLog = restored.auditLog || initialAuditLog;
 const notifications = normalizeTenantCollection(restored.notifications || [
   { id: 'NOT-0001', type: 'critical_alert', title: 'SMW-5 requiere atención', message: 'Existe una alerta crítica abierta en Suez / Mar Rojo.', read: false, createdAt: now },
@@ -252,6 +253,15 @@ export function savePilotMeasurementPlan(input, actor = 'operator', organization
   persistState(state, auditLog, notifications, comments, webhooks, webhookDeliveries, jobRuns);
   return clone(evaluatePilotMeasurementPlan(normalized));
 }
+export function listCapacityMarketplaceOffers(filters = {}) { return listCapacityOffers(filters); }
+export function listCapacityInquiries(organizationId = DEFAULT_ORGANIZATION_ID) { return clone(state.capacityInquiries.filter((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId).map((item) => ({ ...item, offer: getCapacityOffer(item.offerId) }))); }
+export function createCapacityInquiry(input, actor = 'operator', organizationId = DEFAULT_ORGANIZATION_ID) {
+  const item = normalizeCapacityInquiry(input, organizationId, actor);
+  state.capacityInquiries.unshift(item);
+  auditLog.unshift({ id: `AUD-${String(auditLog.length + 1).padStart(4, '0')}`, entityType: 'capacity_inquiry', entityId: item.id, action: 'capacity_inquiry_created', actor, message: `Solicitud local de capacidad ${item.offerId} registrada; acción externa bloqueada.`, createdAt: item.createdAt, organizationId });
+  persistState(state, auditLog, notifications, comments, webhooks, webhookDeliveries, jobRuns);
+  return clone({ ...item, offer: getCapacityOffer(item.offerId) });
+}
 export function recordPilotFeedback(input, actor = 'operator', organizationId = DEFAULT_ORGANIZATION_ID) {
   const item = { id: `PFB-${randomBytes(4).toString('hex').toUpperCase()}`, organizationId, ...input, createdAt: new Date().toISOString(), createdBy: actor };
   state.pilotFeedback.unshift(item);
@@ -443,7 +453,7 @@ export function getDecisionPackageByShareToken(token) {
 }
 function auditBelongsToOrganization(item, organizationId) {
   if (item?.organizationId) return item.organizationId === organizationId;
-  const collections = [state.alerts, state.cases, state.scenarios, state.sources, state.incidents, state.sourceIntakeReviews, state.calibrationFixtures, state.pilotFeedback, state.pilotMeasurementPlans, state.decisionShares];
+  const collections = [state.alerts, state.cases, state.scenarios, state.sources, state.incidents, state.sourceIntakeReviews, state.calibrationFixtures, state.pilotFeedback, state.pilotMeasurementPlans, state.capacityInquiries, state.decisionShares];
   const entity = collections.flat().find((candidate) => candidate.id === item.entityId);
   return entity ? (entity.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId : organizationId === DEFAULT_ORGANIZATION_ID;
 }
@@ -676,6 +686,7 @@ export function resetLocalDemo(actor = 'admin') {
   state.calibrationFixtures = [];
   state.pilotFeedback = [];
   state.pilotMeasurementPlans = [];
+  state.capacityInquiries = [];
   state.incidents = [];
   state.sourceIntakeReviews = [];
   state.decisionShares = [];
@@ -693,7 +704,7 @@ export function restoreLocalSnapshot(snapshot, actor = 'admin', organizationId =
   if (snapshot?.organizationId && snapshot.organizationId !== organizationId) throw new Error('Snapshot pertenece a otra organizaciÃ³n');
   if (!snapshot?.organizationId && organizationId !== DEFAULT_ORGANIZATION_ID) throw new Error('Snapshot legacy sÃ³lo puede restaurarse en el tenant demo');
   const candidate = snapshot?.state;
-  const collections = ['alerts', 'cases', 'scenarios', 'sources', 'deadLetters', 'calibrationFixtures', 'pilotFeedback', 'pilotMeasurementPlans', 'incidents', 'sourceIntakeReviews', 'decisionShares'];
+  const collections = ['alerts', 'cases', 'scenarios', 'sources', 'deadLetters', 'calibrationFixtures', 'pilotFeedback', 'pilotMeasurementPlans', 'capacityInquiries', 'incidents', 'sourceIntakeReviews', 'decisionShares'];
   if (!candidate || collections.some((key) => !Array.isArray(candidate[key]))) throw new Error('Snapshot inválido: faltan colecciones principales');
   if ([...collections, 'auditLog', 'notifications', 'comments', 'webhooks', 'webhookDeliveries', 'jobRuns'].some((key) => {
     const value = key === 'auditLog' || key === 'notifications' || key === 'comments' || key === 'webhooks' || key === 'webhookDeliveries' || key === 'jobRuns' ? snapshot[key] : candidate[key];

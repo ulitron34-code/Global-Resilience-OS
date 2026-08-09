@@ -71,3 +71,8 @@ siguiente fase.
 Capacidades adicionales: registro de modelos y supuestos (`/api/models`) y
 detalle de fuentes (`/api/sources/:id`) disponibles para la trazabilidad de
 cada decisión.
+
+El catálogo local de capacidad de contingencia (`/api/capacity/marketplace`)
+permite comparar costo, tiempo, cobertura y prerrequisitos, y registrar
+inquiries tenant-scoped. Las ofertas son ilustrativas y toda contratación,
+disponibilidad y cotización permanecen bloqueadas para verificación externa.

@@ -486,7 +486,7 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
   métricas separadas.
 - La UI conserva `—` cuando no hay evidencia y muestra la nota del scorecard;
   el auditor de contrato UI verifica estas claves.
-La suite vigente queda en 90 pruebas backend PASS.
+La suite vigente queda en 92 pruebas backend PASS.
 
 ## Bloque: integración del plan de medición al readiness (2026-08-09)
 
@@ -494,6 +494,16 @@ La suite vigente queda en 90 pruebas backend PASS.
   requeridas del plan de medición.
 - Readiness, UI y paquete exportable comparten el mismo bloqueo y siguiente
   acción cuando falta la configuración.
+
+## Bloque: marketplace local de capacidad de contingencia (2026-08-09)
+
+- Se añadió un catálogo comparable de capacidad alterna con costo estimado,
+  lead time, cobertura, unidades y prerrequisitos.
+- `GET /api/capacity/marketplace` filtra ofertas y
+  `POST /api/capacity/inquiries` registra una solicitud por tenant en estado
+  `draft_for_external_review`.
+- La disponibilidad y contratación permanecen explícitamente bloqueadas; no
+  se simula contacto con proveedores ni reserva de capacidad.
 ## Bloque: integridad y redacción del preview cooperativo (2026-08-09)
 
 - El preview cooperativo usa la misma huella SHA-256 verificable que los

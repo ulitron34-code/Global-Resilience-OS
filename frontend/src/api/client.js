@@ -381,6 +381,19 @@ export async function savePilotMeasurementPlan(input) {
   return fetchWithTimeout(`${BACKEND_URL}/api/pilots/measurement-plan`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(input) });
 }
 
+export async function getCapacityMarketplace(filters = {}) {
+  const query = new URLSearchParams(Object.entries(filters).filter(([, value]) => value !== undefined && value !== ''));
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/capacity/marketplace${query.toString() ? `?${query}` : ''}`); } catch (error) { return localFallback({ offers: [], error: error.message }, error); }
+}
+
+export async function getCapacityInquiries() {
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/capacity/inquiries`); } catch (error) { return localFallback([], error); }
+}
+
+export async function createCapacityInquiry(input) {
+  return fetchWithTimeout(`${BACKEND_URL}/api/capacity/inquiries`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(input) });
+}
+
 export async function getPilotPackage() { return fetchWithTimeout(`${BACKEND_URL}/api/pilots/package`); }
 export async function downloadPilotPackage(format = 'json') {
   const normalized = format === 'md' ? 'markdown' : format;

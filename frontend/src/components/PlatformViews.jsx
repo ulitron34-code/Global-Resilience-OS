@@ -24,6 +24,7 @@ import AssistiveSuggestionPanel from './AssistiveSuggestionPanel';
 import OperationalScorecardPanel from './OperationalScorecardPanel';
 import PilotPackagePanel from './PilotPackagePanel';
 import PilotMeasurementPanel from './PilotMeasurementPanel';
+import CapacityMarketplacePanel from './CapacityMarketplacePanel';
 import EnterpriseReadinessPanel from './EnterpriseReadinessPanel';
 import CooperativeNetworkPanel from './CooperativeNetworkPanel';
 import { useSessionStore } from '../store/useSessionStore';
@@ -207,6 +208,7 @@ export function OperationsView() {
     <StructuredPilotEvidencePanel />
     <PilotPackagePanel />
     <PilotMeasurementPanel />
+    <CapacityMarketplacePanel />
     <EnterpriseReadinessPanel />
     <IncidentResponsePanel />
     <SecurityPosturePanel />

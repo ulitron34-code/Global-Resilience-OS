@@ -101,6 +101,9 @@ import {
   updateCase,
   getPilotMeasurementPlan,
   savePilotMeasurementPlan,
+  listCapacityMarketplaceOffers,
+  listCapacityInquiries,
+  createCapacityInquiry,
   listPilotFeedback,
   recordPilotFeedback,
   listSourceIntakeReviews,
@@ -649,6 +652,9 @@ app.get('/api/pilots/interview-guide', authIfConfigured, roleIfConfigured('admin
 app.get('/api/pilots/metrics', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => { const organizationId = req.user?.organizationId || DEFAULT_ORGANIZATION_ID; return res.json(buildPilotMetrics({ cases: listCases({ limit: 200, organizationId }), actionPlans: listActionPlans({ limit: 200, organizationId }), sourceHealth: getSourceHealthOverview(Date.now(), organizationId), notifications: listNotifications(false, organizationId) })); });
 app.get('/api/pilots/measurement-plan', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(getPilotMeasurementPlan(req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
 app.post('/api/pilots/measurement-plan', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => { try { res.status(201).json(savePilotMeasurementPlan(req.body || {}, req.user?.email || 'operator', req.user?.organizationId || DEFAULT_ORGANIZATION_ID)); } catch (error) { res.status(400).json({ error: error.message }); } });
+app.get('/api/capacity/marketplace', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json({ offers: listCapacityMarketplaceOffers(req.query), disclaimer: 'Catálogo local ilustrativo; no confirma disponibilidad, precio, SLA ni capacidad contractual.' }));
+app.get('/api/capacity/inquiries', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(listCapacityInquiries(req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
+app.post('/api/capacity/inquiries', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => { try { res.status(201).json(createCapacityInquiry(req.body || {}, req.user?.email || 'operator', req.user?.organizationId || DEFAULT_ORGANIZATION_ID)); } catch (error) { res.status(400).json({ error: error.message }); } });
 app.use('/api/pilots/package', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res, next) => {
   if (!['markdown', 'md'].includes(String(req.query.format || '').toLowerCase())) return next();
   const organizationId = req.user?.organizationId || DEFAULT_ORGANIZATION_ID;

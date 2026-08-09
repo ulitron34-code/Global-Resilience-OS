@@ -584,6 +584,14 @@ describe('Global Resilience OS API', () => {
     const pilotJsonBody = await pilotJson.json();
     assert.equal(pilotJsonBody.integrity.algorithm, 'sha256');
     assert.equal(verifyPackageIntegrity(pilotJsonBody), true);
+    const capacity = await fetch(`${baseUrl}/api/capacity/marketplace?category=connectivity`);
+    assert.equal(capacity.status, 200);
+    const capacityBody = await capacity.json();
+    assert.equal(capacityBody.offers.length, 1);
+    assert.match(capacityBody.disclaimer, /no confirma disponibilidad/);
+    const inquiry = await fetch(`${baseUrl}/api/capacity/inquiries`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ offerId: capacityBody.offers[0].id, requestedUnits: 1, caseId: 'RS-0827' }) });
+    assert.equal(inquiry.status, 201);
+    assert.equal((await inquiry.json()).externalAction, 'blocked');
     const measurementPlan = await fetch(`${baseUrl}/api/pilots/measurement-plan`);
     assert.equal(measurementPlan.status, 200);
     assert.equal((await measurementPlan.json()).status, 'not_ready');
