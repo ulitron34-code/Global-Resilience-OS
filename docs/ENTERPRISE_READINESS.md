@@ -12,9 +12,10 @@ credenciales o usuarios reales. Los checks de esquema y release sólo pasan
 cuando el proceso que ejecutó la evidencia establece explícitamente:
 
 ```powershell
+$env:LOCAL_SCHEMA_AUDIT_VERIFIED = 'true'
 $env:LOCAL_RELEASE_GATE_VERIFIED = 'true'
 ```
 
-El valor no debe fijarse permanentemente en Render o Vercel: representa una
-ejecución verificable del checkout actual y debe repetirse después de cada
+Los valores no deben fijarse permanentemente en Render o Vercel: representan
+una ejecución verificable del checkout actual y deben repetirse después de cada
 cambio o despliegue.
