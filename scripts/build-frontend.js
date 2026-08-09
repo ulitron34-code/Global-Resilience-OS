@@ -9,4 +9,5 @@ const viteEntry = resolve(frontend, 'node_modules/vite/dist/node/index.js');
 if (!existsSync(viteEntry)) throw new Error('No existe el runtime local de Vite');
 process.chdir(frontend);
 const { build } = await import(pathToFileURL(viteEntry).href);
-await build({ root: frontend, configFile: resolve(frontend, 'vite.config.js') });
+const configModule = await import(pathToFileURL(resolve(frontend, 'vite.config.js')).href);
+await build({ ...(configModule.default || {}), root: frontend, configFile: false });

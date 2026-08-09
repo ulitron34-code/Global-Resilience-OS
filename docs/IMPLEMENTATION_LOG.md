@@ -380,3 +380,6 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
 - El gate de calidad del preview ahora se acota a las fuentes declaradas por el
   plan; evita que una fuente demo no relacionada bloquee una futura fuente
   productiva y conserva el gate global para auditar el catálogo completo.
+- La interfaz de Scenario-to-Action ahora permite declarar la fuente de
+  evidencia y muestra de forma explícita si el preview queda apto para gate
+  productivo o solo como borrador con abstención material.

@@ -54,7 +54,7 @@ externas se mantienen fuera de alcance por decisión del proyecto.
 | Calidad de modelos | Invariantes locales y carga de fixtures de calibración | `/api/models/validation`, `/api/models/calibration` | Implementado local; datos históricos pendientes |
 
 | Producto | Impact Graph local con nodos y aristas explicables | `/api/graph` + `/api/graph/paths` | Implementado local |
-| Producto | Playbooks Scenario-to-Action con economía, pasos y evidencia | `/api/playbooks` + `/api/action-plans/preview` | Implementado local |
+| Producto | Playbooks Scenario-to-Action con economía, pasos, fuente de evidencia y estado del gate | `/api/playbooks` + `/api/action-plans/preview` | Implementado local |
 | Documentación | Requisitos de producto, contratos de datos y bitácora de implementación | `docs/PRODUCT_REQUIREMENTS.md`, `docs/DATA_CONTRACTS.md`, `docs/IMPLEMENTATION_LOG.md` | Implementado |
 
 ## Gates locales
