@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { after, before, describe, it } from 'node:test';
 import { startServer, stopServer } from '../server.js';
 import { createActionPlan, getActionPlan, listActionPlans } from '../domain/actionPlanStore.js';
+import { verifyPackageIntegrity } from '../domain/packageIntegrity.js';
 
 let server;
 let baseUrl;
@@ -576,6 +577,11 @@ describe('Global Resilience OS API', () => {
     assert.ok(Array.isArray(packageBody.evidenceChain.observedSourceIds));
     assert.ok(Number.isInteger(packageBody.evidenceChain.assumedScenarioCount));
     assert.equal(packageBody.evidenceChain.assumedScenarioCount, packageBody.scenarios.length);
+    const pilotJson = await fetch(`${baseUrl}/api/pilots/package`);
+    assert.equal(pilotJson.status, 200);
+    const pilotJsonBody = await pilotJson.json();
+    assert.equal(pilotJsonBody.integrity.algorithm, 'sha256');
+    assert.equal(verifyPackageIntegrity(pilotJsonBody), true);
     const markdownPackage = await fetch(`${baseUrl}/api/cases/RS-0827/decision-package?format=markdown`);
     assert.equal(markdownPackage.status, 200);
     const pilotMarkdown = await fetch(`${baseUrl}/api/pilots/package?format=markdown`);
@@ -585,6 +591,7 @@ describe('Global Resilience OS API', () => {
     assert.match(pilotMarkdownBody, /Paquete de preparaci/);
     assert.match(pilotMarkdownBody, /Organizacion: nashadi-demo/);
     assert.match(pilotMarkdownBody, /Evidencia externa requerida: SI/);
+    assert.match(pilotMarkdownBody, /Integridad: sha256/);
     assert.equal(markdownPackage.headers.get('content-type'), 'text/markdown; charset=utf-8');
     const markdownBody = await markdownPackage.text();
     assert.match(markdownBody, /Paquete de decisión/);

@@ -1,5 +1,12 @@
 # Implementation Log
 
+## Bloque: integridad criptográfica del paquete de piloto (2026-08-09)
+
+- JSON y Markdown parten del mismo paquete con huella SHA-256 basada en JSON
+  canónico ordenado.
+- La prueba de API recalcula y verifica el digest; el artefacto sigue marcado
+  como evidencia local, no como firma legal o certificación.
+
 ## Bloque: trazabilidad del paquete de piloto (2026-08-09)
 
 - Las exportaciones JSON y Markdown del piloto incluyen el tenant y metadatos

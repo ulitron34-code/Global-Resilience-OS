@@ -25,3 +25,6 @@ prueba comercial.
 El paquete de piloto incluye `organizationId` y `packageMetadata` para
 identificar el tenant, el tipo de artefacto y que la evidencia externa sigue
 siendo requerida; la exportación Markdown conserva esos metadatos.
+Las exportaciones incluyen además una huella `sha256` con canonicalización
+`sorted-json-v1`; sirve para detectar modificaciones posteriores del paquete,
+pero no sustituye firma criptográfica gestionada ni validación legal.

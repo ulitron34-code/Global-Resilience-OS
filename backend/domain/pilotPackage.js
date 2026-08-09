@@ -15,6 +15,7 @@ export function pilotPackageToMarkdown(packet = {}) {
     `Organizacion: ${safe(packet.organizationId)}`,
     `Tipo de paquete: ${safe(packet.packageMetadata?.packageType, 'pilot-readiness')}`,
     `Evidencia externa requerida: ${packet.packageMetadata?.externalEvidenceRequired ? 'SI' : 'NO'}`, '',
+    `Integridad: ${safe(packet.integrity?.algorithm, 'sin huella')} / ${safe(packet.integrity?.digest, 'sin digest')}`, '',
     '## Estado', '',
     `- **Estado:** ${safe(readiness.status)}`,
     `- **Readiness tecnico:** ${readiness.technicalReady ? 'PASS' : 'PENDIENTE'}`,

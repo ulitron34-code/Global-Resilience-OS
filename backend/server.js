@@ -26,6 +26,7 @@ import { buildModelGovernance } from './domain/modelGovernance.js';
 import { buildAssistiveSuggestion } from './domain/assistiveAgent.js';
 import { buildPilotMetrics, buildPilotNextActions, buildPilotReadiness, getPilotInterviewGuide, normalizePilotFeedback } from './domain/pilotKit.js';
 import { pilotPackageToMarkdown } from './domain/pilotPackage.js';
+import { attachPackageIntegrity } from './domain/packageIntegrity.js';
 import { decisionPackageToMarkdown } from './domain/decisionPackageMarkdown.js';
 import { summarizeActionPlanEvidence } from './domain/decisionPackageEvidence.js';
 import { getIncidentRunbook } from './domain/incidentOps.js';
@@ -657,7 +658,7 @@ app.use('/api/pilots/package', authIfConfigured, roleIfConfigured('admin', 'risk
   const actionPlans = listActionPlans({ limit: 200, organizationId });
   const metrics = buildPilotMetrics({ cases, actionPlans, sourceHealth, notifications: listNotifications(false, organizationId) });
   const scorecard = buildOperationalScorecard({ alerts: listAlerts({ limit: 200, organizationId }), cases, actionPlans, sources: listSources(organizationId), deadLetters: listDeadLetters(undefined, organizationId), incidents: listIncidents({ organizationId }), calibrationFixtures: getCalibrationOverview(undefined, organizationId).fixtures || [] });
-  const packet = { schemaVersion: '1.0.0-local', generatedAt: new Date().toISOString(), organizationId, packageMetadata: { packageType: 'pilot-readiness', organizationId, externalEvidenceRequired: true }, readiness, interviewGuide: getPilotInterviewGuide(), metrics, scorecard, feedback: listPilotFeedback(organizationId), nextActions: buildPilotNextActions(readiness), disclaimer: 'Paquete local de preparación; no demuestra valor comercial ni sustituye validación con cliente.' };
+  const packet = attachPackageIntegrity({ schemaVersion: '1.0.0-local', generatedAt: new Date().toISOString(), organizationId, packageMetadata: { packageType: 'pilot-readiness', organizationId, externalEvidenceRequired: true }, readiness, interviewGuide: getPilotInterviewGuide(), metrics, scorecard, feedback: listPilotFeedback(organizationId), nextActions: buildPilotNextActions(readiness), disclaimer: 'Paquete local de preparación; no demuestra valor comercial ni sustituye validación con cliente.' });
   return res.type('text/markdown').set('Content-Disposition', 'attachment; filename="global-resilience-pilot-package.md"').send(pilotPackageToMarkdown(packet));
 });
 app.get('/api/pilots/package', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => {
@@ -672,7 +673,7 @@ app.get('/api/pilots/package', authIfConfigured, roleIfConfigured('admin', 'risk
   const actionPlans = listActionPlans({ limit: 200, organizationId });
   const metrics = buildPilotMetrics({ cases, actionPlans, sourceHealth, notifications: listNotifications(false, organizationId) });
   const scorecard = buildOperationalScorecard({ alerts: listAlerts({ limit: 200, organizationId }), cases, actionPlans, sources: listSources(organizationId), deadLetters: listDeadLetters(undefined, organizationId), incidents: listIncidents({ organizationId }), calibrationFixtures: getCalibrationOverview(undefined, organizationId).fixtures || [] });
-  res.json({ schemaVersion: '1.0.0-local', generatedAt: new Date().toISOString(), organizationId, packageMetadata: { packageType: 'pilot-readiness', organizationId, externalEvidenceRequired: true }, readiness, interviewGuide: getPilotInterviewGuide(), metrics, scorecard, feedback: listPilotFeedback(organizationId), nextActions: buildPilotNextActions(readiness), disclaimer: 'Paquete local de preparación; no demuestra valor comercial ni sustituye validación con cliente.' });
+  res.json(attachPackageIntegrity({ schemaVersion: '1.0.0-local', generatedAt: new Date().toISOString(), organizationId, packageMetadata: { packageType: 'pilot-readiness', organizationId, externalEvidenceRequired: true }, readiness, interviewGuide: getPilotInterviewGuide(), metrics, scorecard, feedback: listPilotFeedback(organizationId), nextActions: buildPilotNextActions(readiness), disclaimer: 'Paquete local de preparación; no demuestra valor comercial ni sustituye validación con cliente.' }));
 });
 app.get('/api/pilots/feedback', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(listPilotFeedback(req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
 app.post('/api/pilots/feedback', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => { try { res.status(201).json(recordPilotFeedback(normalizePilotFeedback(req.body || {}), req.user?.email || 'operator', req.user?.organizationId || DEFAULT_ORGANIZATION_ID)); } catch (error) { res.status(400).json({ error: error.message }); } });
