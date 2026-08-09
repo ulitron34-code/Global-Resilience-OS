@@ -5,11 +5,16 @@ const PLAYBOOKS = [
   { id: 'source-quality-degradation', name: 'Degradación de fuente de datos', category: 'data-quality', ownerRole: 'admin', defaultSlaMinutes: 120, triggers: ['stale', 'error', 'duplicate'], steps: ['Marcar la fuente como degradada.', 'Bloquear recomendaciones dependientes si falta evidencia.', 'Activar fuente secundaria o modo abstención.', 'Registrar incidente del conector.', 'Restituir readiness después de prueba de frescura.'] },
   { id: 'regulatory-evidence-pack', name: 'Paquete de evidencia regulatoria', category: 'governance', ownerRole: 'risk_analyst', defaultSlaMinutes: 240, triggers: ['audit', 'regulatory', 'third_party'], steps: ['Seleccionar alcance y jurisdicción.', 'Reunir fuentes, supuestos y versión de modelo.', 'Vincular controles y evidencia de ejecución.', 'Revisión humana del paquete.', 'Exportar y sellar el artefacto.'] },
 ];
+const PLAYBOOK_VERSION = '1.0.0';
+const DEFAULT_EVIDENCE = ['source_ids', 'model_version', 'assumptions', 'human_approval', 'outcome_after_action'];
+function versioned(playbook) {
+  return { ...playbook, schemaVersion: '1.0.0-local', version: PLAYBOOK_VERSION, reviewStatus: 'local_seed', requiredEvidence: [...DEFAULT_EVIDENCE] };
+}
 function clone(value) { return structuredClone(value); }
-export function listPlaybooks() { return clone(PLAYBOOKS); }
-export function getPlaybook(id) { return clone(PLAYBOOKS.find((item) => item.id === id) || null); }
+export function listPlaybooks() { return clone(PLAYBOOKS.map(versioned)); }
+export function getPlaybook(id) { const playbook = PLAYBOOKS.find((item) => item.id === id); return playbook ? clone(versioned(playbook)) : null; }
 export function buildActionPlan(input = {}) {
-  const playbook = PLAYBOOKS.find((item) => item.id === input.playbookId) || PLAYBOOKS[0];
+  const playbook = versioned(PLAYBOOKS.find((item) => item.id === input.playbookId) || PLAYBOOKS[0]);
   const lossIfWaitUsd = Math.max(0, Number(input.lossIfWaitUsd || 0));
   const mitigationCostUsd = Math.max(0, Number(input.mitigationCostUsd || 0));
   const protectedValueUsd = Math.max(0, Number(input.protectedValueUsd || Math.max(lossIfWaitUsd - mitigationCostUsd, 0)));
