@@ -428,6 +428,15 @@ describe('Global Resilience OS API', () => {
       const tenantBQuality = await fetch(`${baseUrl}/api/quality/report`, { headers: { authorization: `Bearer ${tenantB.token}` } });
       assert.equal(tenantBQuality.status, 200);
       assert.equal((await tenantBQuality.json()).organizationId, 'tenant-b-demo');
+      const tenantAAdmin = await loginTenant('tenant-a-admin@resilience.local');
+      const tenantBAdmin = await loginTenant('tenant-b-admin@resilience.local');
+      const tenantASnapshotResponse = await fetch(`${baseUrl}/api/ops/snapshot`, { headers: { authorization: `Bearer ${tenantAAdmin.token}` } });
+      assert.equal(tenantASnapshotResponse.status, 200);
+      const tenantASnapshot = await tenantASnapshotResponse.json();
+      assert.equal(tenantASnapshot.organizationId, 'tenant-a-demo');
+      assert.equal(tenantASnapshot.state.alerts.some((alert) => alert.id === 'INC-0827'), false);
+      const crossTenantRestore = await fetch(`${baseUrl}/api/ops/restore`, { method: 'POST', headers: { authorization: `Bearer ${tenantBAdmin.token}`, 'content-type': 'application/json' }, body: JSON.stringify(tenantASnapshot) });
+      assert.equal(crossTenantRestore.status, 400);
       const tenantBDefaultCase = await fetch(`${baseUrl}/api/cases/RS-0827`, { headers: { authorization: `Bearer ${tenantB.token}` } });
       assert.equal(tenantBDefaultCase.status, 404);
 

@@ -187,3 +187,12 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
   `AUTH_REQUIRED=true` y no exponen fuentes del tenant demo a otra organización.
 - Se añadió cobertura API de dos organizaciones para confirmar respuesta vacía,
   `organizationId` correcto y ausencia de filtración de fuentes.
+## Bloque: snapshots y readiness tenant-scoped (2026-08-09)
+
+- `GET /api/ops/snapshot` ahora exporta únicamente el estado de la
+  organización autenticada e incluye `organizationId` en el artefacto.
+- `POST /api/ops/restore` rechaza snapshots de otro tenant y reemplaza sólo la
+  colección de la organización objetivo, preservando los demás tenants.
+- Readiness empresarial, postura de seguridad y calibración usan el tenant del
+  token; se añadieron administradores demo por organización para probar el flujo
+  de backup/restore con control de rol.

@@ -384,6 +384,7 @@ export function getDecisionPackageByShareToken(token) {
   return { share: { id: share.id, caseId: share.caseId, audience: share.audience, status: share.status, expiresAt: share.expiresAt, accessedAt }, package: packageData, disclaimer: 'Vista de solo lectura; los datos demo y las limitaciones del paquete siguen vigentes.' };
 }
 function auditBelongsToOrganization(item, organizationId) {
+  if (item?.organizationId) return item.organizationId === organizationId;
   const collections = [state.alerts, state.cases, state.scenarios, state.sources, state.incidents, state.sourceIntakeReviews, state.calibrationFixtures, state.pilotFeedback, state.decisionShares];
   const entity = collections.flat().find((candidate) => candidate.id === item.entityId);
   return entity ? (entity.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId : organizationId === DEFAULT_ORGANIZATION_ID;
@@ -582,20 +583,24 @@ export function ingestEvent(input, actor = 'connector', organizationId = DEFAULT
   return { alert: clone(alert), created: true };
 }
 
-export function getReadiness() {
-  const sources = state.sources.map((source) => ({ id: source.id, name: source.name, status: source.status, lastEventAt: source.lastEventAt || null }));
-  const quality = getDataQualityReport();
+export function getReadiness(organizationId = DEFAULT_ORGANIZATION_ID) {
+  const sources = listSources(organizationId).map((source) => ({ id: source.id, name: source.name, status: source.status, lastEventAt: source.lastEventAt || null }));
+  const quality = getDataQualityReport(organizationId);
   const audit = getAuditIntegrity();
-  const sourceHealth = getSourceHealthOverview();
+  const sourceHealth = getSourceHealthOverview(Date.now(), organizationId);
   const persistence = getRemotePersistenceStatus();
   const persistenceReady = !persistence.enabled || (persistence.state === 'ready' && Boolean(persistence.organizationId));
   const checks = { persistence: persistenceReady, sourceRegistry: sources.length > 0, auth: true, dataQuality: quality.ready, auditIntegrity: audit.valid, sourceHealth: sourceHealth.ready };
-  return { ready: Object.values(checks).every(Boolean), checks, persistence: { enabled: persistence.enabled, state: persistence.state, organizationId: persistence.organizationId, lastError: persistence.lastError }, sources, checkedAt: new Date().toISOString() };
+  return { ready: Object.values(checks).every(Boolean), organizationId, checks, persistence: { enabled: persistence.enabled, state: persistence.state, organizationId: persistence.organizationId, lastError: persistence.lastError }, sources, checkedAt: new Date().toISOString() };
 }
 
-export function getLocalSnapshot() {
-  const safeWebhooks = webhooks.map(({ secret: _secret, ...webhook }) => ({ ...webhook, secretConfigured: true }));
-  return clone({ schemaVersion: 1, state, auditLog, notifications, comments, webhooks: safeWebhooks, webhookDeliveries, jobRuns, exportedAt: new Date().toISOString(), mode: 'local-platform' });
+export function getLocalSnapshot(organizationId = DEFAULT_ORGANIZATION_ID) {
+  const scopedState = Object.fromEntries(Object.entries(state).map(([key, items]) => [key, items.filter((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId)]));
+  const caseIds = new Set(scopedState.cases.map((item) => item.id));
+  const scopedComments = comments.filter((item) => caseIds.has(item.caseId) || (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId);
+  const safeWebhooks = webhooks.filter((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId).map(({ secret: _secret, ...webhook }) => ({ ...webhook, secretConfigured: true }));
+  const scopedAudit = auditLog.filter((item) => auditBelongsToOrganization(item, organizationId));
+  return clone({ schemaVersion: 1, organizationId, state: scopedState, auditLog: scopedAudit, notifications: notifications.filter((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId), comments: scopedComments, webhooks: safeWebhooks, webhookDeliveries: webhookDeliveries.filter((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId), jobRuns: jobRuns.filter((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId), exportedAt: new Date().toISOString(), mode: 'local-platform' });
 }
 
 export function resetLocalDemo(actor = 'admin') {
@@ -619,7 +624,9 @@ export function resetLocalDemo(actor = 'admin') {
   return { status: 'reset', mode: 'demo_local_only', actor, resetAt: new Date().toISOString(), counts: { alerts: state.alerts.length, cases: state.cases.length, scenarios: state.scenarios.length, sources: state.sources.length }, disclaimer: 'Reinicio local controlado; no disponible como operación de producción.' };
 }
 
-export function restoreLocalSnapshot(snapshot, actor = 'admin') {
+export function restoreLocalSnapshot(snapshot, actor = 'admin', organizationId = DEFAULT_ORGANIZATION_ID) {
+  if (snapshot?.organizationId && snapshot.organizationId !== organizationId) throw new Error('Snapshot pertenece a otra organizaciÃ³n');
+  if (!snapshot?.organizationId && organizationId !== DEFAULT_ORGANIZATION_ID) throw new Error('Snapshot legacy sÃ³lo puede restaurarse en el tenant demo');
   const candidate = snapshot?.state;
   const collections = ['alerts', 'cases', 'scenarios', 'sources', 'deadLetters', 'calibrationFixtures', 'pilotFeedback', 'incidents', 'sourceIntakeReviews', 'decisionShares'];
   if (!candidate || collections.some((key) => !Array.isArray(candidate[key]))) throw new Error('Snapshot inválido: faltan colecciones principales');
@@ -628,18 +635,31 @@ export function restoreLocalSnapshot(snapshot, actor = 'admin') {
     return !Array.isArray(value) || value.some((item) => !item || typeof item !== 'object' || typeof item.id !== 'string');
   })) throw new Error('Snapshot inválido: registros mal formados');
 
-  for (const key of collections) state[key] = clone(candidate[key]);
-  const replace = (target, value) => { target.splice(0, target.length, ...clone(value)); };
-  replace(auditLog, snapshot.auditLog);
-  replace(notifications, snapshot.notifications);
-  replace(comments, snapshot.comments);
-  replace(webhooks, snapshot.webhooks.map((webhook) => ({ ...webhook, secret: createWebhookSecret() })));
-  replace(webhookDeliveries, snapshot.webhookDeliveries);
-  replace(jobRuns, snapshot.jobRuns);
+  const incomingCollections = [...collections, 'notifications', 'webhooks', 'webhookDeliveries', 'jobRuns'];
+  if (incomingCollections.some((key) => {
+    const value = key === 'notifications' || key === 'webhooks' || key === 'webhookDeliveries' || key === 'jobRuns' ? snapshot[key] : candidate[key];
+    return value.some((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) !== organizationId);
+  })) throw new Error('Snapshot contiene registros de otra organizaciÃ³n');
+
+  const replaceTenant = (target, value) => {
+    const kept = target.filter((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) !== organizationId);
+    target.splice(0, target.length, ...kept, ...clone(value).map((item) => ({ ...item, organizationId: item.organizationId || organizationId })));
+  };
+  for (const key of collections) replaceTenant(state[key], candidate[key]);
+  const restoredCaseIds = new Set(candidate.cases.map((item) => item.id));
+  const keptComments = comments.filter((item) => !restoredCaseIds.has(item.caseId) && (item.organizationId || DEFAULT_ORGANIZATION_ID) !== organizationId);
+  comments.splice(0, comments.length, ...keptComments, ...clone(snapshot.comments).map((item) => ({ ...item, organizationId: item.organizationId || organizationId })));
+  replaceTenant(notifications, snapshot.notifications);
+  replaceTenant(webhooks, snapshot.webhooks.map(({ secret: _secret, ...webhook }) => ({ ...webhook, secret: createWebhookSecret() })));
+  replaceTenant(webhookDeliveries, snapshot.webhookDeliveries);
+  replaceTenant(jobRuns, snapshot.jobRuns);
+  const importedAudit = clone(snapshot.auditLog).map((item) => ({ ...item, organizationId: item.organizationId || organizationId }));
+  const keptAudit = auditLog.filter((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) !== organizationId && !auditBelongsToOrganization(item, organizationId));
+  auditLog.splice(0, auditLog.length, ...keptAudit, ...importedAudit);
   const restoredAt = new Date().toISOString();
-  auditLog.unshift({ id: `AUD-${String(auditLog.length + 1).padStart(4, '0')}`, entityType: 'platform', entityId: 'LOCAL', action: 'snapshot_restored', actor, message: 'Snapshot local restaurado de forma controlada.', createdAt: restoredAt });
+  auditLog.unshift({ id: `AUD-${String(auditLog.length + 1).padStart(4, '0')}`, organizationId, entityType: 'platform', entityId: 'LOCAL', action: 'snapshot_restored', actor, message: 'Snapshot local restaurado de forma controlada.', createdAt: restoredAt });
   persistState(state, auditLog, notifications, comments, webhooks, webhookDeliveries, jobRuns);
-  return { restored: true, restoredAt, schemaVersion: 1, counts: Object.fromEntries(collections.map((key) => [key, state[key].length])) };
+  return { restored: true, restoredAt, schemaVersion: 1, organizationId, counts: Object.fromEntries(collections.map((key) => [key, state[key].filter((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId).length])) };
 }
 
 export function getComplianceReadiness() {

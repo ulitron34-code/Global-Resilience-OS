@@ -268,11 +268,11 @@ app.get('/api/health', (req, res) => {
 });
 app.get('/api/version', (req, res) => res.json({ apiVersion: API_VERSION, serviceVersion: SERVICE_VERSION, environment: process.env.NODE_ENV || 'development' }));
 app.get('/api/health/readiness', (req, res) => {
-  const readiness = getReadiness();
+  const readiness = getReadiness(req.user?.organizationId || DEFAULT_ORGANIZATION_ID);
   res.status(readiness.ready ? 200 : 503).json(readiness);
 });
 app.get('/api/ops/snapshot', authIfConfigured, roleIfConfigured('admin'), (req, res) => {
-  res.type('application/json').set('Content-Disposition', 'attachment; filename="resilience-local-snapshot.json"').send(JSON.stringify(getLocalSnapshot(), null, 2));
+  res.type('application/json').set('Content-Disposition', 'attachment; filename="resilience-local-snapshot.json"').send(JSON.stringify(getLocalSnapshot(req.user?.organizationId || DEFAULT_ORGANIZATION_ID), null, 2));
 });
 app.post('/api/ops/control-plane/projection', authIfConfigured, roleIfConfigured('admin'), (req, res) => {
   try {
@@ -286,7 +286,7 @@ app.post('/api/ops/control-plane/projection', authIfConfigured, roleIfConfigured
 });
 app.post('/api/ops/restore', authIfConfigured, roleIfConfigured('admin'), (req, res) => {
   try {
-    res.json(restoreLocalSnapshot(req.body || {}, req.user?.email || 'admin'));
+    res.json(restoreLocalSnapshot(req.body || {}, req.user?.email || 'admin', req.user?.organizationId || DEFAULT_ORGANIZATION_ID));
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -316,11 +316,12 @@ app.get('/api/runtime/supabase/check', async (req, res) => {
 app.get('/api/runtime/supabase/persistence', (req, res) => res.json(getRemoteStoreStatus()));
 app.get('/api/runtime/config-contract', (req, res) => { const contract = getEnvironmentContract(); res.status(contract.ready ? 200 : 503).json(contract); });
 app.get('/api/readiness/enterprise', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => {
-  const modelGovernance = listModels().map((model) => { const calibration = getCalibrationOverview(model.id); return buildModelGovernance(model, getModelValidationReport(), calibration, benchmarkCalibration(calibration)); });
+  const organizationId = req.user?.organizationId || DEFAULT_ORGANIZATION_ID;
+  const modelGovernance = listModels().map((model) => { const calibration = getCalibrationOverview(model.id, organizationId); return buildModelGovernance(model, getModelValidationReport(), calibration, benchmarkCalibration(calibration)); });
   const runtime = getOperationalRuntimeReadiness();
   const schemaVerified = process.env.LOCAL_SCHEMA_AUDIT_VERIFIED === 'true';
   const releaseVerified = process.env.LOCAL_RELEASE_GATE_VERIFIED === 'true';
-  res.json(buildEnterpriseReadiness({ runtime, environmentContract: getEnvironmentContract(), security: buildSecurityPosture({ runtime, audit: getAuditIntegrity(), tenancy: { organizationId: DEFAULT_ORGANIZATION_ID }, snapshot: getLocalSnapshot() }), catalog: getDataCatalogReadiness(), modelGovernance, actionLibrary: getActionLibraryReadiness(), schemaAudit: schemaVerified, releaseGate: releaseVerified }));
+  res.json(buildEnterpriseReadiness({ runtime, environmentContract: getEnvironmentContract(), security: buildSecurityPosture({ runtime, audit: getAuditIntegrity(), tenancy: { organizationId }, snapshot: getLocalSnapshot(organizationId) }), catalog: getDataCatalogReadiness(), modelGovernance, actionLibrary: getActionLibraryReadiness(), schemaAudit: schemaVerified, releaseGate: releaseVerified }));
 });
 app.get('/api/data-catalog', (req, res) => res.json(listDataCatalog()));
 app.get('/api/data-catalog/readiness', (req, res) => res.json(getDataCatalogReadiness()));
@@ -640,7 +641,7 @@ app.get('/api/incidents/runbook', authIfConfigured, roleIfConfigured('admin', 'r
 app.get('/api/incidents', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(listIncidents({ ...req.query, organizationId: req.user?.organizationId || DEFAULT_ORGANIZATION_ID })));
 app.post('/api/incidents', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => { try { res.status(201).json(createIncident(req.body || {}, req.user?.email || 'operator', req.user?.organizationId || DEFAULT_ORGANIZATION_ID)); } catch (error) { res.status(400).json({ error: error.message }); } });
 app.patch('/api/incidents/:id', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => { try { const item = updateIncident(req.params.id, req.body || {}, req.user?.email || 'operator', req.user?.organizationId || DEFAULT_ORGANIZATION_ID); if (!item) return res.status(404).json({ error: 'Incidente no encontrado' }); res.json(item); } catch (error) { res.status(400).json({ error: error.message }); } });
-app.get('/api/security/posture', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(buildSecurityPosture({ runtime: getRuntimeReadiness(), audit: getAuditIntegrity(), tenancy: { organizationId: DEFAULT_ORGANIZATION_ID }, snapshot: getLocalSnapshot() })));
+app.get('/api/security/posture', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => { const organizationId = req.user?.organizationId || DEFAULT_ORGANIZATION_ID; return res.json(buildSecurityPosture({ runtime: getRuntimeReadiness(), audit: getAuditIntegrity(), tenancy: { organizationId }, snapshot: getLocalSnapshot(organizationId) })); });
 app.post('/api/ingest/batch', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => {
   try {
     const validation = validateBatchInput(req.body || {}, listSources(req.user?.organizationId || DEFAULT_ORGANIZATION_ID), { production: process.env.APP_MODE === 'production' });

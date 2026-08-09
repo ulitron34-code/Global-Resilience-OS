@@ -8,6 +8,8 @@ const USERS = [
   createUser('admin@resilience.local', 'demo123', 'admin', 'Platform Admin'),
   createUser('analyst@resilience.local', 'demo123', 'risk_analyst', 'Risk Analyst'),
   createUser('viewer@resilience.local', 'demo123', 'viewer', 'Read Only Viewer'),
+  createUser('tenant-a-admin@resilience.local', 'demo123', 'admin', 'Tenant A Admin', 'tenant-a-demo'),
+  createUser('tenant-b-admin@resilience.local', 'demo123', 'admin', 'Tenant B Admin', 'tenant-b-demo'),
   createUser('tenant-a@resilience.local', 'demo123', 'risk_analyst', 'Tenant A Analyst', 'tenant-a-demo'),
   createUser('tenant-b@resilience.local', 'demo123', 'risk_analyst', 'Tenant B Analyst', 'tenant-b-demo'),
 ];
