@@ -608,4 +608,10 @@ describe('Global Resilience OS API', () => {
     assert.equal(resetBody.counts.alerts, 4);
     assert.equal(resetBody.counts.cases, 3);
   });
+
+  it('rechaza referencias de playbook desconocidas', async () => {
+    const response = await fetch(`${baseUrl}/api/action-plans/preview`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ playbookId: 'unknown-playbook' }) });
+    assert.equal(response.status, 400);
+    assert.match((await response.json()).error, /Playbook no encontrado/);
+  });
 });

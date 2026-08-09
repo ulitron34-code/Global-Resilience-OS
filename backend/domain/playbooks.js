@@ -14,7 +14,10 @@ function clone(value) { return structuredClone(value); }
 export function listPlaybooks() { return clone(PLAYBOOKS.map(versioned)); }
 export function getPlaybook(id) { const playbook = PLAYBOOKS.find((item) => item.id === id); return playbook ? clone(versioned(playbook)) : null; }
 export function buildActionPlan(input = {}) {
-  const playbook = versioned(PLAYBOOKS.find((item) => item.id === input.playbookId) || PLAYBOOKS[0]);
+  const requestedId = input.playbookId ? String(input.playbookId) : null;
+  const rawPlaybook = requestedId ? PLAYBOOKS.find((item) => item.id === requestedId) : PLAYBOOKS[0];
+  if (!rawPlaybook) throw new Error(`Playbook no encontrado: ${requestedId}`);
+  const playbook = versioned(rawPlaybook);
   const lossIfWaitUsd = Math.max(0, Number(input.lossIfWaitUsd || 0));
   const mitigationCostUsd = Math.max(0, Number(input.mitigationCostUsd || 0));
   const protectedValueUsd = Math.max(0, Number(input.protectedValueUsd || Math.max(lossIfWaitUsd - mitigationCostUsd, 0)));
