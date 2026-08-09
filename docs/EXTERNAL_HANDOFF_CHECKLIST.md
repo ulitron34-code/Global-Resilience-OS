@@ -2,7 +2,7 @@
 
 ## Estado confirmado
 
-- GitHub: `main` sincronizado hasta `649d297`; el commit local siguiente queda pendiente de push si la conexión falla.
+- GitHub: el repositorio remoto sigue en `8a0cfc2`; los commits locales `a15750d`, `2820e23` y `43bd120` están listos, pero el push requiere recuperar permisos/conectividad HTTPS.
 - Supabase: migraciones `001_initial_schema.sql`, `002_enterprise_extensions.sql` y `003_platform_snapshots.sql` aplicadas.
 - Supabase: tablas principales y `platform_snapshots` verificadas; RLS activo con 3 políticas de organización.
 - Vercel: interfaz pública activa y mini-backend conectado.
