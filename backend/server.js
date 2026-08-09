@@ -303,10 +303,10 @@ app.get('/api/ops/metrics', authIfConfigured, roleIfConfigured('admin'), (req, r
     .sort((a, b) => b.count - a.count);
   res.json({ startedAt: operationalMetrics.startedAt, uptimeSeconds: Math.round(process.uptime()), requests: operationalMetrics.requests, errors: operationalMetrics.errors, memory: process.memoryUsage(), routes, generatedAt: new Date().toISOString() });
 });
-app.get('/api/compliance/readiness', (req, res) => res.json(getComplianceReadiness()));
+app.get('/api/compliance/readiness', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(getComplianceReadiness(req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
 app.get('/api/quality/report', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(getDataQualityReport(req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
 app.get('/api/governance/provenance', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(getProvenanceOverview(req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
-app.get('/api/governance/retention', (req, res) => res.json(getRetentionOverview()));
+app.get('/api/governance/retention', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(getRetentionOverview(Date.now(), req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
 app.get('/api/runtime/readiness', (req, res) => { const readiness = getOperationalRuntimeReadiness(); res.status(readiness.ready ? 200 : 503).json(readiness); });
 app.get('/api/runtime/supabase', (req, res) => res.json(getSupabaseReadiness()));
 app.get('/api/runtime/supabase/check', async (req, res) => {
@@ -691,11 +691,11 @@ app.get('/api/jobs', authIfConfigured, roleIfConfigured('admin', 'risk_analyst',
 app.post('/api/jobs/demo-ingest', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => res.status(201).json(runDemoIngestionJob(req.user?.email || 'scheduler', req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
 app.post('/api/jobs/sla-sweep', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => res.status(201).json(runSlaSweep(req.user?.email || 'scheduler', req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
 app.post('/api/jobs/source-health-sweep', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => res.status(201).json(runSourceHealthSweep(req.user?.email || 'scheduler', req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
-app.get('/api/metrics/overview', (req, res) => res.json(getOverviewMetrics({ vertical: req.query.vertical })));
+app.get('/api/metrics/overview', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(getOverviewMetrics({ vertical: req.query.vertical, organizationId: req.user?.organizationId || DEFAULT_ORGANIZATION_ID })));
  app.get('/api/metrics/scorecard', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => { const organizationId = req.user?.organizationId || DEFAULT_ORGANIZATION_ID; return res.json(buildOperationalScorecard({ alerts: listAlerts({ limit: 200, organizationId }), cases: listCases({ limit: 200, organizationId }), actionPlans: listActionPlans({ limit: 200, organizationId }), sources: listSources(organizationId), deadLetters: listDeadLetters(undefined, organizationId), incidents: listIncidents({ organizationId }), calibrationFixtures: getCalibrationOverview(undefined, organizationId).fixtures || [] })); });
-app.get('/api/briefs/latest', (req, res) => res.json(getLatestBrief({ audience: req.query.audience })));
-app.get('/api/briefs/latest/export', (req, res) => {
-  const brief = getLatestBrief({ audience: req.query.audience });
+app.get('/api/briefs/latest', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(getLatestBrief({ audience: req.query.audience, organizationId: req.user?.organizationId || DEFAULT_ORGANIZATION_ID })));
+app.get('/api/briefs/latest/export', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => {
+  const brief = getLatestBrief({ audience: req.query.audience, organizationId: req.user?.organizationId || DEFAULT_ORGANIZATION_ID });
   if (req.query.format === 'csv') {
     const rows = [['Campo', 'Valor'], ['Resilience score', brief.resilienceScore], ['Exposición USD', brief.exposureUsd], ['Eventos materiales', brief.materialEvents], ['Decisión requerida', brief.decisionRequired], ['Recomendación', brief.recommendation], ['Valor protegido USD', brief.protectedValueUsd], ['Confianza', brief.confidence]];
     res.type('text/csv').set('Content-Disposition', 'attachment; filename="resilience-brief.csv"').send(rows.map((row) => row.map((value) => `"${String(value).replaceAll('"', '""')}"`).join(',')).join('\n'));

@@ -1,5 +1,14 @@
 # Implementation Log
 
+## Bloque: métricas, briefs y gobernanza tenant-scoped (2026-08-09)
+
+- Métricas generales, brief ejecutivo, exportación, compliance y retención
+  reciben el `organizationId` del token y no calculan sobre el tenant demo.
+- Un tenant sin escenarios ya no rompe el brief: devuelve abstención explícita y
+  mantiene el requisito de revisión humana.
+- Se añadió cobertura API protegida para comprobar que métricas y briefs
+  identifican correctamente la organización autenticada.
+
 ## Bloque: Decision Room Markdown (2026-08-09)
 
 - Los enlaces compartibles de solo lectura admiten descarga Markdown sin

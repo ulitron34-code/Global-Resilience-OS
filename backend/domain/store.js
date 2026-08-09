@@ -662,7 +662,7 @@ export function restoreLocalSnapshot(snapshot, actor = 'admin', organizationId =
   return { restored: true, restoredAt, schemaVersion: 1, organizationId, counts: Object.fromEntries(collections.map((key) => [key, state[key].filter((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId).length])) };
 }
 
-export function getComplianceReadiness() {
+export function getComplianceReadiness(organizationId = DEFAULT_ORGANIZATION_ID) {
   const persistence = getRemotePersistenceStatus();
   const remotePersistenceReady = persistence.enabled && persistence.state === 'ready' && Boolean(persistence.organizationId);
   const controls = [
@@ -701,11 +701,12 @@ export function getProvenanceOverview(organizationId = DEFAULT_ORGANIZATION_ID) 
   return { scope: 'local-platform', organizationId, generatedAt: new Date().toISOString(), disclaimer: 'El registro documenta procedencia y supuestos locales; no prueba derechos de uso ni exactitud de mercado.', sources: sourceRecords, models: modelRecords, ready: sourceRecords.length > 0 && modelRecords.length > 0 };
 }
 
-export function getRetentionOverview(referenceTime = Date.now()) {
+export function getRetentionOverview(referenceTime = Date.now(), organizationId = DEFAULT_ORGANIZATION_ID) {
   const configuredDays = Number(process.env.LOCAL_RETENTION_DAYS || 365);
   const retentionDays = Number.isFinite(configuredDays) ? Math.min(Math.max(Math.floor(configuredDays), 1), 3650) : 365;
   const cutoffMs = referenceTime - retentionDays * 86_400_000;
-  const collections = { alerts: state.alerts, cases: state.cases, scenarios: state.scenarios, deadLetters: state.deadLetters, sourceIntakeReviews: state.sourceIntakeReviews, auditLog, comments, webhookDeliveries, jobRuns };
+  const belongs = (item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId;
+  const collections = { alerts: state.alerts.filter(belongs), cases: state.cases.filter(belongs), scenarios: state.scenarios.filter(belongs), deadLetters: state.deadLetters.filter(belongs), sourceIntakeReviews: state.sourceIntakeReviews.filter(belongs), auditLog: auditLog.filter((item) => auditBelongsToOrganization(item, organizationId)), comments: comments.filter((item) => belongs(item) || state.cases.some((candidate) => candidate.id === item.caseId && belongs(candidate))), webhookDeliveries: webhookDeliveries.filter(belongs), jobRuns: jobRuns.filter(belongs) };
   const summary = Object.entries(collections).map(([name, items]) => {
     const dated = items.filter((item) => Number.isFinite(Date.parse(item.createdAt || item.startedAt || item.updatedAt)));
     const eligible = dated.filter((item) => Date.parse(item.createdAt || item.startedAt || item.updatedAt) < cutoffMs);
@@ -837,14 +838,17 @@ export function createScenario(input, actor = 'operator', organizationId = DEFAU
 }
 
 export function getOverviewMetrics(filters = {}) {
-  const alerts = state.alerts.filter((item) => !filters.vertical || itemVertical(item) === filters.vertical);
-  const cases = state.cases.filter((item) => !filters.vertical || itemVertical(item) === filters.vertical);
+  const organizationId = filters.organizationId || DEFAULT_ORGANIZATION_ID;
+  const belongs = (item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId;
+  const alerts = state.alerts.filter((item) => belongs(item) && (!filters.vertical || itemVertical(item) === filters.vertical));
+  const cases = state.cases.filter((item) => belongs(item) && (!filters.vertical || itemVertical(item) === filters.vertical));
   return {
     resilienceScore: 72,
     vertical: filters.vertical || 'all',
     openAlerts: alerts.filter((item) => item.status === 'open').length,
     openCases: cases.filter((item) => item.status !== 'closed').length,
-    monitoredSources: state.sources.length,
+    organizationId,
+    monitoredSources: listSources(organizationId).length,
     exposureUsd: cases.filter((item) => item.status !== 'closed').reduce((sum, item) => sum + item.impactUsd, 0),
     lastUpdatedAt: new Date().toISOString(),
   };
@@ -897,9 +901,10 @@ export function updateCase(id, patch, actor = 'operator', organizationId = DEFAU
 
 export function getLatestBrief(options = {}) {
   const audience = ['executive', 'operator'].includes(options.audience) ? options.audience : 'executive';
-  const openCases = state.cases.filter((item) => item.status === 'open');
+  const organizationId = options.organizationId || DEFAULT_ORGANIZATION_ID;
+  const openCases = state.cases.filter((item) => item.status === 'open' && (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId);
   const exposureUsd = openCases.reduce((sum, item) => sum + item.impactUsd, 0);
-  const scenario = state.scenarios[0];
+  const scenario = state.scenarios.find((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId) || null;
   const decoratedScenario = decorateScenarioEvidence(scenario);
   const brief = {
     id: 'BRIEF-LATEST',
@@ -909,17 +914,18 @@ export function getLatestBrief(options = {}) {
     exposureUsd,
     materialEvents: state.alerts.filter((item) => item.status === 'open').length,
     decisionRequired: 'Autorizar reruteo preventivo del corredor Suez–Mar Rojo.',
-    recommendation: scenario.name,
-    protectedValueUsd: scenario.protectedValueUsd,
-    confidence: scenario.confidence,
+    organizationId,
+    recommendation: scenario?.name || 'Sin escenario disponible: revisión humana requerida.',
+    protectedValueUsd: scenario?.protectedValueUsd ?? null,
+    confidence: scenario?.confidence ?? null,
     assumptions: ['Los datos de esta demo son ilustrativos.', 'Cada recomendación debe enlazar a su fuente y versión de modelo.'],
     evidence: decoratedScenario?.evidence || null,
     evidenceClass: decoratedScenario?.evidenceClass || 'assumed',
   };
   if (audience === 'operator') brief.operatorDetail = {
     openCases: openCases.map((item) => decorateCase(item)),
-    topAlerts: listAlerts({ limit: 5 }),
-    pendingApprovals: state.cases.filter((item) => item.humanValidation === 'pending').map((item) => item.id),
+    topAlerts: listAlerts({ limit: 5, organizationId }),
+    pendingApprovals: state.cases.filter((item) => item.humanValidation === 'pending' && (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId).map((item) => item.id),
     actionEvidenceRequired: ['source_ids', 'model_version', 'assumptions', 'human_approval', 'outcome_after_action']
   };
   return brief;

@@ -428,6 +428,12 @@ describe('Global Resilience OS API', () => {
       const tenantBQuality = await fetch(`${baseUrl}/api/quality/report`, { headers: { authorization: `Bearer ${tenantB.token}` } });
       assert.equal(tenantBQuality.status, 200);
       assert.equal((await tenantBQuality.json()).organizationId, 'tenant-b-demo');
+      const tenantBMetrics = await fetch(`${baseUrl}/api/metrics/overview`, { headers: { authorization: `Bearer ${tenantB.token}` } });
+      const tenantBBrief = await fetch(`${baseUrl}/api/briefs/latest`, { headers: { authorization: `Bearer ${tenantB.token}` } });
+      assert.equal(tenantBMetrics.status, 200);
+      assert.equal(tenantBBrief.status, 200);
+      assert.equal((await tenantBMetrics.json()).organizationId, 'tenant-b-demo');
+      assert.equal((await tenantBBrief.json()).organizationId, 'tenant-b-demo');
       const tenantAAdmin = await loginTenant('tenant-a-admin@resilience.local');
       const tenantBAdmin = await loginTenant('tenant-b-admin@resilience.local');
       const tenantASnapshotResponse = await fetch(`${baseUrl}/api/ops/snapshot`, { headers: { authorization: `Bearer ${tenantAAdmin.token}` } });

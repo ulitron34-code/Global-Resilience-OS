@@ -14,7 +14,7 @@ El esquema OpenAPI resumido está en `docs/openapi.local.json`.
 - `GET /api/ops/metrics` — solicitudes, errores, latencia por ruta y memoria del proceso; requiere admin en modo protegido.
 - `GET /api/ops/sla` — estado de ventanas SLA por caso (`on_track`, `at_risk`, `overdue`, `closed`).
 - `GET /api/ops/source-health` — salud de fuentes por latencia, estado del conector y frescura del último evento; aislada por tenant y protegida por rol en modo autenticado.
-- `GET /api/metrics/overview` — exposición, alertas, casos y fuentes.
+- `GET /api/metrics/overview` — exposición, alertas, casos y fuentes del tenant autenticado.
 
 Los endpoints de alertas, casos y métricas aceptan `vertical` como filtro. Las alertas también aceptan `region`, `status` y `severity`. El frontend conserva este contexto en la barra superior y lo aplica a las vistas operativas.
 
@@ -44,7 +44,7 @@ Los endpoints de alertas, casos y métricas aceptan `vertical` como filtro. Las 
 - `GET /api/sources/:id` — detalle de una fuente.
 - `GET /api/models` — registro de modelos, versiones, supuestos y limitaciones.
 - `POST /api/scenarios` — crea un escenario validado.
-- `GET /api/briefs/latest` — brief ejecutivo generado desde el estado operativo.
+- `GET /api/briefs/latest` — brief ejecutivo generado desde el estado operativo del tenant autenticado; abstiene si no existe escenario.
 
 ## Evento de ingesta
 
