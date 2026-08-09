@@ -205,6 +205,7 @@ export function OperationsView() {
     <RegulatoryEvidencePanel />
     <DataQualityPanel />
     <GovernancePanel />
+    <RetentionPolicyConflictPanel />
     <SourceHealthPanel />
     <SourceHealthSweepPanel />
     <PilotReadinessPanel />
@@ -416,6 +417,12 @@ function StructuredPilotEvidencePanel() {
   const [message, setMessage] = useState('');
   const submit = async (event) => { event.preventDefault(); setMessage(''); try { await recordPilotFeedback(draft); setDraft((current) => ({ ...current, summary: '', evidence: '' })); setMessage('Evidencia estructurada registrada.'); } catch (error) { setMessage(error.message); } };
   return <section className="bg-panel border border-line rounded-lg p-4"><div className="font-mono text-[10px] uppercase tracking-widest text-signal">Pilot evidence ledger</div><h2 className="font-display text-lg font-semibold text-ink mt-1">Evidencia que abre el gate</h2><p className="text-xs text-ink-muted mt-2">Registra por separado valor economico y criterio de exito; el sistema no los infiere desde texto libre.</p><form onSubmit={submit} className="grid grid-cols-1 md:grid-cols-5 gap-2 mt-3"><select className="control" value={draft.evidenceType} onChange={(event) => setDraft({ ...draft, evidenceType: event.target.value })}><option value="economic_value">Valor economico</option><option value="success_criteria">Criterio de exito</option><option value="general">Evidencia general</option><option value="data_access">Acceso a datos</option><option value="adoption">Adopcion</option></select><input className="control" required value={draft.role} onChange={(event) => setDraft({ ...draft, role: event.target.value })} placeholder="Rol / sponsor" /><input className="control" required value={draft.summary} onChange={(event) => setDraft({ ...draft, summary: event.target.value })} placeholder="Hallazgo" /><input className="control" required value={draft.evidence} onChange={(event) => setDraft({ ...draft, evidence: event.target.value })} placeholder="Evidencia verificable" /><button className="border border-signal/40 text-signal rounded px-3 py-2 text-xs">Registrar evidencia</button></form>{message && <div role="status" className="text-xs text-signal mt-2">{message}</div>}</section>;
+}
+
+function RetentionPolicyConflictPanel() {
+  const [retention, setRetention] = useState({ policyConflictCount: 0, policyConflicts: [] });
+  useEffect(() => { getRetentionOverview().then(setRetention); }, []);
+  return <div className={`bg-panel border rounded-lg p-4 ${retention.policyConflictCount ? 'border-alert/40' : 'border-line'}`}><div className="flex items-center justify-between gap-3"><div><div className="font-mono text-[10px] uppercase tracking-widest text-signal">License retention guard</div><h2 className="font-display text-lg font-semibold text-ink mt-1">Compatibilidad contractual</h2></div><span className={`font-mono text-[10px] ${retention.policyConflictCount ? 'text-alert' : 'text-signal'}`}>{retention.policyConflictCount ? 'REVISAR' : 'SIN CONFLICTOS'}</span></div><p className="text-xs text-ink-muted mt-2">Compara la ventana local con la retención declarada por cada licencia conocida. No elimina ni modifica registros.</p>{retention.policyConflictCount ? <div className="mt-3 space-y-2">{retention.policyConflicts.map((item) => <div key={item.sourceId} className="border border-alert/30 rounded p-2 text-xs flex justify-between gap-3"><span className="text-ink-muted">{item.sourceName}</span><span className="font-mono text-[10px] text-alert">plataforma {item.platformRetentionDays}d · licencia {item.licenseRetentionDays}d</span></div>)}</div> : <div className="mt-3 text-xs text-signal">Las fuentes con retención declarada están dentro de la ventana local configurada.</div>}</div>;
 }
 
 function PilotReadinessPanel() {

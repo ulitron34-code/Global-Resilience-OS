@@ -69,6 +69,9 @@ El preview cooperativo exige consentimiento, cohorte minima y revision explicita
 de reidentificacion antes de generar senales compartibles; el modo real sigue
 bloqueado por `dry_run_only`.
 
+La gobernanza de retencion tambien compara la ventana local contra los limites
+de licencia declarados por fuente y marca conflictos sin ejecutar borrado.
+
 ```powershell
 cd backend; npm test
 cd ..; node scripts/local-smoke-test.js

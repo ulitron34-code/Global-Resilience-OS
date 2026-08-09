@@ -350,7 +350,18 @@ app.get('/api/ops/metrics', authIfConfigured, roleIfConfigured('admin'), (req, r
 app.get('/api/compliance/readiness', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(getComplianceReadiness(req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
 app.get('/api/quality/report', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(getDataQualityReport(req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
 app.get('/api/governance/provenance', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(getProvenanceOverview(req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
-app.get('/api/governance/retention', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(getRetentionOverview(Date.now(), req.user?.organizationId || DEFAULT_ORGANIZATION_ID, req.query.retentionDays)));
+app.get('/api/governance/retention', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => {
+  const organizationId = req.user?.organizationId || DEFAULT_ORGANIZATION_ID;
+  const retention = getRetentionOverview(Date.now(), organizationId, req.query.retentionDays);
+  const retentionConstraints = listSources(organizationId).map((source) => {
+    const licenseDays = Number(source.license?.retentionDays ?? source.retentionDays);
+    if (!Number.isFinite(licenseDays) || licenseDays < 1) return null;
+    const normalizedDays = Math.floor(licenseDays);
+    return { sourceId: source.id, sourceName: source.name, licenseRetentionDays: normalizedDays, platformRetentionDays: retention.retentionDays, conflict: retention.retentionDays > normalizedDays, status: retention.retentionDays > normalizedDays ? 'review_required' : 'within_license_window' };
+  }).filter(Boolean);
+  const policyConflicts = retentionConstraints.filter((item) => item.conflict);
+  res.json({ ...retention, retentionConstraints, policyConflicts, policyConflictCount: policyConflicts.length });
+});
 app.get('/api/runtime/readiness', (req, res) => { const readiness = getOperationalRuntimeReadiness(); res.status(readiness.ready ? 200 : 503).json(readiness); });
 app.get('/api/runtime/supabase', (req, res) => res.json(getSupabaseReadiness()));
 app.get('/api/runtime/supabase/check', async (req, res) => {

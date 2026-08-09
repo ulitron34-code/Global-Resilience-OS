@@ -1,5 +1,12 @@
 # Implementation Log
 
+## Bloque: conflicto de retención contra licencia (2026-08-09)
+
+- La revisión local compara la ventana configurada con `license.retentionDays`
+  de cada fuente conocida y devuelve `policyConflicts` con estado explícito.
+- La UI Operación muestra el conflicto por fuente y días; no borra ni modifica
+  registros y deja la decisión legal/contractual para producción.
+
 ## Bloque: gate explícito de reidentificación cooperativa (2026-08-09)
 
 - El preview cooperativo ahora requiere consentimiento, cohorte mínima y una

@@ -117,6 +117,7 @@ El grafo y los planes actuales son locales y demo. No ejecutan acciones externas
 - `GET /api/governance/provenance` — expone el linaje, clasificación, limitaciones y estado de licencia de fuentes y modelos locales, aislados por tenant.
 - `GET /api/governance/retention` — genera una revisión de retención no destructiva; no elimina datos y deja la política legal para la fase productiva.
 - `GET /api/governance/retention?retentionDays=30` — previsualiza una ventana local de 1–3650 días; nunca elimina ni modifica registros.
+- La respuesta incluye `retentionConstraints` y `policyConflicts` para detectar cuando la ventana local excede la retención declarada en una licencia; son alertas de gobernanza, no acciones de borrado.
 - `GET /api/models/validation` — ejecuta invariantes locales del motor y declara explícitamente si existe calibración histórica (actualmente no).
 - `GET /api/models/calibration?modelId=...` — consulta métricas de error y fixtures registrados.
 - `GET /api/models/calibration/benchmark?modelId=...` - compara el modelo contra baseline de media observada y se abstiene si faltan fixtures o no demuestra mejora.
