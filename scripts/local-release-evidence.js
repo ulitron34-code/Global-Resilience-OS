@@ -29,7 +29,10 @@ const checks = [
 const results = [];
 for (const check of checks) {
   const cwd = resolve(root, check.cwd || '.');
-  const maxAttempts = process.platform === 'win32' && ['frontend-build', 'performance'].includes(check.id) ? 2 : 1;
+  // esbuild puede perder su proceso hijo de forma intermitente en Windows
+  // cuando varios gates se ejecutan seguidos; un tercer intento evita marcar
+  // como fallo un checkout sano sin ocultar errores persistentes.
+  const maxAttempts = process.platform === 'win32' && ['frontend-build', 'performance'].includes(check.id) ? 3 : 1;
   let result;
   let attempts = 0;
   do {
