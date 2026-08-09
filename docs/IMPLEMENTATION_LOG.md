@@ -353,3 +353,6 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
   el gate tecnico y reporta el conteo de fuentes productivas por separado.
 - El paquete de piloto ya no usa proximas acciones estaticas: las deriva de los
   gates fallidos y entrega una secuencia de go/no-go cuando todos pasan.
+- La cobertura del piloto usa como denominador solo las fuentes productivas;
+  las fuentes ilustrativas se reportan aparte para no degradar ni inflar la
+  lectura operativa.

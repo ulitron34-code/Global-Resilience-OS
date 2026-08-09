@@ -83,11 +83,12 @@ export function buildPilotMetrics({ cases = [], actionPlans = [], sourceHealth, 
   const sourceCount = sourceHealth?.sources?.length || 0;
   const healthySources = sourceHealth?.sources?.filter((item) => item.health === 'healthy' && !isIllustrativeSource(item)).length || 0;
   const illustrativeSources = sourceHealth?.sources?.filter((item) => isIllustrativeSource(item)).length || 0;
+  const productiveSourceCount = sourceCount - illustrativeSources;
   return {
     scope: 'local-pilot',
     generatedAt: new Date().toISOString(),
-    metrics: { casesObserved: cases.length, casesClosed: closedCases, actionsDocumented: documentedActions, outcomesRecorded: withOutcome, sourceCoverage: sourceCount ? healthySources / sourceCount : null, productiveSourceCount: sourceCount - illustrativeSources, illustrativeSourceCount: illustrativeSources, notificationsObserved: notifications.length },
-    definitions: { timeToDecision: 'requiere timestamps de senal y decision', avoidedLoss: 'requiere outcome con evidencia; no se infiere del demo', hoursRecovered: 'requiere captura de tiempo del usuario', sourceCoverage: 'proporcion de fuentes con health healthy; demo no cuenta como cobertura productiva' },
+    metrics: { casesObserved: cases.length, casesClosed: closedCases, actionsDocumented: documentedActions, outcomesRecorded: withOutcome, sourceCoverage: productiveSourceCount ? healthySources / productiveSourceCount : null, productiveSourceCount, illustrativeSourceCount: illustrativeSources, notificationsObserved: notifications.length },
+    definitions: { timeToDecision: 'requiere timestamps de senal y decision', avoidedLoss: 'requiere outcome con evidencia; no se infiere del demo', hoursRecovered: 'requiere captura de tiempo del usuario', sourceCoverage: 'proporcion de fuentes productivas con health healthy; fuentes ilustrativas se excluyen del numerador y denominador' },
     missingEvidence: ['cliente piloto', 'baseline externo', 'timestamps de decision', 'costo evitado validado', 'fuentes productivas licenciadas'],
   };
 }

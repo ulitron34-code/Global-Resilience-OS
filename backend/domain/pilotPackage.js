@@ -24,6 +24,8 @@ export function pilotPackageToMarkdown(packet = {}) {
     `- Acciones documentadas: ${safe(metrics.actionsDocumented, '0')}`,
     `- Outcomes registrados: ${safe(metrics.outcomesRecorded, '0')}`,
     `- Cobertura de fuentes: ${metrics.sourceCoverage === null || metrics.sourceCoverage === undefined ? 'sin evidencia' : `${Math.round(metrics.sourceCoverage * 100)}%`}`, '',
+    `- Fuentes productivas: ${safe(metrics.productiveSourceCount, '0')}`,
+    `- Fuentes ilustrativas excluidas: ${safe(metrics.illustrativeSourceCount, '0')}`, '',
     '## Gates', '',
     checks.length ? checks.map((item) => `- ${item.pass ? 'PASS' : 'PENDIENTE'} - ${safe(item.label)}: ${safe(item.evidence)}`).join('\n') : '- Sin gates calculados.', '',
     '## Entrevistas y feedback', '',

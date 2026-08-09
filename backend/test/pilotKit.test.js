@@ -83,9 +83,10 @@ test('normalizes and validates structured pilot evidence type', () => {
 
 test('demo sources never count as productive pilot coverage', () => {
   const result = buildPilotMetrics({ sourceHealth: { sources: [{ id: 'ais-demo', health: 'demo' }, { id: 'licensed-source', health: 'healthy' }] } });
-  assert.equal(result.metrics.sourceCoverage, 0.5);
+  assert.equal(result.metrics.sourceCoverage, 1);
+  assert.equal(result.metrics.productiveSourceCount, 1);
   assert.equal(result.metrics.illustrativeSourceCount, 1);
-  assert.match(result.definitions.sourceCoverage, /demo no cuenta/);
+  assert.match(result.definitions.sourceCoverage, /se excluyen/);
   assert.ok(result.missingEvidence.includes('fuentes productivas licenciadas'));
 });
 
