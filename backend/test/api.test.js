@@ -238,6 +238,8 @@ describe('Global Resilience OS API', () => {
     assert.equal(cooperativeBody.status, 'consent_required');
     assert.equal(cooperativeBody.sharedSignals.length, 0);
     assert.equal(cooperativeBody.anonymization.applied, true);
+    assert.equal(cooperativeBody.consentEvidence.actor, null);
+    assert.equal(cooperativeBody.consentEvidence.scope, 'dry_run_only');
     const modelValidationBody = await modelValidation.json();
     assert.equal(modelValidationBody.ready, true);
     assert.equal(modelValidationBody.historicalFixtures, 0);

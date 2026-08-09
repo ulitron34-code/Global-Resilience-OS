@@ -1,5 +1,12 @@
 # Implementation Log
 
+## Bloque: evidencia de consentimiento de red cooperativa (2026-08-09)
+
+- El preview cooperativo conserva propósito, actor, fecha y alcance del
+  consentimiento; siempre permanece en `dry_run_only`.
+- La UI muestra si el consentimiento quedó registrado y la suite cubre la ruta
+  con cohorte elegible sin convertirla en intercambio real.
+
 ## Bloque: integridad criptográfica del paquete de piloto (2026-08-09)
 
 - JSON y Markdown parten del mismo paquete con huella SHA-256 basada en JSON
@@ -479,3 +486,4 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
   métricas separadas.
 - La UI conserva `—` cuando no hay evidencia y muestra la nota del scorecard;
   el auditor de contrato UI verifica estas claves.
+La suite vigente queda en 86 pruebas backend PASS.

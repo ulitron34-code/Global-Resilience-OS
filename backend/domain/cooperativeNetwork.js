@@ -10,7 +10,7 @@ function dayBucket(value) {
   return Number.isFinite(parsed) ? new Date(parsed).toISOString().slice(0, 10) : null;
 }
 
-export function buildCooperativeIncidentPreview({ alerts = [], minCohort = 3, consent = false } = {}) {
+export function buildCooperativeIncidentPreview({ alerts = [], minCohort = 3, consent = false, consentActor = null, consentAt = null } = {}) {
   const cohort = Math.max(3, Math.min(20, Number(minCohort) || 3));
   const signals = (Array.isArray(alerts) ? alerts : []).map((alert) => ({
     severity: alert.severity || 'unknown',
@@ -27,6 +27,7 @@ export function buildCooperativeIncidentPreview({ alerts = [], minCohort = 3, co
     mode: 'dry_run_only',
     consentRequired: true,
     consentProvided: Boolean(consent),
+    consentEvidence: { purpose: 'cooperative_incident_preview', actor: consent ? consentActor || 'operator_unspecified' : null, recordedAt: consent ? consentAt || new Date().toISOString() : null, scope: 'dry_run_only' },
     anonymization: { applied: true, removedFields: ['id', 'externalId', 'location', 'caseId', 'organizationId'], kAnonymityMinimum: cohort, cohortEligible: eligible },
     status: canShare ? 'ready_for_human_review' : !consent ? 'consent_required' : 'abstain_insufficient_cohort',
     signalCount: signals.length,

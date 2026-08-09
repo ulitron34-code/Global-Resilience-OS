@@ -12,3 +12,6 @@ cohorte minima (`minCohort`, k-anonimato local). Cohortes menores se publican co
 El benchmark es una semilla para la futura red cooperativa de incidentes. Antes de
 usarlo comercialmente se requieren gobernanza entre tenants, consentimiento,
 anonimizacion revisada, control de reidentificacion y suficiente muestra histórica.
+El preview conserva `consentEvidence` con propósito, actor, fecha y alcance
+`dry_run_only`; esto documenta autorización para revisar el paquete, no autoriza
+el intercambio real de datos.
