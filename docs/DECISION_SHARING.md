@@ -31,6 +31,12 @@ Antes de producción se debe migrar el registro de enlaces a Supabase, aplicar
 RLS por organización, añadir rate limiting específico para enlaces, registrar
 IP/actor conforme a la política de privacidad y revisar la exposición de cada
 campo del paquete.
+## Redacción local del payload
+
+El payload público aplica `local-share-redaction-v1`: conserva la información
+necesaria para revisar el caso, pero elimina `organizationId`, payloads crudos,
+secretos, hashes de token, contratos de licencia, actores internos y autores.
+
 ## Protección local
 
 El endpoint público aplica un límite específico de 60 accesos por minuto por

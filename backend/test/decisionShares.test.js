@@ -25,6 +25,9 @@ test('decision share is read-only, expiring metadata hides the token hash and re
   assert.equal(accessed.share.caseId, 'RS-0827');
   assert.equal(accessed.package.case.id, 'RS-0827');
   assert.equal(accessed.package.disclaimer.includes('demo'), true);
+  assert.equal(accessed.package.organizationId, undefined);
+  assert.equal(accessed.package.alert.payload, undefined);
+  assert.equal(accessed.package.shareExposure.policyVersion, 'local-share-redaction-v1');
   assert.equal(listDecisionShares('RS-0827')[0].accessCount, 1);
 });
 

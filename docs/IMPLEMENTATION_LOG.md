@@ -545,3 +545,7 @@ Se documentó el estado de cada ítem del Plan Maestro con evidencia local y el 
 ## Bloque: preview parametrizable de retención (2026-08-09)
 
 `GET /api/governance/retention` acepta una ventana de 1 a 3650 días para probar escenarios de política sin cambiar configuración, eliminar datos ni mutar el estado. El borrado y la política legal siguen bloqueados para producción.
+
+## Bloque: redacción de enlaces compartidos (2026-08-09)
+
+Los paquetes expuestos por enlaces de solo lectura ahora aplican `local-share-redaction-v1`. Se conservan caso, escenario y evidencia necesarios para revisión, pero se excluyen tenant, payload crudo, secretos, hashes de token, contratos de licencia y actores internos.
