@@ -3,9 +3,12 @@ import { isIllustrativeSource } from './sourceClassification.js';
 
 const REQUIRED_FIELDS = ['sourceId', 'observedAt', 'confidence', 'provenance'];
 
-export function evaluateDataQuality({ catalog = [], sources = [], now = new Date() } = {}) {
+export function evaluateDataQuality({ catalog = [], sources = [], requiredSourceIds = null, now = new Date() } = {}) {
+  const requestedIds = Array.isArray(requiredSourceIds) ? [...new Set(requiredSourceIds.map(String).map((value) => value.trim()).filter(Boolean))] : null;
+  const catalogById = new Map(catalog.map((item) => [item.id, item]));
+  const scopedCatalog = requestedIds === null ? catalog : requestedIds.map((id) => catalogById.get(id) || { id, name: id, requiredFor: [] });
   const sourceMap = new Map(sources.map((source) => [source.id, source]));
-  const checks = catalog.map((item) => {
+  const checks = scopedCatalog.map((item) => {
     const source = sourceMap.get(item.id);
     const sourcePresent = Boolean(source);
     const ageMinutes = source?.lastEventAt ? Math.max(0, (now.getTime() - Date.parse(source.lastEventAt)) / 60000) : null;
@@ -18,7 +21,7 @@ export function evaluateDataQuality({ catalog = [], sources = [], now = new Date
     return { id: item.id, label: item.name, requiredFor: item.requiredFor, status, sourcePresent, sourceConnectionPass, licensePass, licenseMetadataPass, coveragePass, freshnessPass, ageMinutes: ageMinutes === null ? null : Math.round(ageMinutes), blocking: [!sourcePresent && 'source', !sourceConnectionPass && 'connection', !licensePass && 'license', !licenseMetadataPass && 'license_metadata', !coveragePass && 'coverage', !freshnessPass && 'freshness'].filter(Boolean) };
   });
   const materialReady = checks.length > 0 && checks.every((check) => check.status === 'pass');
-  return { schemaVersion: '1.0.0-local', ready: materialReady, checkedAt: now.toISOString(), checks, counts: { total: checks.length, pass: checks.filter((item) => item.status === 'pass').length, abstain: checks.filter((item) => item.status === 'abstain').length }, decision: materialReady ? 'allow_material_recommendations' : 'abstain_material_recommendations', disclaimer: 'Gate local de calidad. Una fuente no licenciada, ilustrativa o stale bloquea recomendaciones materiales; no sustituye revisión contractual.' };
+  return { schemaVersion: '1.0.0-local', ready: materialReady, scope: requestedIds === null ? 'catalog' : 'required_sources', requiredSourceIds: requestedIds, checkedAt: now.toISOString(), checks, counts: { total: checks.length, pass: checks.filter((item) => item.status === 'pass').length, abstain: checks.filter((item) => item.status === 'abstain').length }, decision: materialReady ? 'allow_material_recommendations' : 'abstain_material_recommendations', disclaimer: 'Gate local de calidad. Una fuente no licenciada, ilustrativa o stale bloquea recomendaciones materiales; no sustituye revisión contractual.' };
 }
 
 export function validateDataRecord(record = {}, source = {}) {

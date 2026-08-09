@@ -357,7 +357,7 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
   las fuentes ilustrativas se reportan aparte para no degradar ni inflar la
   lectura operativa.
 - La auditoria de cobertura y el estado actual fueron sincronizados con la
-  evidencia vigente de 74 pruebas backend pasando, incluyendo los casos de
+  evidencia vigente de 75 pruebas backend pasando, incluyendo los casos de
   evidencia de decision enlazada a fuentes ilustrativas y productivas.
 - La elegibilidad de calibracion, benchmark, backtesting y scorecard reutiliza
   la misma clasificacion de fuentes ilustrativas, incluyendo `sourceId`,
@@ -377,3 +377,6 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
 - El preview de Action OS ahora exige tambien `evidence.productionEligible`
   para habilitar recomendaciones materiales; la ausencia de fuente conserva el
   plan como borrador revisable y no como recomendacion productiva.
+- El gate de calidad del preview ahora se acota a las fuentes declaradas por el
+  plan; evita que una fuente demo no relacionada bloquee una futura fuente
+  productiva y conserva el gate global para auditar el catálogo completo.

@@ -372,7 +372,7 @@ app.post('/api/entities/resolve', (req, res) => {
 app.post('/api/action-plans/preview', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => {
   try {
     const plan = attachDecisionEvidence(buildActionPlan(req.body || {}), req.body || {});
-    const dataQualityGate = evaluateDataQuality({ catalog: listDataCatalogForOrganization(req.user?.organizationId || DEFAULT_ORGANIZATION_ID), sources: listSources(req.user?.organizationId || DEFAULT_ORGANIZATION_ID) });
+    const dataQualityGate = evaluateDataQuality({ catalog: listDataCatalogForOrganization(req.user?.organizationId || DEFAULT_ORGANIZATION_ID), sources: listSources(req.user?.organizationId || DEFAULT_ORGANIZATION_ID), requiredSourceIds: plan.evidence.sourceIds });
     res.json({ ...plan, dataQualityGate, materialRecommendationAllowed: dataQualityGate.ready && plan.evidence.productionEligible === true && !plan.decision.startsWith('abstain') });
   }
   catch (error) { res.status(400).json({ error: error.message }); }

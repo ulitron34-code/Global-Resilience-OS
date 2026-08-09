@@ -38,3 +38,18 @@ test('record validation abstains for an illustrative source despite active licen
   assert.equal(result.checks.sourceClassification, false);
   assert.equal(result.decision, 'abstain');
 });
+
+test('quality gate can scope a material check to the plan sources', () => {
+  const productive = { id: 'provider-live', name: 'Proveedor live', coverage: 'authorized_events', licenseStatus: 'active', refreshSlaHours: 24, license };
+  const result = evaluateDataQuality({
+    catalog: [
+      { id: 'ais-demo', name: 'AIS demo', coverage: 'demo_events', licenseStatus: 'verification_required', license: {} },
+      productive,
+    ],
+    sources: [{ ...productive, status: 'connected', lastEventAt: new Date().toISOString() }],
+    requiredSourceIds: ['provider-live'],
+  });
+  assert.equal(result.scope, 'required_sources');
+  assert.equal(result.ready, true);
+  assert.deepEqual(result.requiredSourceIds, ['provider-live']);
+});

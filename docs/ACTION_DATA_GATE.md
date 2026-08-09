@@ -8,6 +8,8 @@ Cada `POST /api/action-plans/preview` devuelve:
   para producción.
 
 - `dataQualityGate` con licencia, cobertura y frescura por fuente;
+- el preview evalúa únicamente las fuentes declaradas en `evidence.sourceIds`,
+  mientras el endpoint global conserva la auditoría de todo el catálogo;
 - `materialRecommendationAllowed`, que solo es verdadero cuando pasan el gate
   de calidad, la decisión no abstiene y la evidencia enlaza una fuente
   productiva no ilustrativa;

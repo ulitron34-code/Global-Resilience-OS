@@ -119,6 +119,7 @@ describe('Global Resilience OS API', () => {
     assert.ok(planBody.evidenceRequirements.includes('human_approval'));
     assert.equal(planBody.evidence.completeness, 'incomplete_until_source_linked');
     assert.equal(planBody.evidence.model.id, 'impact-cascade');
+    assert.equal(planBody.dataQualityGate.scope, 'required_sources');
     assert.equal(planBody.materialRecommendationAllowed, false);
 
     const abstention = await fetch(`${baseUrl}/api/action-plans/preview`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ confidence: 0.2, lossIfWaitUsd: 1000000, mitigationCostUsd: 100, protectedValueUsd: 999999 }) });
