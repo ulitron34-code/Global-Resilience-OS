@@ -230,6 +230,17 @@ app.post('/api/auth/logout', requireAuth, (req, res) => {
 app.get('/api/auth/roles', (req, res) => res.json(listRoles()));
 app.get('/api/auth/users', authIfConfigured, roleIfConfigured('admin'), (req, res) => res.json(listUsers()));
 
+const PUBLIC_API_PATHS = new Set([
+  '/health', '/version', '/health/readiness', '/auth/login', '/auth/roles',
+  '/runtime/readiness', '/runtime/supabase', '/runtime/supabase/check',
+  '/runtime/supabase/persistence', '/runtime/config-contract',
+]);
+app.use('/api', (req, res, next) => {
+  if (req.method === 'OPTIONS' || process.env.AUTH_REQUIRED !== 'true') return next();
+  if (PUBLIC_API_PATHS.has(req.path) || req.path.startsWith('/shares/')) return next();
+  return requireAuth(req, res, next);
+});
+
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
   next();

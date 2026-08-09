@@ -349,6 +349,10 @@ describe('Global Resilience OS API', () => {
     const previous = process.env.AUTH_REQUIRED;
     process.env.AUTH_REQUIRED = 'true';
     try {
+      const publicHealth = await fetch(`${baseUrl}/api/health`);
+      assert.equal(publicHealth.status, 200);
+      const protectedGraph = await fetch(`${baseUrl}/api/graph`);
+      assert.equal(protectedGraph.status, 401);
       const unauthenticated = await patchCase('RS-0825', { owner: 'blocked' });
       assert.equal(unauthenticated.status, 401);
 
