@@ -597,6 +597,10 @@ export async function updateSourceIntakeReview(id, input) {
   return fetchWithTimeout(`${BACKEND_URL}/api/data-catalog/intake-reviews/${encodeURIComponent(id)}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(input) });
 }
 
+export async function registerSourceFromIntakeReview(id) {
+  return fetchWithTimeout(`${BACKEND_URL}/api/data-catalog/intake-reviews/${encodeURIComponent(id)}/register-local`, { method: 'POST' });
+}
+
 export async function getDataQualityGate() {
   try { return await fetchWithTimeout(`${BACKEND_URL}/api/data-quality/gate`); } catch (error) { return localFallback({ ready: false, checks: [], error: error.message }, error); }
 }

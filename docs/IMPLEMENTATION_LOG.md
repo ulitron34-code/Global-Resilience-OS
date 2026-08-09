@@ -215,6 +215,14 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
 - El comparador incluye `no_action` como baseline de valor neto, evitando
   recomendar una mitigación costosa sólo por tener efectividad positiva.
 
+## Bloque: onboarding visual completo de fuentes (2026-08-09)
+
+- El panel de Source onboarding ahora permite continuar el flujo después de
+  aprobar una revisión: registrar la fuente localmente y mostrar su estado
+  `pending_external`.
+- Se agregó el cliente frontend para `register-local`; la interfaz mantiene el
+  límite explícito de que ninguna licencia ni activación externa se ejecuta.
+
 - Una revisiÃ³n `approved_local` puede crear una fuente tenant-scoped en estado
   `pending_external` mediante `POST /api/data-catalog/intake-reviews/:id/register-local`.
 - El registro conserva la ficha contractual, enlaza la fuente con su revisiÃ³n y
