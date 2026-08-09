@@ -3,6 +3,7 @@ import { createHmac, randomBytes, scryptSync, timingSafeEqual } from 'node:crypt
 const TOKEN_TTL_SECONDS = 8 * 60 * 60;
 const AUTH_SECRET = process.env.AUTH_SECRET || 'global-resilience-local-demo-secret';
 const revokedSessions = new Map();
+const MAX_REVOKED_SESSIONS = 10_000;
 const USERS = [
   createUser('admin@resilience.local', 'demo123', 'admin', 'Platform Admin'),
   createUser('analyst@resilience.local', 'demo123', 'risk_analyst', 'Risk Analyst'),
@@ -35,8 +36,20 @@ function encodeToken(payload) {
   return `${body}.${sign(body)}`;
 }
 
+function purgeRevokedSessions(now = Date.now()) {
+  for (const [jti, expiresAt] of revokedSessions) {
+    if (expiresAt <= now) revokedSessions.delete(jti);
+  }
+  while (revokedSessions.size > MAX_REVOKED_SESSIONS) {
+    const oldest = revokedSessions.keys().next().value;
+    if (!oldest) break;
+    revokedSessions.delete(oldest);
+  }
+}
+
 function decodeToken(token) {
   try {
+    purgeRevokedSessions();
     const [body, signature] = String(token || '').split('.');
     if (!body || !signature) return null;
     const expected = Buffer.from(sign(body));
@@ -46,7 +59,6 @@ function decodeToken(token) {
     if (!payload.exp || payload.exp <= Math.floor(Date.now() / 1000)) return null;
     const revokedUntil = revokedSessions.get(payload.jti);
     if (revokedUntil && revokedUntil > Date.now()) return null;
-    if (revokedUntil && revokedUntil <= Date.now()) revokedSessions.delete(payload.jti);
     return payload;
   } catch {
     return null;
@@ -66,6 +78,7 @@ export function revokeToken(token) {
   const payload = decodeToken(token);
   if (!payload?.jti) return false;
   revokedSessions.set(payload.jti, payload.exp * 1000);
+  purgeRevokedSessions();
   return true;
 }
 export function publicUser(user) { return { id: user.id, email: user.email, name: user.name, role: user.role, organizationId: user.organizationId }; }
