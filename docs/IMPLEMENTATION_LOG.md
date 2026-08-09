@@ -1,5 +1,11 @@
 # Implementation Log
 
+## Bloque: paquete de piloto Markdown (2026-08-09)
+
+- El paquete consolidado de piloto admite exportación JSON y Markdown.
+- La interfaz permite descargar ambos formatos y conserva el descargo de que
+  la evidencia comercial, histórica y de licencias sigue pendiente.
+
 ## Bloque 1 - Impact Graph y Scenario-to-Action
 
 **Fecha:** 8 de agosto de 2026  

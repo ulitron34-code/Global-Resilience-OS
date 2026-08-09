@@ -347,6 +347,19 @@ export async function getPilotMetrics() {
 }
 
 export async function getPilotPackage() { return fetchWithTimeout(`${BACKEND_URL}/api/pilots/package`); }
+export async function downloadPilotPackage(format = 'json') {
+  const normalized = format === 'md' ? 'markdown' : format;
+  const token = localStorage.getItem('gr_auth_token');
+  const response = await fetch(`${BACKEND_URL}/api/pilots/package?format=${encodeURIComponent(normalized)}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+  if (!response.ok) throw new Error(`No se pudo exportar el paquete de piloto (${response.status})`);
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = `global-resilience-pilot-package.${normalized === 'markdown' ? 'md' : 'json'}`;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
 export async function getEnterpriseReadiness() { return fetchWithTimeout(`${BACKEND_URL}/api/readiness/enterprise`); }
 
 export async function getPilotFeedback() {

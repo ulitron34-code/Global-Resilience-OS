@@ -24,6 +24,7 @@ import { getSchema, getSchemaRegistryReadiness, listSchemas } from './domain/sch
 import { buildModelGovernance } from './domain/modelGovernance.js';
 import { buildAssistiveSuggestion } from './domain/assistiveAgent.js';
 import { buildPilotMetrics, buildPilotReadiness, getPilotInterviewGuide, normalizePilotFeedback } from './domain/pilotKit.js';
+import { pilotPackageToMarkdown } from './domain/pilotPackage.js';
 import { getIncidentRunbook } from './domain/incidentOps.js';
 import { buildSecurityPosture } from './domain/securityPosture.js';
 import { validateBatchInput } from './domain/batchIngestion.js';
@@ -525,6 +526,21 @@ app.get('/api/pilots/readiness', authIfConfigured, roleIfConfigured('admin', 'ri
 });
 app.get('/api/pilots/interview-guide', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(getPilotInterviewGuide()));
 app.get('/api/pilots/metrics', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(buildPilotMetrics({ cases: listCases({ limit: 200 }), actionPlans: listActionPlans({ limit: 200 }), sourceHealth: getSourceHealthOverview(), notifications: listNotifications() })));
+app.use('/api/pilots/package', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res, next) => {
+  if (!['markdown', 'md'].includes(String(req.query.format || '').toLowerCase())) return next();
+  const modelGovernance = listModels().map((model) => { const calibration = getCalibrationOverview(model.id); return buildModelGovernance(model, getModelValidationReport(), calibration, benchmarkCalibration(calibration)); });
+  const runtime = getRuntimeReadiness();
+  const catalog = getDataCatalogReadiness();
+  const sourceHealth = getSourceHealthOverview();
+  const actionLibrary = getActionLibraryReadiness();
+  const readiness = buildPilotReadiness({ runtime, catalog, sourceHealth, modelGovernance, actionLibrary, tenancy: { organizationId: DEFAULT_ORGANIZATION_ID }, pilotFeedback: listPilotFeedback(), historicalFixtures: getCalibrationOverview().fixtures || [] });
+  const cases = listCases({ limit: 200 });
+  const actionPlans = listActionPlans({ limit: 200, organizationId: req.user?.organizationId || DEFAULT_ORGANIZATION_ID });
+  const metrics = buildPilotMetrics({ cases, actionPlans, sourceHealth, notifications: listNotifications() });
+  const scorecard = buildOperationalScorecard({ alerts: listAlerts({ limit: 200 }), cases, actionPlans, sources: listSources(), deadLetters: listDeadLetters(), incidents: listIncidents(), calibrationFixtures: getCalibrationOverview().fixtures || [] });
+  const packet = { schemaVersion: '1.0.0-local', generatedAt: new Date().toISOString(), readiness, interviewGuide: getPilotInterviewGuide(), metrics, scorecard, feedback: listPilotFeedback(), nextActions: ['Realizar cinco entrevistas estructuradas', 'Autorizar fuentes y registrar licencias', 'Cargar 3-5 eventos históricos verificables', 'Definir baseline y criterio go/no-go'], disclaimer: 'Paquete local de preparación; no demuestra valor comercial ni sustituye validación con cliente.' };
+  return res.type('text/markdown').set('Content-Disposition', 'attachment; filename="global-resilience-pilot-package.md"').send(pilotPackageToMarkdown(packet));
+});
 app.get('/api/pilots/package', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => {
   const modelGovernance = listModels().map((model) => { const calibration = getCalibrationOverview(model.id); return buildModelGovernance(model, getModelValidationReport(), calibration, benchmarkCalibration(calibration)); });
   const runtime = getRuntimeReadiness();

@@ -10,6 +10,8 @@ que ya existe un cliente, un baseline de mercado o datos licenciados.
 - `GET /api/pilots/metrics`: métricas operativas locales y evidencia faltante.
 - `GET/POST /api/pilots/feedback`: feedback estructurado con auditoría local.
 
+`GET /api/pilots/package?format=json|markdown` exporta el paquete consolidado de preparación de piloto.
+
 ## Gate de cliente
 
 `customerReady` permanece en `false` hasta contar con entrevistas estructuradas,
