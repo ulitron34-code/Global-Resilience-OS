@@ -212,6 +212,8 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
   su clasificación de evidencia.
 - La vista de recuperación ahora muestra el índice por horizonte junto con la
   exposición residual, el valor evitado y la opción contrafactual seleccionada.
+- El comparador incluye `no_action` como baseline de valor neto, evitando
+  recomendar una mitigación costosa sólo por tener efectividad positiva.
 
 - Una revisiÃ³n `approved_local` puede crear una fuente tenant-scoped en estado
   `pending_external` mediante `POST /api/data-catalog/intake-reviews/:id/register-local`.

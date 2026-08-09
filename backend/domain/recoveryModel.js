@@ -46,7 +46,7 @@ function buildRecoveryProfileBase(input = {}) {
     return { id: template.id, label: template.label, responseHours: template.responseHours, effectiveness, costUsd, results };
   }).filter(Boolean);
   const bestByHorizon = horizons.map((horizonHours) => {
-    const candidates = options.filter((option) => option.id !== 'no_action').map((option) => ({ id: option.id, netValueUsd: option.results.find((result) => result.horizonHours === horizonHours)?.netValueUsd || 0 }));
+    const candidates = options.map((option) => ({ id: option.id, netValueUsd: option.results.find((result) => result.horizonHours === horizonHours)?.netValueUsd || 0 }));
     return { horizonHours, optionId: candidates.sort((a, b) => b.netValueUsd - a.netValueUsd)[0]?.id || 'no_action' };
   });
   return { schemaVersion: '1.0.0-local', generatedAt: new Date().toISOString(), cable: dailyImpact.cable, severity, baseline, options: clone(options), bestByHorizon, recoveryAssumptions: { naturalRecoveryHours: recoveryHours, systemicImpactModel: 'heuristic_local', inputDurationHours: positive(input.durationHours, 24) }, disclaimer: 'Perfil de recuperación contrafactual basado en supuestos locales. No es una predicción ni sustituye calibración histórica, datos licenciados o aprobación humana.' };
