@@ -261,7 +261,7 @@ export function updateIncident(id, input, actor = 'operator', organizationId = D
 export function getSourceHealthOverview(referenceTime = Date.now(), organizationId = DEFAULT_ORGANIZATION_ID) {
   const catalogMap = new Map(listDataCatalog().map((item) => [item.id, item]));
   const sources = listSources(organizationId).map((source) => {
-    const catalog = catalogMap.get(source.id) || {};
+    const catalog = catalogMap.get(source.id) || source;
     const ageMinutes = source.lastEventAt ? Math.max(0, Math.round((referenceTime - Date.parse(source.lastEventAt)) / 60_000)) : null;
     const illustrativeSeed = source.status === 'demo' || source.id.endsWith('-demo');
     let health = illustrativeSeed ? 'demo' : 'unknown';
@@ -701,7 +701,7 @@ export function getComplianceReadiness(organizationId = DEFAULT_ORGANIZATION_ID)
 export function getProvenanceOverview(organizationId = DEFAULT_ORGANIZATION_ID) {
   const catalogMap = new Map(listDataCatalog().map((item) => [item.id, item]));
   const sourceRecords = listSources(organizationId).map((source) => {
-    const catalog = catalogMap.get(source.id) || {};
+    const catalog = catalogMap.get(source.id) || source;
     return {
       id: source.id,
       name: source.name,

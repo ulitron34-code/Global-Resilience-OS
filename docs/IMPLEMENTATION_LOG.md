@@ -200,6 +200,20 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
 
 ## Bloque: registro local de fuentes aprobado por intake (2026-08-09)
 
+- Una revisión `approved_local` puede crear una fuente tenant-scoped en estado
+  `pending_external` mediante `POST /api/data-catalog/intake-reviews/:id/register-local`.
+- El registro conserva la ficha contractual, enlaza la fuente con su revisión y
+  mantiene `activationStatus: blocked_external`; no ejecuta llamadas externas.
+- La ingesta exige coincidencia de tenant y `status: connected`, por lo que una
+  fuente pendiente no puede generar eventos hasta el alta externa.
+- La cobertura sube a 55 pruebas y el nuevo endpoint queda en OpenAPI local.
+- La prueba API protegida recorre el flujo completo: crear revisión, aprobar,
+  registrar, comprobar estado `pending_external` y verificar aislamiento entre
+  tenant A y tenant B.
+- Los reportes de health y procedencia reutilizan los metadatos de la fuente
+  registrada cuando ésta aún no aparece en el catálogo semilla, conservando
+  licencia, cobertura y clasificación sin mostrar valores `unknown` por defecto.
+
 ## Bloque: índice de resiliencia efectiva por horizonte (2026-08-09)
 
 - El perfil de recuperación ahora devuelve `effectiveResilienceIndex` para

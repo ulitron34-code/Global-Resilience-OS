@@ -481,6 +481,13 @@ describe('Global Resilience OS API', () => {
       const tenantBSourcesAfterIntake = await fetch(`${baseUrl}/api/sources`, { headers: { authorization: `Bearer ${tenantB.token}` } });
       assert.ok((await tenantASourcesAfterIntake.json()).some((source) => source.id === intakeCandidate.id));
       assert.equal((await tenantBSourcesAfterIntake.json()).some((source) => source.id === intakeCandidate.id), false);
+      const tenantASourceHealthAfterIntake = await fetch(`${baseUrl}/api/ops/source-health`, { headers: { authorization: `Bearer ${tenantA.token}` } });
+      const tenantASourceHealthBody = await tenantASourceHealthAfterIntake.json();
+      assert.equal(tenantASourceHealthBody.sources.find((source) => source.id === intakeCandidate.id).licenseStatus, 'active');
+      assert.equal(tenantASourceHealthBody.sources.find((source) => source.id === intakeCandidate.id).coverage, 'licensed_global_events');
+      const tenantAProvenanceAfterIntake = await fetch(`${baseUrl}/api/governance/provenance`, { headers: { authorization: `Bearer ${tenantA.token}` } });
+      const tenantAProvenanceBody = await tenantAProvenanceAfterIntake.json();
+      assert.equal(tenantAProvenanceBody.sources.find((source) => source.id === intakeCandidate.id).licenseStatus, 'active');
       const tenantBNotifications = await fetch(`${baseUrl}/api/notifications`, { headers: { authorization: `Bearer ${tenantB.token}` } });
       assert.equal(tenantBNotifications.status, 200);
       assert.equal((await tenantBNotifications.json()).some((notification) => notification.title === 'Tenant A signal'), false);
