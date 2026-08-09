@@ -463,15 +463,15 @@ export async function downloadAudit(format = 'csv', entityId = '') {
   URL.revokeObjectURL(url);
 }
 
-export async function downloadDecisionPackage(caseId) {
+export async function downloadDecisionPackage(caseId, format = 'json') {
   const token = localStorage.getItem('resilience_token');
-  const response = await fetch(`${BACKEND_URL}/api/cases/${caseId}/decision-package`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+  const response = await fetch(`${BACKEND_URL}/api/cases/${caseId}/decision-package?format=${encodeURIComponent(format)}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   const blob = await response.blob();
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = `decision-package-${caseId}.json`;
+  link.download = `decision-package-${caseId}.${format === 'markdown' || format === 'md' ? 'md' : 'json'}`;
   link.click();
   URL.revokeObjectURL(url);
 }

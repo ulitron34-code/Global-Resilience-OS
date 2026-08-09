@@ -30,7 +30,7 @@ Los endpoints de alertas, casos y métricas aceptan `vertical` como filtro. Las 
 - `GET /api/cases?q=Ormuz&status=open&priority=P1&owner=Risk&sort=sla_urgent&limit=50&offset=0` — búsqueda, filtros operativos, orden y paginación de casos con los mismos headers de conteo.
 - `PATCH /api/cases/:id` — actualiza owner, status o validación humana.
 - `GET /api/cases/:id/audit` — bitácora de cambios del caso.
-- `GET /api/cases/:id/decision-package` — exporta un paquete JSON con caso, alerta, fuentes, modelos, escenarios, comentarios y auditoría.
+- `GET /api/cases/:id/decision-package?format=json|markdown` — exporta el paquete auditable en JSON técnico o Markdown legible para comité/operador.
 - `GET /api/cases/:id/shares` — lista enlaces temporales de decisión sin exponer tokens.
 - `POST /api/cases/:id/shares` — crea un enlace de solo lectura; entrega el token claro una sola vez.
 - `POST /api/cases/:caseId/shares/:shareId/revoke` — revoca un enlace de decisión.

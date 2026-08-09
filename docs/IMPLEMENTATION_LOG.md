@@ -159,3 +159,10 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
   aviso de datos ilustrativos está presente.
 - La checklist de presentación queda respaldada por evidencia automatizada, sin
   declarar que los datos demo sean aptos para decisiones productivas.
+## Bloque: paquete de decisión Markdown (2026-08-09)
+
+- El endpoint de decisión admite `format=json|markdown`.
+- Cases incorpora botones separados para descargar el paquete técnico JSON o
+  la lectura legible Markdown.
+- La exportación Markdown conserva estado, prioridad, responsable, cadena de
+  evidencia, número de planes y descargo de no ejecución externa.

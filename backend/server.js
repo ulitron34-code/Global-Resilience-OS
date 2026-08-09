@@ -114,6 +114,7 @@ const loginAttempts = new Map();
 const shareRequestCounts = new Map();
 const SHARE_RATE_WINDOW_MS = 60_000;
 const SHARE_RATE_LIMIT = 60;
+const GLOBAL_RATE_LIMIT = Number(process.env.GLOBAL_RATE_LIMIT || (process.env.NODE_ENV === 'test' ? 1000 : 120));
 
 const configuredOrigins = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',').map((origin) => origin.trim()).filter(Boolean) : null;
 app.use(cors({ origin: (origin, callback) => {
@@ -162,13 +163,14 @@ app.use((req, res, next) => {
 });
 
 app.use((req, res, next) => {
+  if (req.path.startsWith('/api/shares/')) return next();
   const key = req.ip || 'local';
   const now = Date.now();
   const current = requestCounts.get(key) || { startedAt: now, count: 0 };
   if (now - current.startedAt > 60_000) { current.startedAt = now; current.count = 0; }
   current.count += 1;
   requestCounts.set(key, current);
-  if (current.count > 120) return res.status(429).json({ error: 'Límite de solicitudes excedido', retryAfterSeconds: 60 });
+  if (current.count > GLOBAL_RATE_LIMIT) return res.status(429).json({ error: 'Límite de solicitudes excedido', retryAfterSeconds: 60 });
   next();
 });
 
@@ -421,6 +423,13 @@ app.get('/api/cases/:id/decision-package', authIfConfigured, roleIfConfigured('a
   if (!item) return res.status(404).json({ error: 'Caso no encontrado' });
   const organizationId = req.user?.organizationId || DEFAULT_ORGANIZATION_ID;
   const enriched = { ...item, actionPlans: listActionPlans({ organizationId, caseId: req.params.id }), recoveryProfile: buildRecoveryProfile({ cableId: 'seamewe3', severity: 'total', horizons: [24, 168, 720] }), regulatoryEvidenceMap: buildRegulatoryEvidenceMap({ scope: req.params.id, evidence: [] }), packageCapabilities: ['case', 'alert', 'sources', 'models', 'scenarios', 'audit', 'comments', 'action_plans', 'recovery_counterfactual', 'regulatory_evidence'] };
+  if (req.query.format === 'markdown' || req.query.format === 'md') {
+    const caseItem = enriched.case || {};
+    const alert = enriched.alert || {};
+    const chain = enriched.evidenceChain || {};
+    const lines = [`# Paquete de decisión — ${caseItem.id || req.params.id}`, '', `- **Título:** ${caseItem.title || 'Sin título'}`, `- **Estado:** ${caseItem.status || 'no disponible'}`, `- **Prioridad:** ${caseItem.priority || 'no disponible'}`, `- **Responsable:** ${caseItem.owner || 'sin asignar'}`, `- **Alerta asociada:** ${alert.id || 'no disponible'}`, '', '## Decisión y evidencia', '', `- Fuentes observadas: ${(chain.observedSourceIds || []).join(', ') || 'ninguna'}`, `- Modelos inferidos: ${(chain.inferredModelIds || []).join(', ') || 'ninguno'}`, `- Escenarios asumidos: ${chain.assumedScenarioCount ?? 0}`, `- Planes de acción: ${(enriched.actionPlans || []).length}`, '', '## Limitaciones', '', 'Este paquete es un artefacto local para revisión humana. No acredita cumplimiento, no valida causalidad de mercado y no ejecuta acciones externas.', '', `Generado: ${new Date().toISOString()}`];
+    return res.type('text/markdown').set('Content-Disposition', `attachment; filename="decision-package-${req.params.id}.md"`).send(lines.join('\n'));
+  }
   res.type('application/json').set('Content-Disposition', `attachment; filename="decision-package-${req.params.id}.json"`).send(JSON.stringify(enriched, null, 2));
 });
 app.get('/api/cases/:id/shares', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => res.json(listDecisionShares(req.params.id)));

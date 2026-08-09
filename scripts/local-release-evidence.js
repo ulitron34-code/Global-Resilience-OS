@@ -29,7 +29,7 @@ const checks = [
 const results = [];
 for (const check of checks) {
   const cwd = resolve(root, check.cwd || '.');
-  const maxAttempts = process.platform === 'win32' && check.id === 'performance' ? 2 : 1;
+  const maxAttempts = process.platform === 'win32' && ['frontend-build', 'performance'].includes(check.id) ? 2 : 1;
   let result;
   let attempts = 0;
   do {

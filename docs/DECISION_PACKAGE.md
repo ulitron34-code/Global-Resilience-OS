@@ -13,7 +13,9 @@ La exportacion local de un caso conserva ahora una vista integrada de:
 Cada escenario expone `evidenceClass` (`observed`, `inferred` o `assumed`) y un
 objeto `evidence` con fuentes, modelo, observaciones, inferencias y supuestos.
 
-Endpoint: `GET /api/cases/:id/decision-package`.
+Endpoints: `GET /api/cases/:id/decision-package?format=json|markdown`. JSON sirve
+el artefacto técnico; Markdown genera una lectura compacta para comité u
+operador y conserva los mismos descargos.
 
 El paquete es un artefacto local para revision humana. No acredita cumplimiento,
 no valida causalidad y no ejecuta ninguna accion externa.
