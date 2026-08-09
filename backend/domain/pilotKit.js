@@ -1,3 +1,5 @@
+import { getCalibrationEligibility } from './calibrationEligibility.js';
+
 const INTERVIEW_SECTIONS = [
   { id: 'critical_decision', title: 'Decision critica', questions: ['Que evento externo cambia una decision importante en menos de 72 horas?', 'Quien recibe hoy esa senal y quien decide?'], evidence: 'Ejemplo documentado de una decision reciente.' },
   { id: 'current_workflow', title: 'Flujo actual', questions: ['Que sistemas, hojas o personas se consultan?', 'Donde se pierde tiempo o confianza?'], evidence: 'Mapa del flujo actual y tiempos aproximados.' },
@@ -10,7 +12,7 @@ export function buildPilotReadiness({ runtime, catalog, sourceHealth, modelGover
   const feedback = Array.isArray(pilotFeedback) ? pilotFeedback : [];
   const interviewCount = feedback.filter((item) => item.stage === 'interview').length;
   const customerReviewCount = feedback.filter((item) => ['pilot_review', 'gate_review'].includes(item.stage) && item.evidence).length;
-  const verifiedHistoricalCount = (Array.isArray(historicalFixtures) ? historicalFixtures : []).filter((item) => item.sourceId && !String(item.sourceId).endsWith('-demo') && item.provenance).length;
+  const verifiedHistoricalCount = (Array.isArray(historicalFixtures) ? historicalFixtures : []).filter((item) => getCalibrationEligibility(item).eligible).length;
   const checks = [
     { id: 'runtime', label: 'Runtime local reproducible', pass: Boolean(runtime?.ready), evidence: runtime?.ready ? 'runtime readiness pass' : 'configuracion local incompleta' },
     { id: 'data_quality', label: 'Datos no materiales sin gate', pass: Boolean(catalog?.ready), evidence: catalog?.ready ? 'catalogo listo' : 'licencia/cobertura/frescura requieren revision' },

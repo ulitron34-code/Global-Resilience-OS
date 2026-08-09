@@ -335,3 +335,5 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
 - Benchmark y backtesting ahora reportan por separado el tamano de entrada y los
   fixtures ilustrativos excluidos, haciendo visible cualquier abstencion por falta
   de evidencia productiva.
+- Pilot readiness reutiliza la misma elegibilidad de calibracion: fixtures
+  incompletas o ilustrativas ya no pueden abrir el gate historico del piloto.

@@ -23,9 +23,9 @@ test('pilot readiness can open the customer gate only with explicit evidence', (
     ...technicalInputs,
     pilotFeedback: [{ stage: 'pilot_review', evidence: 'Cliente confirmó el criterio de éxito.' }],
     historicalFixtures: [
-      { id: 'evt-1', sourceId: 'licensed-ais', provenance: 'contract-1' },
-      { id: 'evt-2', sourceId: 'licensed-cables', provenance: 'contract-2' },
-      { id: 'evt-3', sourceId: 'licensed-ports', provenance: 'contract-3' },
+      { id: 'evt-1', sourceId: 'licensed-ais', provenance: 'contract-1', evidenceStatus: 'complete' },
+      { id: 'evt-2', sourceId: 'licensed-cables', provenance: 'contract-2', evidenceStatus: 'complete' },
+      { id: 'evt-3', sourceId: 'licensed-ports', provenance: 'contract-3', evidenceStatus: 'complete' },
     ],
   });
   assert.equal(result.customerReady, true);
@@ -38,13 +38,26 @@ test('demo fixtures never count as authorized historical evidence', () => {
     ...technicalInputs,
     pilotFeedback: [{ stage: 'pilot_review', evidence: 'Review documentada.' }],
     historicalFixtures: [
-      { id: 'evt-1', sourceId: 'ais-demo', provenance: 'demo' },
-      { id: 'evt-2', sourceId: 'cables-demo', provenance: 'demo' },
-      { id: 'evt-3', sourceId: 'ports-demo', provenance: 'demo' },
+      { id: 'evt-1', sourceId: 'ais-demo', provenance: 'demo', evidenceStatus: 'complete' },
+      { id: 'evt-2', sourceId: 'cables-demo', provenance: 'demo', evidenceStatus: 'complete' },
+      { id: 'evt-3', sourceId: 'ports-demo', provenance: 'demo', evidenceStatus: 'complete' },
     ],
   });
   assert.equal(result.customerReady, false);
   assert.equal(result.evidenceCounts.verifiedHistoricalEvents, 0);
+});
+
+test('pilot readiness excludes incomplete historical fixtures', () => {
+  const result = buildPilotReadiness({
+    ...technicalInputs,
+    pilotFeedback: [{ stage: 'pilot_review', evidence: 'Review documentada.' }],
+    historicalFixtures: [
+      { id: 'evt-incomplete', sourceId: 'licensed-ais', provenance: 'contract-1', evidenceStatus: 'incomplete' },
+      { id: 'evt-complete', sourceId: 'licensed-ais', provenance: 'contract-1', evidenceStatus: 'complete' },
+    ],
+  });
+  assert.equal(result.evidenceCounts.verifiedHistoricalEvents, 1);
+  assert.equal(result.customerReady, false);
 });
 
 test('demo sources never count as productive pilot coverage', () => {
