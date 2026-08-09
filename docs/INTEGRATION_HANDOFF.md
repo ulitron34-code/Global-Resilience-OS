@@ -12,10 +12,14 @@ activan desde el entorno local.
    El workflow `.github/workflows/ci.yml` ya queda preparado para ejecutar
    pruebas backend, lint y build frontend en Node 20 y 22.
 2. Ejecutar `docs/supabase/001_initial_schema.sql` y después
-   `docs/supabase/002_enterprise_extensions.sql` en un proyecto nuevo.
+   `docs/supabase/002_enterprise_extensions.sql`,
+   `docs/supabase/003_platform_snapshots.sql`,
+   `docs/supabase/004_operational_extensions.sql` y
+   `docs/supabase/005_control_plane_extensions.sql` en un proyecto nuevo.
 3. Crear organización inicial, perfil administrador y claims JWT con
    `organization_id`.
-4. Implementar el adaptador de persistencia Supabase conservando los contratos
+4. Activar el adaptador de persistencia Supabase y ejecutar el backfill
+   idempotente descrito en `docs/CONTROL_PLANE_PROJECTION.md`, conservando los contratos
    de `docs/API_CONTRACT.md`.
 5. Configurar `APP_MODE=production`, `DATA_MODE=licensed`,
    `AUTH_REQUIRED=true`, `AUTH_SECRET` seguro, CORS explícito y

@@ -3,7 +3,7 @@
 ## Estado confirmado
 
 - GitHub: el repositorio remoto sigue en `8a0cfc2`; el checkout local está en `ac32c6c` con los bloques de persistencia, auditoría y release gate listos, pero el push requiere recuperar conectividad HTTPS.
-- Supabase: migraciones `001_initial_schema.sql`, `002_enterprise_extensions.sql` y `003_platform_snapshots.sql` aplicadas.
+- Supabase: migraciones `001` a `005_control_plane_extensions.sql` preparadas localmente; falta aplicar 004-005 y validar el backfill en staging.
 - Supabase: tablas principales y `platform_snapshots` verificadas; RLS activo con 3 políticas de organización.
 - Vercel: interfaz pública activa y mini-backend conectado.
 - Render: servicio configurado con `AUTH_REQUIRED=true`, acciones externas deshabilitadas y datos ilustrativos; la activación final del adaptador remoto queda pendiente de redeploy.
