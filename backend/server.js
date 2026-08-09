@@ -11,6 +11,7 @@ import { DEFAULT_ORGANIZATION_ID, createActionPlan, getActionPlan, getActionPlan
 import { resolveEntity } from './domain/entityResolution.js';
 import { listDataCatalog, getDataCatalogReadiness, validateSourceIntake } from './domain/dataCatalog.js';
 import { getRuntimeReadiness } from './config/runtimeConfig.js';
+import { getSupabaseReadiness } from './config/supabase.js';
 import { getEnvironmentContract } from './config/environmentContract.js';
 import { benchmarkCalibration } from './domain/calibrationBenchmark.js';
 import { validateEventEnvelope } from './domain/eventContract.js';
@@ -248,6 +249,7 @@ app.get('/api/quality/report', (req, res) => res.json(getDataQualityReport()));
 app.get('/api/governance/provenance', (req, res) => res.json(getProvenanceOverview()));
 app.get('/api/governance/retention', (req, res) => res.json(getRetentionOverview()));
 app.get('/api/runtime/readiness', (req, res) => { const readiness = getRuntimeReadiness(); res.status(readiness.ready ? 200 : 503).json(readiness); });
+app.get('/api/runtime/supabase', (req, res) => res.json(getSupabaseReadiness()));
 app.get('/api/runtime/config-contract', (req, res) => { const contract = getEnvironmentContract(); res.status(contract.ready ? 200 : 503).json(contract); });
 app.get('/api/readiness/enterprise', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => {
   const modelGovernance = listModels().map((model) => { const calibration = getCalibrationOverview(model.id); return buildModelGovernance(model, getModelValidationReport(), calibration, benchmarkCalibration(calibration)); });

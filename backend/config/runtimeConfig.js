@@ -1,4 +1,5 @@
 const DEMO_SECRET = 'global-resilience-local-demo-secret';
+import { getSupabaseReadiness } from './supabase.js';
 
 function asBool(value, fallback = false) {
   if (value === undefined || value === null || value === '') return fallback;
@@ -22,6 +23,7 @@ export function getRuntimeConfig() {
 
 export function getRuntimeReadiness() {
   const config = getRuntimeConfig();
+  const supabase = getSupabaseReadiness();
   const production = config.mode === 'production';
   const checks = {
     modeExplicit: config.mode === 'demo' || config.mode === 'staging' || config.mode === 'production',
@@ -31,5 +33,5 @@ export function getRuntimeReadiness() {
     cors: !production || config.corsConfigured,
     externalActionsDisabledByDefault: !config.allowExternalActions,
   };
-  return { ready: Object.values(checks).every(Boolean), scope: 'local-runtime', generatedAt: new Date().toISOString(), production, checks, config: { ...config, authSecretLength: config.authSecretLength, authSecretConfigured: config.authSecretConfigured } };
+  return { ready: Object.values(checks).every(Boolean), scope: 'local-runtime', generatedAt: new Date().toISOString(), production, checks, supabase, config: { ...config, authSecretLength: config.authSecretLength, authSecretConfigured: config.authSecretConfigured } };
 }
