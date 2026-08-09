@@ -699,7 +699,7 @@ app.get('/api/briefs/latest', authIfConfigured, roleIfConfigured('admin', 'risk_
 app.get('/api/briefs/latest/export', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => {
   const brief = getLatestBrief({ audience: req.query.audience, organizationId: req.user?.organizationId || DEFAULT_ORGANIZATION_ID });
   if (req.query.format === 'csv') {
-    const rows = [['Campo', 'Valor'], ['Resilience score', brief.resilienceScore], ['Exposición USD', brief.exposureUsd], ['Eventos materiales', brief.materialEvents], ['Decisión requerida', brief.decisionRequired], ['Recomendación', brief.recommendation], ['Valor protegido USD', brief.protectedValueUsd], ['Confianza', brief.confidence]];
+    const rows = [['Campo', 'Valor'], ['Resilience score', brief.resilienceScore], ['Resilience score status', brief.resilienceScoreStatus], ['Exposición USD', brief.exposureUsd], ['Eventos materiales', brief.materialEvents], ['Decisión requerida', brief.decisionRequired], ['Recomendación', brief.recommendation], ['Valor protegido USD', brief.protectedValueUsd], ['Confianza', brief.confidence]];
     res.type('text/csv').set('Content-Disposition', 'attachment; filename="resilience-brief.csv"').send(rows.map((row) => row.map((value) => `"${String(value).replaceAll('"', '""')}"`).join(',')).join('\n'));
     return;
   }

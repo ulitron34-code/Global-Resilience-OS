@@ -203,6 +203,8 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
 - Executive Brief deja de pintar un `72/100` fijo en el frontend.
 - Cuando el backend devuelve `not_calibrated`, la vista muestra `N/D` y el
   estado explícito, alineando la interfaz con el contrato de evidencia.
+- Las exportaciones CSV incluyen también `resilienceScoreStatus` y la vista no
+  convierte una confianza nula en un falso `0%`.
 
 ## Bloque: registro local de fuentes aprobado por intake (2026-08-09)
 

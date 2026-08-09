@@ -599,7 +599,10 @@ describe('Global Resilience OS API', () => {
 
     const csv = await fetch(`${baseUrl}/api/briefs/latest/export?format=csv`);
     assert.equal(csv.status, 200);
-    assert.match(await csv.text(), /Resilience score/);
+    const csvBody = await csv.text();
+    assert.match(csvBody, /Resilience score/);
+    assert.match(csvBody, /Resilience score status/);
+    assert.match(csvBody, /not_calibrated/);
   });
 
   it('convierte una alerta en caso sin duplicarla', async () => {
