@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ArrowRight, CheckCircle2, Clock3, UserRound } from 'lucide-react';
-import { addCaseComment, createActionPlan, createDecisionShare, createIncident, createWebhook, downloadAudit, downloadBrief, downloadDecisionPackage, downloadLocalSnapshot, getActionPlans, getAuditIntegrity, getCaseAudit, getCaseComments, getCases, getDataCatalogReadiness, getDataQualityReport, getDeadLetters, getDecisionShares, getImpactGraph, getIncidents, getJobs, getLatestBrief, getOperationalMetrics, getPilotFeedback, getPilotMetrics, getPilotReadiness, getPlaybooks, getProvenanceOverview, getRetentionOverview, getRuntimeReadiness, getSecurityPosture, getSlaOverview, getSourceHealthOverview, getSources, getTenancyContext, getWebhooks, previewActionPlan, processLocalWebhookDeliveries, recordActionPlanOutcome, recordPilotFeedback, resetLocalDemo, restoreLocalSnapshot, retryDeadLetter, revokeDecisionShare, rotateWebhookSecret, runDemoIngestionJob, runSlaSweep, runSourceHealthSweep, updateActionPlan, updateCase, updateIncident } from '../api/client';
+import { addCaseComment, createActionPlan, createDecisionShare, createIncident, createWebhook, downloadAudit, downloadBrief, downloadDecisionPackage, downloadLocalSnapshot, getActionPlans, getAuditIntegrity, getCaseAudit, getCaseComments, getCases, getDataCatalogReadiness, getDataQualityReport, getDeadLetters, getDecisionShares, getIncidents, getJobs, getLatestBrief, getOperationalMetrics, getPilotFeedback, getPilotMetrics, getPilotReadiness, getPlaybooks, getProvenanceOverview, getRetentionOverview, getRuntimeReadiness, getSecurityPosture, getSlaOverview, getSourceHealthOverview, getSources, getTenancyContext, getWebhooks, previewActionPlan, processLocalWebhookDeliveries, recordActionPlanOutcome, recordPilotFeedback, resetLocalDemo, restoreLocalSnapshot, retryDeadLetter, revokeDecisionShare, rotateWebhookSecret, runDemoIngestionJob, runSlaSweep, runSourceHealthSweep, updateActionPlan, updateCase, updateIncident } from '../api/client';
 import CableList from './CableList';
 import ImpactPanel from './ImpactPanel';
 import ReportExport from './ReportExport';
@@ -28,6 +28,7 @@ import PilotPackagePanel from './PilotPackagePanel';
 import PilotMeasurementPanel from './PilotMeasurementPanel';
 import CapacityMarketplacePanel from './CapacityMarketplacePanel';
 import EnterpriseReadinessPanel from './EnterpriseReadinessPanel';
+import EvidenceManifestPanel from './EvidenceManifestPanel';
 import CooperativeNetworkPanel from './CooperativeNetworkPanel';
 import { useSessionStore } from '../store/useSessionStore';
 
@@ -213,6 +214,7 @@ export function OperationsView() {
     <PilotValueCasePanel />
     <CapacityMarketplacePanel />
     <EnterpriseReadinessPanel />
+    <EvidenceManifestPanel />
     <IncidentResponsePanel />
     <SecurityPosturePanel />
     <ModelUncertaintyPanel />
