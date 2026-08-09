@@ -1,5 +1,11 @@
 # Implementation Log
 
+## Bloque: captura UI de evidencia del piloto (2026-08-09)
+
+- El panel de Pilot Readiness ahora permite registrar etapa, tipo de evidencia,
+  urgencia 1-5, rol, hallazgo y evidencia verificable; los subgates ya no
+  dependen exclusivamente del API.
+
 ## Correccion: subgates de urgencia y acceso a datos del piloto (2026-08-09)
 
 - El readiness exige dos entrevistas con urgencia alta y evidencia de acceso a
