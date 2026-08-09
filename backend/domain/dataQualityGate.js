@@ -11,7 +11,7 @@ export function evaluateDataQuality({ catalog = [], sources = [], now = new Date
     const ageMinutes = source?.lastEventAt ? Math.max(0, (now.getTime() - Date.parse(source.lastEventAt)) / 60000) : null;
     const licensePass = item.licenseStatus === 'active';
     const licenseMetadataPass = hasCompleteLicenseMetadata(item);
-    const coveragePass = !String(item.coverage || '').includes('illustrative') && !String(item.coverage || '').includes('demo');
+    const coveragePass = !isIllustrativeSource({ ...item, ...source });
     const sourceConnectionPass = sourcePresent && source.status === 'connected' && !isIllustrativeSource({ ...item, ...source });
     const freshnessPass = sourceConnectionPass && (item.refreshSlaHours === null || (ageMinutes !== null && ageMinutes <= item.refreshSlaHours * 60));
     const status = sourcePresent && sourceConnectionPass && licensePass && licenseMetadataPass && coveragePass && freshnessPass ? 'pass' : 'abstain';

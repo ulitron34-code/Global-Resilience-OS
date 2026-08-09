@@ -361,3 +361,5 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
 - La elegibilidad de calibracion, benchmark, backtesting y scorecard reutiliza
   la misma clasificacion de fuentes ilustrativas, incluyendo `sourceId`,
   cobertura y clase declarada; se eliminaron filtros duplicados por sufijo.
+- El data quality gate tambien reutiliza esa clasificacion para bloquear una
+  fuente ilustrativa aunque su identificador parezca productivo.
