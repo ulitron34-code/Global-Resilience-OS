@@ -14,7 +14,8 @@ de cero si alguno falla.
 El orquestador ejecuta el build real mediante `scripts/build-frontend.js`, que
 entra al directorio `frontend` antes de lanzar Vite, y ejecuta además
 `scripts/standalone-artifact-check.js`, que sirve el artefacto con un servidor
-HTTP local y verifica que HTML y assets respondan sin backend.
+HTTP local, verifica que HTML y assets respondan sin backend y confirma que el
+aviso de datos ilustrativos permanezca dentro del bundle.
 
 También ejecuta `scripts/pdf-export-check.js`, que genera un reporte con el
 mismo módulo usado por el botón del frontend y verifica la firma `%PDF-`.

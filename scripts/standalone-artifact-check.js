@@ -25,11 +25,13 @@ await new Promise((resolveReady, reject) => {
       const base = `http://127.0.0.1:${server.address().port}`;
       const index = await request(`${base}/`);
       if (index.response.status !== 200 || !index.body.includes('<div id="root">')) fail('index no se sirve como HTML');
-      const assetPath = index.body.match(/(?:src|href)="(\/assets\/[^"']+)"/)?.[1];
-      if (!assetPath) fail('index no referencia un asset compilado');
-      const asset = await request(`${base}${assetPath}`);
-      if (asset.response.status !== 200 || !asset.body.length) fail('asset compilado no se puede descargar');
-      console.log(JSON.stringify({ gate: 'PASS', mode: 'standalone-artifact', root, indexStatus: index.response.status, assetStatus: asset.response.status, backendRequired: false }));
+      const assetPaths = [...index.body.matchAll(/(?:src|href)="(\/assets\/[^"']+)"/g)].map((match) => match[1]);
+      if (!assetPaths.length) fail('index no referencia assets compilados');
+      const assets = await Promise.all(assetPaths.map((assetPath) => request(`${base}${assetPath}`)));
+      if (assets.some(({ response, body }) => response.status !== 200 || !body.length)) fail('asset compilado no se puede descargar');
+      const disclaimerPresent = assets.some(({ body }) => /datos ilustrativos|datos demo|demo funcional/i.test(body));
+      if (!disclaimerPresent) fail('el aviso de datos ilustrativos no está presente en el artefacto');
+      console.log(JSON.stringify({ gate: 'PASS', mode: 'standalone-artifact', root, indexStatus: index.response.status, assetsChecked: assets.length, disclaimerPresent, backendRequired: false }));
       resolveReady();
     } catch (error) { reject(error); }
     finally { server.close(); }

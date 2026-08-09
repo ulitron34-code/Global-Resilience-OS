@@ -153,3 +153,9 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
   que la salida tenga encabezado `%PDF-` y contenido real.
 - El gate de release incluye la prueba; la checklist de despliegue ya no deja
   la exportación PDF como pendiente local.
+## Bloque: disclaimer de demo verificable (2026-08-09)
+
+- El smoke standalone descarga todos los assets del bundle y confirma que el
+  aviso de datos ilustrativos está presente.
+- La checklist de presentación queda respaldada por evidencia automatizada, sin
+  declarar que los datos demo sean aptos para decisiones productivas.
