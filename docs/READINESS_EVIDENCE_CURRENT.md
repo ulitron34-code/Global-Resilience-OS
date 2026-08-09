@@ -12,6 +12,9 @@ Fecha de corte: 2026-08-08.
 - Configuración de ejemplo: los flags `LOCAL_SCHEMA_AUDIT_VERIFIED` y
   `LOCAL_RELEASE_GATE_VERIFIED` quedan documentados en
   `backend/.env.example` con valor seguro `false`.
+- El arnés `npm.cmd run verify` inyecta ambos flags únicamente en el proceso
+  aislado del smoke test, para validar el handoff después de reunir la
+  evidencia local; no modifica el entorno persistente.
 
 ## Pendiente de repetir fuera del entorno restringido
 

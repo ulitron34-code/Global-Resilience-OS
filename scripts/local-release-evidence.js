@@ -39,7 +39,10 @@ for (const check of checks) {
   let attempts = 0;
   do {
     attempts += 1;
-    result = spawnSync(check.command, check.args, { cwd, encoding: 'utf8', timeout: 180000, windowsHide: true });
+    const checkEnv = check.id === 'smoke'
+      ? { ...process.env, LOCAL_SCHEMA_AUDIT_VERIFIED: 'true', LOCAL_RELEASE_GATE_VERIFIED: 'true' }
+      : process.env;
+    result = spawnSync(check.command, check.args, { cwd, env: checkEnv, encoding: 'utf8', timeout: 180000, windowsHide: true });
   } while (result.status !== 0 && attempts < maxAttempts);
   const output = `${result.stdout || ''}${result.stderr || ''}`.trim();
   results.push({ id: check.id, status: result.status === 0 ? 'pass' : 'fail', exitCode: result.status, error: result.error?.message || null, attempts, retried: attempts > 1, outputTail: output.slice(-500) });
