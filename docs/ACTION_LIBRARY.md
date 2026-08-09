@@ -11,6 +11,9 @@ Endpoints:
 - `GET /api/actions/library/:id`
 - `GET /api/actions/library/readiness`
 - `POST /api/actions/recommendations`
+- `GET /api/playbooks/readiness` verifica cinco playbooks reutilizables para
+  cada vertical inicial: infraestructura digital, corredores marítimos y
+  commodities críticos.
 
 El catalogo es intencionalmente no ejecutable. Antes de produccion debe sustituirse
 por proveedores, contratos, disponibilidad y precios verificados; la recomendacion

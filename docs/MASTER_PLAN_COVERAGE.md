@@ -42,7 +42,7 @@ Fecha de auditoria: 9 de agosto de 2026.
 - Proyección determinista del control plane para backfill normalizado, con
   validación de tenant, claves foráneas y ausencia de secretos planos.
 - CI preparado para Node 20/22 con permisos de solo lectura.
-- OpenAPI completo: 148 rutas documentadas, sin faltantes ni duplicados.
+- OpenAPI completo: 149 rutas documentadas, sin faltantes ni duplicados.
 - Benchmark sectorial con readiness, cohortes k-anonimas y bloqueo de claims de
   mercado; gobernanza de retencion con conflictos por licencia visibles.
 - Plan de benchmark histórico con objetivo explícito de 10 eventos, mínimo de

@@ -43,6 +43,7 @@ import { attachDecisionEvidence } from './domain/decisionEvidence.js';
 import { buildCooperativeIncidentPreview } from './domain/cooperativeNetwork.js';
 import { enrichAnonymousSectorBenchmark } from './domain/benchmarkReadiness.js';
 import { buildHistoricalBenchmarkPlan } from './domain/benchmarkPlan.js';
+import { buildPlaybookReadiness } from './domain/playbookReadiness.js';
 import { buildEvidenceManifest } from './domain/evidenceManifest.js';
 import { authIfConfigured, listRoles, listUsers, login, requireAuth, revokeToken, roleIfConfigured } from './auth/auth.js';
 import {
@@ -413,6 +414,7 @@ app.get('/api/graph/paths', (req, res) => {
   res.json({ ...result, evidenceClass: 'inferred' });
 });
 app.get('/api/playbooks', (req, res) => res.json(listPlaybooks()));
+app.get('/api/playbooks/readiness', (req, res) => res.json(buildPlaybookReadiness(listPlaybooks())));
 app.get('/api/playbooks/:id', (req, res) => {
   const result = getPlaybook(req.params.id);
   if (!result) return res.status(404).json({ error: 'Playbook no encontrado' });

@@ -104,6 +104,11 @@ describe('Global Resilience OS API', () => {
     const playbookBody = await playbooks.json();
     assert.ok(playbookBody.length >= 5);
     assert.ok(playbookBody.every((item) => item.version === '1.0.0' && item.reviewStatus === 'local_seed' && item.requiredEvidence.includes('human_approval')));
+    const playbookReadiness = await fetch(`${baseUrl}/api/playbooks/readiness`);
+    assert.equal(playbookReadiness.status, 200);
+    const playbookReadinessBody = await playbookReadiness.json();
+    assert.equal(playbookReadinessBody.status, 'ready_for_local_pilot');
+    assert.ok(playbookReadinessBody.verticals.every((item) => item.playbookCount >= 5 && item.pass));
 
     const resolved = await fetch(`${baseUrl}/api/entities/resolve`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ type: 'cable', query: 'SMW3' }) });
     assert.equal((await resolved.json()).resolved.id, 'seamewe3');

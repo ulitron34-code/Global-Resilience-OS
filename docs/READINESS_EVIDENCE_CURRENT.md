@@ -10,7 +10,7 @@ históricas y no representan el estado actual.
 
 - Backend: `npm.cmd test` — 51 pruebas correctas.
 - Frontend: `npm.cmd run lint` — correcto.
-- OpenAPI: 148 rutas auditadas, 148 documentadas, sin duplicados.
+- OpenAPI: 149 rutas auditadas, 149 documentadas, sin duplicados.
 - Readiness empresarial: bloquea cuando faltan las evidencias explícitas de
   esquema y release; pasa esos dos checks únicamente con sus flags en `true`.
 - Configuración de ejemplo: los flags `LOCAL_SCHEMA_AUDIT_VERIFIED` y

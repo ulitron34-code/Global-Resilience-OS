@@ -8,7 +8,7 @@ Fecha de corte: 2026-08-09.
 - Frontend: lint y build PASS.
 - Release evidence: `npm.cmd run verify` PASS.
 - Plan Maestro: fases locales 0-7 y salvaguardas PASS.
-- OpenAPI: 148 rutas documentadas, sin faltantes ni duplicados.
+- OpenAPI: 149 rutas documentadas, sin faltantes ni duplicados.
 - Supabase schema audit: migraciones 001-005, tablas, columnas de tenant,
   RLS y politicas de lectura PASS.
 - Smoke, artefacto standalone, exportacion PDF, rendimiento, reproducibilidad,

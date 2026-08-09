@@ -32,7 +32,7 @@ pública de solo lectura.
   `PASS`.
 - Auditoría ejecutable del Plan Maestro: fases 0–7 y salvaguardas locales:
   `PASS`.
-- OpenAPI: 148 rutas Express con 148 operaciones documentadas, sin faltantes ni
+- OpenAPI: 149 rutas Express con 149 operaciones documentadas, sin faltantes ni
   duplicados.
 - Auditoría portable, reproducibilidad, instalación limpia y release gate:
   `PASS` en sus ejecuciones individuales.
