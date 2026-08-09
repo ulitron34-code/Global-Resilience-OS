@@ -52,6 +52,34 @@ describe('Global Resilience OS API', () => {
     assert.equal((await missing.json()).error, 'Ruta no encontrada');
   });
 
+  it('expone readiness empresarial y exige evidencia explicita de release', async () => {
+    const previousSchema = process.env.LOCAL_SCHEMA_AUDIT_VERIFIED;
+    const previousRelease = process.env.LOCAL_RELEASE_GATE_VERIFIED;
+    try {
+      process.env.LOCAL_SCHEMA_AUDIT_VERIFIED = 'false';
+      process.env.LOCAL_RELEASE_GATE_VERIFIED = 'false';
+      const blocked = await fetch(`${baseUrl}/api/readiness/enterprise`);
+      assert.equal(blocked.status, 200);
+      const blockedBody = await blocked.json();
+      assert.equal(blockedBody.localReady, false);
+      assert.equal(blockedBody.localChecks.find((item) => item.id === 'schema').pass, false);
+      assert.equal(blockedBody.localChecks.find((item) => item.id === 'release').pass, false);
+
+      process.env.LOCAL_SCHEMA_AUDIT_VERIFIED = 'true';
+      process.env.LOCAL_RELEASE_GATE_VERIFIED = 'true';
+      const verified = await fetch(`${baseUrl}/api/readiness/enterprise`);
+      assert.equal(verified.status, 200);
+      const verifiedBody = await verified.json();
+      assert.equal(verifiedBody.localChecks.find((item) => item.id === 'schema').pass, true);
+      assert.equal(verifiedBody.localChecks.find((item) => item.id === 'release').pass, true);
+    } finally {
+      if (previousSchema === undefined) delete process.env.LOCAL_SCHEMA_AUDIT_VERIFIED;
+      else process.env.LOCAL_SCHEMA_AUDIT_VERIFIED = previousSchema;
+      if (previousRelease === undefined) delete process.env.LOCAL_RELEASE_GATE_VERIFIED;
+      else process.env.LOCAL_RELEASE_GATE_VERIFIED = previousRelease;
+    }
+  });
+
   it('expone el Impact Graph y planes de acción con aprobación humana', async () => {
     const graph = await fetch(`${baseUrl}/api/graph?cableId=seamewe3&verticalId=petroleo`);
     assert.equal(graph.status, 200);
