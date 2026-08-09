@@ -145,3 +145,11 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
   `npm --prefix` en Windows.
 - El orquestador ejecuta el build real, no sólo la existencia de `dist`.
 - `npm run build`, `npm run verify` y el gate standalone quedaron verificados.
+## Bloque: exportación PDF verificable (2026-08-09)
+
+- El generador se separó en `frontend/src/utils/reportPdf.js` y el botón del
+  frontend lo reutiliza directamente.
+- `scripts/pdf-export-check.js` produce un PDF con el mismo generador y verifica
+  que la salida tenga encabezado `%PDF-` y contenido real.
+- El gate de release incluye la prueba; la checklist de despliegue ya no deja
+  la exportación PDF como pendiente local.

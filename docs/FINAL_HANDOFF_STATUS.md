@@ -12,7 +12,7 @@ La base local de Global Resilience OS queda implementada y verificable para cont
 - Frontend: `npm.cmd run lint` y `npm.cmd run build` — correctos.
 - Smoke end-to-end local: `LOCAL SMOKE TEST: PASS`.
 - Release evidence: `npm.cmd run verify` — PASS.
-- Rendimiento local: 60 solicitudes, 0 errores, p95 130.78 ms.
+- Rendimiento local: 60 solicitudes, 0 errores, p95 118.64 ms.
 - Auditoría portable: 0 hallazgos.
 - Dependencias de producción backend/frontend: 0 vulnerabilidades reportadas.
 - Reproducibilidad: manifests, lockfiles, `.env.example`, exclusiones y entrypoints: PASS.

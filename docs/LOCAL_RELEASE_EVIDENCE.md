@@ -16,5 +16,8 @@ entra al directorio `frontend` antes de lanzar Vite, y ejecuta además
 `scripts/standalone-artifact-check.js`, que sirve el artefacto con un servidor
 HTTP local y verifica que HTML y assets respondan sin backend.
 
+También ejecuta `scripts/pdf-export-check.js`, que genera un reporte con el
+mismo módulo usado por el botón del frontend y verifica la firma `%PDF-`.
+
 No requiere GitHub, Supabase, Vercel ni credenciales externas; es un control
 reproducible para la copia local/USB.
