@@ -14,7 +14,7 @@ const phases = {
   'phase-2': ['backend/domain/eventContract.js', 'backend/domain/dataCatalog.js', 'backend/domain/batchIngestion.js', 'backend/domain/connectors.js', 'docs/DATA_CONTRACTS.md', 'docs/CONNECTOR_CONTRACTS.md', 'docs/SOURCE_HEALTH_SWEEP.md'],
   'phase-3': ['backend/domain/impactGraph.js', 'backend/domain/entityResolution.js', 'backend/domain/evidenceClassification.js', 'backend/domain/calibrationBenchmark.js', 'backend/domain/backtesting.js', 'backend/domain/sensitivityAnalysis.js', 'backend/domain/uncertainty.js', 'docs/TEMPORAL_IMPACT_GRAPH.md', 'docs/BACKTESTING.md'],
   'phase-4': ['backend/domain/playbooks.js', 'backend/domain/actionPlanStore.js', 'backend/domain/decisionEvidence.js', 'backend/domain/actionLibrary.js', 'docs/DECISION_PACKAGE.md', 'docs/ACTION_LIBRARY.md', 'docs/OUTCOME_FEEDBACK_LOOP.md'],
-  'phase-5': ['backend/domain/securityPosture.js', 'backend/config/environmentContract.js', 'backend/domain/enterpriseReadiness.js', 'scripts/local-supabase-schema-check.js', 'docs/SECURITY_POSTURE.md', 'docs/SUPABASE_SCHEMA_AUDIT.md'],
+  'phase-5': ['backend/domain/securityPosture.js', 'backend/config/environmentContract.js', 'backend/domain/enterpriseReadiness.js', 'backend/domain/persistence.js', 'docs/supabase/003_platform_snapshots.sql', 'scripts/local-supabase-schema-check.js', 'docs/SECURITY_POSTURE.md', 'docs/SUPABASE_SCHEMA_AUDIT.md'],
   'phase-6': ['backend/domain/pilotKit.js', 'docs/PILOT_READINESS.md', 'docs/OPERATIONAL_SCORECARD.md'],
   'phase-7': ['docs/ROADMAP.md', 'docs/REGULATORY_EVIDENCE.md', 'docs/LOCAL_CAPABILITY_MATRIX.md'],
 };
