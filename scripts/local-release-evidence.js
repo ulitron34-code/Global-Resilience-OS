@@ -11,7 +11,7 @@ const npmPrefix = npmCommand === process.execPath ? [npmCli] : [];
 const checks = [
   { id: 'backend-tests', command: npmCommand, args: [...npmPrefix, 'test'], cwd: 'backend' },
   { id: 'frontend-lint', command: npmCommand, args: [...npmPrefix, 'run', 'lint'], cwd: 'frontend' },
-  { id: 'frontend-build', command: process.execPath, args: ['scripts/build-frontend.js'] },
+  { id: 'frontend-build', command: npmCommand, args: [...npmPrefix, 'run', 'build'], cwd: 'frontend' },
   { id: 'standalone-artifact', command: process.execPath, args: ['scripts/standalone-artifact-check.js'] },
   { id: 'pdf-export', command: process.execPath, args: ['scripts/pdf-export-check.js'] },
   { id: 'smoke', command: process.execPath, args: ['scripts/local-smoke-test.js'] },
