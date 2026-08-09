@@ -10,6 +10,7 @@ const source = read('frontend/src/components/OperationalScorecardPanel.jsx');
 const measurement = read('frontend/src/components/PilotMeasurementPanel.jsx');
 const capacity = read('frontend/src/components/CapacityMarketplacePanel.jsx');
 const modelProfiles = read('frontend/src/components/ModelProfilesPanel.jsx');
+const valueCase = read('frontend/src/components/PilotValueCasePanel.jsx');
 const checks = [
   { id: 'readiness-fetch', pass: view.includes('getPilotReadiness()'), evidence: 'Pilot Readiness refresca el gate desde la API' },
   { id: 'feedback-submit', pass: view.includes('recordPilotFeedback(') && client.includes('/api/pilots/feedback'), evidence: 'El formulario conecta con el endpoint de feedback' },
@@ -21,6 +22,7 @@ checks.push({ id: 'scorecard-timing', pass: source.includes('timeToDetectionMinu
 checks.push({ id: 'pilot-measurement-ledger', pass: measurement.includes('getPilotMeasurementPlan') && measurement.includes('savePilotMeasurementPlan') && measurement.includes('evidenceRef'), evidence: 'La UI captura baseline, objetivo, resultado y evidencia del piloto' });
 checks.push({ id: 'capacity-marketplace', pass: capacity.includes('getCapacityMarketplace') && capacity.includes('createCapacityInquiry') && capacity.includes('acción externa bloqueada'), evidence: 'La UI compara capacidad alterna y registra inquiries en dry-run' });
 checks.push({ id: 'model-profiles', pass: modelProfiles.includes('getModelProfiles') && modelProfiles.includes('Datos faltantes para especialización') && modelProfiles.includes('ABSTENERSE'), evidence: 'La UI expone contexto regional/vertical y abstención productiva' });
+checks.push({ id: 'pilot-value-case', pass: valueCase.includes('buildPilotValueCase') && valueCase.includes('Caso económico con evidencia') && valueCase.includes('willingness'), evidence: 'La UI calcula valor de piloto y conserva el gate de evidencia' });
 const failed = checks.filter((check) => !check.pass);
 console.log(JSON.stringify({ schemaVersion: '1.0.0-local-ui-contract-audit', checkedAt: new Date().toISOString(), gate: failed.length ? 'FAIL' : 'PASS', checks, failed }, null, 2));
 if (failed.length) process.exitCode = 1;

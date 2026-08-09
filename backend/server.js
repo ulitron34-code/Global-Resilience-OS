@@ -31,6 +31,7 @@ import { attachPackageIntegrity } from './domain/packageIntegrity.js';
 import { decisionPackageToMarkdown } from './domain/decisionPackageMarkdown.js';
 import { summarizeActionPlanEvidence } from './domain/decisionPackageEvidence.js';
 import { getIncidentRunbook } from './domain/incidentOps.js';
+import { buildValueCase } from './domain/valueCase.js';
 import { buildSecurityPosture } from './domain/securityPosture.js';
 import { validateBatchInput } from './domain/batchIngestion.js';
 import { buildBacktestReport } from './domain/backtesting.js';
@@ -711,6 +712,7 @@ app.post('/api/models/calibration/fixtures', authIfConfigured, roleIfConfigured(
 app.get('/api/models/backtest', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(buildBacktestReport(getCalibrationOverview(req.query.modelId, req.user?.organizationId || DEFAULT_ORGANIZATION_ID).fixtures, { modelId: req.query.modelId || 'all' })));
 app.post('/api/models/sensitivity', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => { try { res.json(buildSensitivityAnalysis(req.body || {})); } catch (error) { res.status(400).json({ error: error.message }); } });
 app.post('/api/models/uncertainty', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => { try { res.json(buildUncertaintyReport(req.body || {})); } catch (error) { res.status(400).json({ error: error.message }); } });
+app.post('/api/pilots/value-case', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => { try { res.json(buildValueCase(req.body || {})); } catch (error) { res.status(400).json({ error: error.message }); } });
 app.get('/api/notifications', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(listNotifications(req.query.unread === 'true', req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
 app.get('/api/notifications/policy/readiness', (req, res) => res.json(getNotificationPolicyReadiness()));
 app.post('/api/notifications/policy/preview', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(buildNotificationPolicy(req.body || {})));

@@ -529,3 +529,7 @@ La suite vigente queda en 92 pruebas backend PASS.
 # Bloque: perfiles regionales y verticales (2026-08-09)
 
 Se incorporó un catálogo local de perfiles de decisión por región y vertical. Los perfiles hacen visibles los lentes de análisis y los datos que faltan para una especialización real; no generan predicciones ni activan acciones externas. La API `GET /api/models/profiles` y la vista de operaciones mantienen `decision=abstain_for_production` hasta contar con datos licenciados, fixtures históricos y revisión experta.
+
+## Bloque: caso económico de piloto con gate de evidencia (2026-08-09)
+
+Se añadió `POST /api/pilots/value-case` y su panel operativo. Calcula exposición anual, valor protegido, valor neto de primer año, relación beneficio/costo y payback bajo supuestos declarados. Si no hay al menos dos referencias verificables, conserva `status=not_ready`; nunca afirma costo evitado ni willingness-to-pay.

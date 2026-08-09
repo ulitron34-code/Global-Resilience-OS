@@ -234,6 +234,9 @@ describe('Global Resilience OS API', () => {
     assert.equal(modelProfilesBody.selection.vertical, 'semiconductores');
     assert.equal(modelProfilesBody.model.decision, 'abstain_for_production');
     assert.ok(modelProfilesBody.dataNeeds.includes('BOM afectado'));
+    const valueCase = await fetch(`${baseUrl}/api/pilots/value-case`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ annualEvents: 4, lossPerEventUsd: 100000, mitigationRate: 0.5, platformAnnualCostUsd: 50000, implementationCostUsd: 25000, evidenceRefs: ['ledger', 'sponsor'] }) });
+    assert.equal(valueCase.status, 200);
+    assert.equal((await valueCase.json()).status, 'ready_for_human_review');
     const modelValidation = await fetch(`${baseUrl}/api/models/validation`);
     assert.equal(modelValidation.status, 200);
     const benchmark = await fetch(`${baseUrl}/api/models/calibration/benchmark`);

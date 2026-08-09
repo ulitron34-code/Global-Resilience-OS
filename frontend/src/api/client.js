@@ -242,6 +242,10 @@ export async function getModelProfiles({ vertical = '', region = 'global' } = {}
   try { return await fetchWithTimeout(`${BACKEND_URL}/api/models/profiles?vertical=${encodeURIComponent(vertical)}&region=${encodeURIComponent(region)}`); } catch (error) { return localFallback({ selection: { vertical, region }, dataNeeds: [], readiness: { productionReady: false }, error: error.message }, error); }
 }
 
+export async function buildPilotValueCase(input) {
+  return fetchWithTimeout(`${BACKEND_URL}/api/pilots/value-case`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(input) });
+}
+
 export async function createScenario(input) {
   const data = await fetchWithTimeout(`${BACKEND_URL}/api/scenarios`, {
     method: 'POST',

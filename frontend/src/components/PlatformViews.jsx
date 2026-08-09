@@ -14,6 +14,7 @@ import ReadinessPanel from './ReadinessPanel';
 import CompliancePanel from './CompliancePanel';
 import ModelRegistryPanel from './ModelRegistryPanel';
 import ModelProfilesPanel from './ModelProfilesPanel';
+import PilotValueCasePanel from './PilotValueCasePanel';
 import ModelValidationPanel from './ModelValidationPanel';
 import RegulatoryEvidencePanel from './RegulatoryEvidencePanel';
 import RecoveryProfilePanel from './RecoveryProfilePanel';
@@ -209,6 +210,7 @@ export function OperationsView() {
     <StructuredPilotEvidencePanel />
     <PilotPackagePanel />
     <PilotMeasurementPanel />
+    <PilotValueCasePanel />
     <CapacityMarketplacePanel />
     <EnterpriseReadinessPanel />
     <IncidentResponsePanel />
