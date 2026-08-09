@@ -1,5 +1,13 @@
 # Estado actual de la plataforma
 
+## Corte externo actual — 2026-08-08
+
+- GitHub: `main` sincronizado hasta `016192c`.
+- Supabase: proyecto real configurado; migraciones base y enterprise/RLS aplicadas; 13 tablas principales verificadas.
+- Vercel: sitio público activo y mini-backend conectado.
+- Render: blueprint preparado, pero las variables privadas y el redeploy final deben verificarse desde el dashboard.
+- Persistencia: el backend todavía opera con archivo local; Supabase está listo como infraestructura y health check, no como adaptador transaccional activo.
+
 La copia local ya no es únicamente la demo inicial. Incluye un núcleo
 operativo verificable con casos, Impact Graph temporal, escenarios,
 Scenario-to-Action, aprobaciones humanas, outcomes, auditoría, gobernanza,

@@ -25,6 +25,15 @@ La base local de Global Resilience OS queda implementada y verificable para cont
 - Blueprint de Render disponible en `render.yaml`, con autenticación obligatoria y acciones externas deshabilitadas.
 - `APP_MODE=production` bloquea el login y el listado de usuarios demo; el gate está cubierto por prueba automatizada.
 
+## Actualización del tramo externo
+
+- GitHub ya tiene la rama `main` sincronizada hasta `016192c`.
+- Supabase ya tiene las dos migraciones aplicadas y 13 tablas principales verificadas.
+- Vercel está sirviendo la interfaz pública con el mini-backend conectado.
+- El backend incluye `/api/runtime/supabase` y `/api/runtime/supabase/check` para validar configuración y conectividad sin exponer secretos.
+- Render todavía requiere confirmar variables privadas y redeploy.
+- La persistencia productiva sigue deliberadamente desactivada: el adaptador transaccional Supabase y sus pruebas de aislamiento son el siguiente bloque.
+
 ## Pendientes externos deliberados
 
 Estos puntos requieren credenciales, cuentas, datos reales o validación humana:
@@ -39,6 +48,8 @@ Estos puntos requieren credenciales, cuentas, datos reales o validación humana:
 8. Completar revisión legal, DPA, certificaciones y claims comerciales.
 
 ## Orden recomendado de cierre
+
+Nota de corte: GitHub y la aplicación inicial de Supabase ya están cerrados. El cierre restante de este tramo es CI/secrets, prueba RLS con dos organizaciones, variables privadas y redeploy de Render/Vercel.
 
 1. GitHub y CI.
 2. Supabase y migraciones/RLS.
