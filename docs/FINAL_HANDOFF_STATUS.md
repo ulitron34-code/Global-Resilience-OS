@@ -14,7 +14,7 @@ pública de solo lectura.
 
 ## Evidencia ejecutada
 
-- Backend: `npm.cmd test` — 48 pruebas correctas.
+- Backend: `npm.cmd test` — 54 pruebas correctas.
 - Frontend: `npm.cmd run lint` y `npm.cmd run build` — correctos cuando se
   ejecutan directamente desde la raíz.
 - Smoke end-to-end local: `LOCAL SMOKE TEST: PASS`.
@@ -33,7 +33,7 @@ pública de solo lectura.
 ## Estado externo comprobado
 
 - GitHub: el remoto permanece en `8a0cfc2`; el checkout local está en
-  `c6c32b8`, 14 commits adelante y pendiente de publicación.
+  `94a00a3`, 66 commits adelante y pendiente de publicación.
 - Supabase: tres migraciones aplicadas; `platform_snapshots` verificada con RLS
   y tres políticas.
 - Vercel: interfaz pública activa.
