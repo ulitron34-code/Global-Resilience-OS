@@ -7,6 +7,7 @@ import { buildEvidence } from './evidenceClassification.js';
 import { getDataCatalogReadiness, listDataCatalog, validateSourceIntake } from './dataCatalog.js';
 import { buildControlPlaneProjection, validateControlPlaneProjection } from './controlPlaneProjection.js';
 import { getCalibrationEligibility, filterEligibleCalibrationFixtures } from './calibrationEligibility.js';
+import { isIllustrativeSource } from './sourceClassification.js';
 
 const now = new Date().toISOString();
 const DEFAULT_ORGANIZATION_ID = 'nashadi-demo';
@@ -276,7 +277,7 @@ export function getSourceHealthOverview(referenceTime = Date.now(), organization
   const sources = listSources(organizationId).map((source) => {
     const catalog = catalogMap.get(source.id) || source;
     const ageMinutes = source.lastEventAt ? Math.max(0, Math.round((referenceTime - Date.parse(source.lastEventAt)) / 60_000)) : null;
-    const illustrativeSeed = source.status === 'demo' || source.id.endsWith('-demo');
+    const illustrativeSeed = isIllustrativeSource({ ...source, ...catalog });
     let health = illustrativeSeed ? 'demo' : 'unknown';
     if (source.status === 'error') health = 'error';
     else if (!illustrativeSeed && source.latencySeconds !== null && source.latencySeconds !== undefined) health = source.latencySeconds > 180 ? 'degraded' : 'healthy';

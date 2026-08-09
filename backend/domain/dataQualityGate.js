@@ -1,4 +1,5 @@
 import { hasCompleteLicenseMetadata } from './dataCatalog.js';
+import { isIllustrativeSource } from './sourceClassification.js';
 
 const REQUIRED_FIELDS = ['sourceId', 'observedAt', 'confidence', 'provenance'];
 
@@ -11,7 +12,7 @@ export function evaluateDataQuality({ catalog = [], sources = [], now = new Date
     const licensePass = item.licenseStatus === 'active';
     const licenseMetadataPass = hasCompleteLicenseMetadata(item);
     const coveragePass = !String(item.coverage || '').includes('illustrative') && !String(item.coverage || '').includes('demo');
-    const sourceConnectionPass = sourcePresent && source.status === 'connected' && !String(item.id).endsWith('-demo');
+    const sourceConnectionPass = sourcePresent && source.status === 'connected' && !isIllustrativeSource({ ...item, ...source });
     const freshnessPass = sourceConnectionPass && (item.refreshSlaHours === null || (ageMinutes !== null && ageMinutes <= item.refreshSlaHours * 60));
     const status = sourcePresent && sourceConnectionPass && licensePass && licenseMetadataPass && coveragePass && freshnessPass ? 'pass' : 'abstain';
     return { id: item.id, label: item.name, requiredFor: item.requiredFor, status, sourcePresent, sourceConnectionPass, licensePass, licenseMetadataPass, coveragePass, freshnessPass, ageMinutes: ageMinutes === null ? null : Math.round(ageMinutes), blocking: [!sourcePresent && 'source', !sourceConnectionPass && 'connection', !licensePass && 'license', !licenseMetadataPass && 'license_metadata', !coveragePass && 'coverage', !freshnessPass && 'freshness'].filter(Boolean) };

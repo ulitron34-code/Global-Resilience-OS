@@ -1,4 +1,5 @@
 import { getCalibrationEligibility } from './calibrationEligibility.js';
+import { isIllustrativeSource } from './sourceClassification.js';
 
 const INTERVIEW_SECTIONS = [
   { id: 'critical_decision', title: 'Decision critica', questions: ['Que evento externo cambia una decision importante en menos de 72 horas?', 'Quien recibe hoy esa senal y quien decide?'], evidence: 'Ejemplo documentado de una decision reciente.' },
@@ -58,8 +59,8 @@ export function buildPilotMetrics({ cases = [], actionPlans = [], sourceHealth, 
   const documentedActions = actionPlans.filter((item) => ['in_execution', 'completed'].includes(item.status)).length;
   const withOutcome = actionPlans.filter((item) => item.outcome).length;
   const sourceCount = sourceHealth?.sources?.length || 0;
-  const healthySources = sourceHealth?.sources?.filter((item) => item.health === 'healthy').length || 0;
-  const illustrativeSources = sourceHealth?.sources?.filter((item) => item.health === 'demo').length || 0;
+  const healthySources = sourceHealth?.sources?.filter((item) => item.health === 'healthy' && !isIllustrativeSource(item)).length || 0;
+  const illustrativeSources = sourceHealth?.sources?.filter((item) => isIllustrativeSource(item)).length || 0;
   return {
     scope: 'local-pilot',
     generatedAt: new Date().toISOString(),

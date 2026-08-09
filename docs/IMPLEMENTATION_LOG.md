@@ -346,3 +346,6 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
 - El scorecard operativo reutiliza la elegibilidad de calibracion y expone
   fixtures de entrada, elegibles y excluidas; el paquete Markdown conserva el
   tipo y el texto de evidencia por registro.
+- La clasificacion de fuentes ilustrativas se centralizo por estado, cobertura,
+  nombre e identificador; salud, calidad, scorecard y piloto ya no dependen
+  unicamente del sufijo `-demo`.
