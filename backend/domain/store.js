@@ -616,12 +616,14 @@ export function restoreLocalSnapshot(snapshot, actor = 'admin') {
 }
 
 export function getComplianceReadiness() {
+  const persistence = getRemotePersistenceStatus();
+  const remotePersistenceReady = persistence.enabled && persistence.state === 'ready' && Boolean(persistence.organizationId);
   const controls = [
     { id: 'authentication', label: 'Autenticación', status: process.env.AUTH_REQUIRED === 'true' ? 'configured_local' : 'demo_optional', evidence: 'Tokens HMAC y usuarios locales' },
     { id: 'authorization', label: 'Autorización por rol', status: 'implemented_local', evidence: 'admin, risk_analyst y viewer' },
     { id: 'auditability', label: 'Trazabilidad', status: 'implemented_local', evidence: 'audit log por casos, alertas y escenarios' },
-    { id: 'persistence', label: 'Persistencia', status: 'partial_local', evidence: 'JSON local; migración productiva pendiente' },
-    { id: 'row_level_security', label: 'Aislamiento por organización', status: 'pending_external', evidence: 'Requiere Supabase RLS' },
+    { id: 'persistence', label: 'Persistencia', status: remotePersistenceReady ? 'configured_remote' : 'partial_local', evidence: remotePersistenceReady ? `Snapshot Supabase activo para ${persistence.organizationId}` : 'JSON local o adaptador remoto no verificado' },
+    { id: 'row_level_security', label: 'Aislamiento por organización', status: remotePersistenceReady ? 'configured_remote' : 'pending_external', evidence: remotePersistenceReady ? 'RLS aplicado en migración y tenant resuelto en runtime' : 'Requiere Supabase RLS y validación de aislamiento' },
     { id: 'data_provenance', label: 'Procedencia de datos', status: 'partial_local', evidence: 'Registro local de fuentes, linaje y clasificación; licencias pendientes' },
     { id: 'retention_policy', label: 'Retención y borrado', status: 'pending_external', evidence: 'Debe definirse con política legal y almacenamiento productivo' },
     { id: 'webhook_security', label: 'Seguridad webhook', status: 'partial_local', evidence: 'Firma HMAC, rotación y outbox local; worker externo pendiente' },

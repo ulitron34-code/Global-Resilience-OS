@@ -17,9 +17,18 @@ function remoteHeaders() {
 }
 
 async function remoteFetch(path, options = {}) {
-  const response = await fetch(`${remoteConfig.projectUrl}/rest/v1/${path}`, { ...options, headers: { ...remoteHeaders(), ...(options.headers || {}) } });
-  if (!response.ok) throw new Error(`Supabase REST HTTP ${response.status}`);
-  return response.status === 204 ? null : response.json();
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), Number(process.env.SUPABASE_TIMEOUT_MS || 5000));
+  try {
+    const response = await fetch(`${remoteConfig.projectUrl}/rest/v1/${path}`, { ...options, signal: controller.signal, headers: { ...remoteHeaders(), ...(options.headers || {}) } });
+    if (!response.ok) throw new Error(`Supabase REST HTTP ${response.status}`);
+    return response.status === 204 ? null : response.json();
+  } catch (error) {
+    if (error.name === 'AbortError') throw new Error('Supabase REST timeout');
+    throw error;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 async function ensureRemoteOrganization() {
