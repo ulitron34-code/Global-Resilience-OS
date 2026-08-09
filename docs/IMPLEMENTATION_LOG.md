@@ -200,6 +200,17 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
 
 ## Bloque: registro local de fuentes aprobado por intake (2026-08-09)
 
+## Bloque: índice de resiliencia efectiva por horizonte (2026-08-09)
+
+- El perfil de recuperación ahora devuelve `effectiveResilienceIndex` para
+  cada horizonte solicitado, con porcentaje de exposición recuperable, opción
+  contrafactual elegida, exposición residual y valor evitado.
+- La salida conserva `evidenceClass: assumed` y el descargo heurístico; no
+  convierte el índice en una predicción validada ni oculta la falta de datos
+  históricos/licenciados.
+- La API protegida valida que el índice quede acotado entre 0 y 95% y conserve
+  su clasificación de evidencia.
+
 - Una revisiÃ³n `approved_local` puede crear una fuente tenant-scoped en estado
   `pending_external` mediante `POST /api/data-catalog/intake-reviews/:id/register-local`.
 - El registro conserva la ficha contractual, enlaza la fuente con su revisiÃ³n y

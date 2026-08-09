@@ -12,6 +12,16 @@ function clone(value) { return structuredClone(value); }
 function positive(value, fallback = 0) { const number = Number(value); return Number.isFinite(number) && number >= 0 ? number : fallback; }
 
 export function buildRecoveryProfile(input = {}) {
+  const profile = buildRecoveryProfileBase(input);
+  const effectiveResilienceIndex = profile.bestByHorizon.map(({ horizonHours, optionId }) => {
+    const option = profile.options.find((item) => item.id === optionId) || profile.options.find((item) => item.id === 'no_action');
+    const result = option?.results.find((item) => item.horizonHours === horizonHours) || { baselineExposureUsd: 0, residualExposureUsd: 0, avoidedLossUsd: 0, recoveredFraction: 0 };
+    return { horizonHours, optionId: option?.id || 'no_action', indexPct: Number((result.recoveredFraction * 100).toFixed(1)), baselineExposureUsd: result.baselineExposureUsd, residualExposureUsd: result.residualExposureUsd, avoidedLossUsd: result.avoidedLossUsd, evidenceClass: 'assumed', calculation: 'best_local_counterfactual_recovered_fraction' };
+  });
+  return { ...profile, effectiveResilienceIndex };
+}
+
+function buildRecoveryProfileBase(input = {}) {
   const cableId = String(input.cableId || 'seamewe3');
   const severity = input.severity === 'parcial' ? 'parcial' : 'total';
   const horizons = (Array.isArray(input.horizons) ? input.horizons : DEFAULT_HORIZONS).map((value) => Math.round(positive(value))).filter((value) => value > 0 && value <= 8760).slice(0, 6);

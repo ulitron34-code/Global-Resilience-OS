@@ -191,8 +191,10 @@ describe('Global Resilience OS API', () => {
     assert.equal(recovery.status, 200);
     const recoveryBody = await recovery.json();
     assert.equal(recoveryBody.baseline.length, 3);
-    assert.ok(recoveryBody.options.some((item) => item.id === 'reroute'));
-    assert.ok(recoveryBody.bestByHorizon.every((item) => item.optionId));
+      assert.ok(recoveryBody.options.some((item) => item.id === 'reroute'));
+      assert.ok(recoveryBody.bestByHorizon.every((item) => item.optionId));
+      assert.equal(recoveryBody.effectiveResilienceIndex.length, 3);
+      assert.ok(recoveryBody.effectiveResilienceIndex.every((item) => item.indexPct >= 0 && item.indexPct <= 95 && item.evidenceClass === 'assumed'));
     const validEvent = await fetch(`${baseUrl}/api/ingest/validate`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ externalId: 'contract-001', sourceId: 'ais-demo', eventType: 'ais_gap', title: 'AIS gap', severity: 'medium', impactUsd: 100, observedAt: '2026-08-08T12:00:00Z', confidence: 0.8, provenance: { licenseRef: 'demo-contract' } }) });
     assert.equal((await validEvent.json()).valid, true);
 
