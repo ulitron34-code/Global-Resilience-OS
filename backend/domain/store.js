@@ -8,6 +8,7 @@ import { getDataCatalogReadiness, listDataCatalog, validateSourceIntake } from '
 import { buildControlPlaneProjection, validateControlPlaneProjection } from './controlPlaneProjection.js';
 import { getCalibrationEligibility, filterEligibleCalibrationFixtures } from './calibrationEligibility.js';
 import { isIllustrativeSource } from './sourceClassification.js';
+import { evaluateProductiveSource } from './sourceReadiness.js';
 
 const now = new Date().toISOString();
 const DEFAULT_ORGANIZATION_ID = 'nashadi-demo';
@@ -589,6 +590,11 @@ export function ingestEvent(input, actor = 'connector', organizationId = DEFAULT
   const required = ['externalId', 'sourceId', 'eventType', 'title', 'severity', 'impactUsd'];
   if (required.some((field) => input[field] === undefined)) throw new Error('Faltan campos requeridos del evento');
   const source = state.sources.find((item) => item.id === input.sourceId && (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId);
+  if (process.env.APP_MODE === 'production') {
+    const catalog = listDataCatalog().find((item) => item.id === input.sourceId);
+    const readiness = evaluateProductiveSource(source, catalog);
+    if (!readiness.ready) throw new Error(`Fuente no apta para producciÃ³n: ${input.sourceId}`);
+  }
   if (source && source.status !== 'connected') throw new Error(`Fuente no activa para ingesta: ${input.sourceId}`);
   if (!source) throw new Error(`Fuente no registrada para la organización activa: ${input.sourceId}`);
   if (typeof input.externalId !== 'string' || input.externalId.trim().length < 2 || input.externalId.length > 200) throw new Error('externalId debe tener entre 2 y 200 caracteres');

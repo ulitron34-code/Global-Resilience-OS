@@ -15,5 +15,7 @@ Endpoints:
 - `GET /api/data-quality/gate`
 - `POST /api/data-quality/validate`
 
+La misma regla se aplica a ingesta individual y batch en producciÃ³n: conexiÃ³n activa, fuente no ilustrativa, licencia activa y ficha contractual completa.
+
 El gate local no sustituye contratos, auditoria de licencias ni validacion de
 exactitud con eventos historicos.

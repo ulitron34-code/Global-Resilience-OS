@@ -1,5 +1,10 @@
 # Implementation Log
 
+## Bloque: readiness unificado de fuentes (2026-08-09)
+
+- La regla se centralizÃ³ en `sourceReadiness.js` y tambiÃ©n protege la ingesta
+  individual de eventos cuando `APP_MODE=production`, igual que la ingesta batch.
+
 ## Bloque: métricas, briefs y gobernanza tenant-scoped (2026-08-09)
 
 - Métricas generales, brief ejecutivo, exportación, compliance y retención
@@ -361,7 +366,7 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
   las fuentes ilustrativas se reportan aparte para no degradar ni inflar la
   lectura operativa.
 - La auditoria de cobertura y el estado actual fueron sincronizados con la
-  evidencia vigente de 77 pruebas backend pasando, incluyendo los casos de
+  evidencia vigente de 79 pruebas backend pasando, incluyendo los casos de
   evidencia de decision enlazada a fuentes ilustrativas y productivas.
 - La elegibilidad de calibracion, benchmark, backtesting y scorecard reutiliza
   la misma clasificacion de fuentes ilustrativas, incluyendo `sourceId`,
@@ -394,7 +399,7 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
   `organizationId`; se evita mezclar solicitudes y errores de distintos tenants
   en el panel de operación.
 - Se sincronizaron los documentos de handoff y readiness con la evidencia actual
-  de 77 pruebas, build reproducible y release gate PASS; las cifras previas se
+  de 79 pruebas, build reproducible y release gate PASS; las cifras previas se
   conservaron únicamente como historial.
 - El paquete de decisión ahora calcula escenarios, auditoría y comentarios con
   aislamiento por organización; se eliminó el conteo global de escenarios.

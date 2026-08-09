@@ -1,6 +1,7 @@
 import { validateEventEnvelope } from './eventContract.js';
 import { hasCompleteLicenseMetadata } from './dataCatalog.js';
 import { isIllustrativeSource } from './sourceClassification.js';
+import { evaluateProductiveSource } from './sourceReadiness.js';
 
 export function validateBatchInput(input = {}, sources = [], options = {}) {
   const mode = input.mode === undefined ? 'dry_run' : String(input.mode);
@@ -12,9 +13,11 @@ export function validateBatchInput(input = {}, sources = [], options = {}) {
     try {
       const normalized = validateEventEnvelope(event, options);
       const source = sourceMap.get(normalized.sourceId);
+      const record = { ...catalogMap.get(normalized.sourceId), ...source };
       if (!source) throw new Error(`Fuente desconocida: ${normalized.sourceId}`);
       if (options.production) {
-        const record = { ...catalogMap.get(normalized.sourceId), ...source };
+        const readiness = evaluateProductiveSource(source, catalogMap.get(normalized.sourceId));
+        if (!readiness.ready) throw new Error(`Fuente no apta para producción: ${normalized.sourceId}`);
         if (source.status !== 'connected' || isIllustrativeSource(record) || record.licenseStatus !== 'active' || !hasCompleteLicenseMetadata(record)) throw new Error(`Fuente no apta para producción: ${normalized.sourceId}`);
       }
       return { index, externalId: normalized.externalId, status: 'valid', event: normalized };
