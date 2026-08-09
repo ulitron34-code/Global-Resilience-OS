@@ -11,10 +11,9 @@ const npmPrefix = npmCommand === process.execPath ? [npmCli] : [];
 const checks = [
   { id: 'backend-tests', command: npmCommand, args: [...npmPrefix, 'test'], cwd: 'backend' },
   { id: 'frontend-lint', command: npmCommand, args: [...npmPrefix, 'run', 'lint'], cwd: 'frontend' },
-  // El wrapper raíz fija explícitamente el root y el config de Vite; eso evita
-  // que la ruta de trabajo heredada de PowerShell sea interpretada como una
-  // ruta de filesystem por esbuild en Windows.
-  { id: 'frontend-build', command: process.execPath, args: ['scripts/build-frontend.js'] },
+  // Ejecutar el script raíz mediante npm conserva el entorno de lifecycle que
+  // Vite/esbuild espera en Windows y evita errores de resolución intermitentes.
+  { id: 'frontend-build', command: process.platform === 'win32' ? (process.env.ComSpec || 'cmd.exe') : npm, args: process.platform === 'win32' ? ['/d', '/s', '/c', 'npm.cmd run build'] : ['run', 'build'] },
   { id: 'standalone-artifact', command: process.execPath, args: ['scripts/standalone-artifact-check.js'] },
   { id: 'pdf-export', command: process.execPath, args: ['scripts/pdf-export-check.js'] },
   { id: 'smoke', command: process.execPath, args: ['scripts/local-smoke-test.js'] },
