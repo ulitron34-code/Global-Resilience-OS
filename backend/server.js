@@ -348,7 +348,7 @@ app.get('/api/ops/metrics', authIfConfigured, roleIfConfigured('admin'), (req, r
 app.get('/api/compliance/readiness', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(getComplianceReadiness(req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
 app.get('/api/quality/report', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(getDataQualityReport(req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
 app.get('/api/governance/provenance', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(getProvenanceOverview(req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
-app.get('/api/governance/retention', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(getRetentionOverview(Date.now(), req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
+app.get('/api/governance/retention', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(getRetentionOverview(Date.now(), req.user?.organizationId || DEFAULT_ORGANIZATION_ID, req.query.retentionDays)));
 app.get('/api/runtime/readiness', (req, res) => { const readiness = getOperationalRuntimeReadiness(); res.status(readiness.ready ? 200 : 503).json(readiness); });
 app.get('/api/runtime/supabase', (req, res) => res.json(getSupabaseReadiness()));
 app.get('/api/runtime/supabase/check', async (req, res) => {

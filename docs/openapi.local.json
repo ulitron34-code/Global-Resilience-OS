@@ -120,7 +120,7 @@
     "/api/audit/integrity": { "get": { "summary": "Verificar integridad de auditoria", "security": [{ "bearerAuth": [] }], "responses": { "200": { "description": "Resultado de la cadena hash" } } } },
     "/api/quality/report": { "get": { "summary": "Calidad e integridad de datos locales", "responses": { "200": { "description": "Informe de calidad" } } } },
     "/api/governance/provenance": { "get": { "summary": "Procedencia y linaje de fuentes y modelos", "responses": { "200": { "description": "Registro de gobernanza local" } } } },
-    "/api/governance/retention": { "get": { "summary": "Vista previa de retención local", "responses": { "200": { "description": "Revisión no destructiva" } } } },
+    "/api/governance/retention": { "get": { "summary": "Vista previa de retención local", "parameters": [{ "name": "retentionDays", "in": "query", "schema": { "type": "integer", "minimum": 1, "maximum": 3650 } }], "responses": { "200": { "description": "Revisión no destructiva" } } } },
     "/api/models/validation": { "get": { "summary": "Validar invariantes del motor local", "responses": { "200": { "description": "Reporte de validación y calibración" } } } },
     "/api/models/calibration": { "get": { "summary": "Métricas de calibración local", "responses": { "200": { "description": "Fixtures y métricas de error" } } } },
     "/api/models/calibration/fixtures": { "post": { "summary": "Registrar fixtures históricos", "security": [{ "bearerAuth": [] }], "responses": { "201": { "description": "Fixtures registrados" }, "400": { "description": "Fixtures inválidos" } } } },

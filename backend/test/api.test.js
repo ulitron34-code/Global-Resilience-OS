@@ -277,6 +277,11 @@ describe('Global Resilience OS API', () => {
     const retentionBody = await retention.json();
     assert.equal(retentionBody.dryRun, true);
     assert.equal(retentionBody.deletionEnabled, false);
+    const retentionPreview = await fetch(`${baseUrl}/api/governance/retention?retentionDays=30`);
+    assert.equal(retentionPreview.status, 200);
+    const retentionPreviewBody = await retentionPreview.json();
+    assert.equal(retentionPreviewBody.retentionDays, 30);
+    assert.equal(retentionPreviewBody.deletionEnabled, false);
     const readAll = await fetch(`${baseUrl}/api/notifications/read-all`, { method: 'POST' });
     assert.equal(readAll.status, 200);
     assert.ok((await readAll.json()).updated >= 0);

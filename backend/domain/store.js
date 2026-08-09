@@ -778,8 +778,8 @@ export function getProvenanceOverview(organizationId = DEFAULT_ORGANIZATION_ID) 
   return { scope: 'local-platform', organizationId, generatedAt: new Date().toISOString(), disclaimer: 'El registro documenta procedencia y supuestos locales; no prueba derechos de uso ni exactitud de mercado.', sources: sourceRecords, models: modelRecords, ready: sourceRecords.length > 0 && modelRecords.length > 0 };
 }
 
-export function getRetentionOverview(referenceTime = Date.now(), organizationId = DEFAULT_ORGANIZATION_ID) {
-  const configuredDays = Number(process.env.LOCAL_RETENTION_DAYS || 365);
+export function getRetentionOverview(referenceTime = Date.now(), organizationId = DEFAULT_ORGANIZATION_ID, requestedDays) {
+  const configuredDays = Number(requestedDays ?? process.env.LOCAL_RETENTION_DAYS ?? 365);
   const retentionDays = Number.isFinite(configuredDays) ? Math.min(Math.max(Math.floor(configuredDays), 1), 3650) : 365;
   const cutoffMs = referenceTime - retentionDays * 86_400_000;
   const belongs = (item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId;

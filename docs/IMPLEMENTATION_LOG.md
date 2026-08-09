@@ -541,3 +541,7 @@ El paquete JSON y Markdown de piloto ahora conserva el perfil regional/vertical 
 ## Bloque: matriz verificable del backlog P0/P1/P2 (2026-08-09)
 
 Se documentó el estado de cada ítem del Plan Maestro con evidencia local y el requisito externo que todavía lo bloquea. La matriz evita confundir un contrato o un dry-run con una integración productiva.
+
+## Bloque: preview parametrizable de retención (2026-08-09)
+
+`GET /api/governance/retention` acepta una ventana de 1 a 3650 días para probar escenarios de política sin cambiar configuración, eliminar datos ni mutar el estado. El borrado y la política legal siguen bloqueados para producción.

@@ -466,8 +466,8 @@ export async function recordCalibrationFixtures(input) {
   return fetchWithTimeout(`${BACKEND_URL}/api/models/calibration/fixtures`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(input) });
 }
 
-export async function getRetentionOverview() {
-  try { return await fetchWithTimeout(`${BACKEND_URL}/api/governance/retention`); } catch (error) { return localFallback({ dryRun: true, collections: [], error: error.message }, error); }
+export async function getRetentionOverview(retentionDays = '') {
+  try { const query = retentionDays ? `?retentionDays=${encodeURIComponent(retentionDays)}` : ''; return await fetchWithTimeout(`${BACKEND_URL}/api/governance/retention${query}`); } catch (error) { return localFallback({ dryRun: true, collections: [], error: error.message }, error); }
 }
 
 export async function runDemoIngestionJob() {
