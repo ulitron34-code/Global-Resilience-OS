@@ -208,6 +208,15 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
 - La auditoría API verifica el contrato completo en el grafo filtrado y en la
   trayectoria cable-vertical.
 
+## Bloque: cobertura de piloto sin contar fuentes demo (2026-08-09)
+
+- `buildPilotMetrics` calcula `sourceCoverage` únicamente con fuentes
+  `healthy`; una fuente `demo` ya no eleva la cobertura productiva.
+- Se expone `illustrativeSourceCount` y se añade la falta de fuentes
+  productivas licenciadas a la evidencia pendiente.
+- La prueba de piloto confirma la separación entre cobertura operativa local y
+  cobertura apta para producción.
+
 ## Bloque: Executive Brief sin score fijo no calibrado (2026-08-09)
 
 - Executive Brief deja de pintar un `72/100` fijo en el frontend.

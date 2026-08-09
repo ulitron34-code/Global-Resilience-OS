@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildPilotReadiness } from '../domain/pilotKit.js';
+import { buildPilotMetrics, buildPilotReadiness } from '../domain/pilotKit.js';
 
 const technicalInputs = {
   runtime: { ready: true },
@@ -45,4 +45,12 @@ test('demo fixtures never count as authorized historical evidence', () => {
   });
   assert.equal(result.customerReady, false);
   assert.equal(result.evidenceCounts.verifiedHistoricalEvents, 0);
+});
+
+test('demo sources never count as productive pilot coverage', () => {
+  const result = buildPilotMetrics({ sourceHealth: { sources: [{ id: 'ais-demo', health: 'demo' }, { id: 'licensed-source', health: 'healthy' }] } });
+  assert.equal(result.metrics.sourceCoverage, 0.5);
+  assert.equal(result.metrics.illustrativeSourceCount, 1);
+  assert.match(result.definitions.sourceCoverage, /demo no cuenta/);
+  assert.ok(result.missingEvidence.includes('fuentes productivas licenciadas'));
 });
