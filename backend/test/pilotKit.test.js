@@ -11,6 +11,8 @@ const technicalInputs = {
   tenancy: { organizationId: 'org-test' },
 };
 
+const interviewEvidence = [1, 2, 3, 4, 5].map((index) => ({ stage: 'interview', role: `Role ${index}`, summary: `Decision critica documentada ${index}` }));
+
 test('pilot readiness remains blocked without customer and historical evidence', () => {
   const result = buildPilotReadiness(technicalInputs);
   assert.equal(result.technicalReady, true);
@@ -19,7 +21,7 @@ test('pilot readiness remains blocked without customer and historical evidence',
 });
 
 test('pilot readiness requires structured value and success evidence', () => {
-  const feedback = [
+  const feedback = [...interviewEvidence,
     { stage: 'pilot_review', evidence: 'Cliente reviso el criterio.', evidenceType: 'general' },
     { stage: 'pilot_review', evidence: 'Rango de costo evitado documentado.', evidenceType: 'economic_value' },
     { stage: 'pilot_review', evidence: 'Baseline y umbral definidos.', evidenceType: 'success_criteria' },
@@ -36,10 +38,24 @@ test('pilot readiness requires structured value and success evidence', () => {
   assert.equal(result.evidenceCounts.successCriteria, 1);
 });
 
+test('pilot readiness requires five structured interviews before customer gate', () => {
+  const result = buildPilotReadiness({
+    ...technicalInputs,
+    pilotFeedback: [...interviewEvidence.slice(0, 4), { stage: 'pilot_review', evidence: 'Review documentada.', evidenceType: 'general' }],
+    historicalFixtures: [
+      { id: 'evt-1', sourceId: 'licensed-ais', provenance: 'contract-1', evidenceStatus: 'complete' },
+      { id: 'evt-2', sourceId: 'licensed-cables', provenance: 'contract-2', evidenceStatus: 'complete' },
+      { id: 'evt-3', sourceId: 'licensed-ports', provenance: 'contract-3', evidenceStatus: 'complete' },
+    ],
+  });
+  assert.equal(result.checks.find((check) => check.id === 'interview_threshold').pass, false);
+  assert.equal(result.customerReady, false);
+});
+
 test('pilot readiness remains blocked when value evidence is missing', () => {
   const result = buildPilotReadiness({
     ...technicalInputs,
-    pilotFeedback: [{ stage: 'pilot_review', evidence: 'Review documentada.', evidenceType: 'general' }],
+    pilotFeedback: [...interviewEvidence, { stage: 'pilot_review', evidence: 'Review documentada.', evidenceType: 'general' }],
     historicalFixtures: [
       { id: 'evt-1', sourceId: 'licensed-ais', provenance: 'contract-1', evidenceStatus: 'complete' },
       { id: 'evt-2', sourceId: 'licensed-cables', provenance: 'contract-2', evidenceStatus: 'complete' },

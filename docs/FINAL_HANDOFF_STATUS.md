@@ -4,7 +4,7 @@ Fecha de corte: 2026-08-09
 
 ## Evidencia vigente (2026-08-09)
 
-El corte actual supersede las cifras históricas de este documento: 79 pruebas
+El corte actual supersede las cifras históricas de este documento: 80 pruebas
 backend PASS, lint y build frontend PASS, y `npm.cmd run verify` PASS. El
 checkout local permanece sin cambios pendientes y los commits siguen esperando
 publicación externa.

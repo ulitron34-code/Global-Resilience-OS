@@ -4,7 +4,7 @@ Fecha de corte: 2026-08-09.
 
 ## Verificaciones ejecutadas
 
-El corte vigente es de 79 pruebas backend PASS, lint y build frontend PASS, y
+El corte vigente es de 80 pruebas backend PASS, lint y build frontend PASS, y
 `npm.cmd run verify` PASS. Las cifras anteriores de este archivo son
 históricas y no representan el estado actual.
 

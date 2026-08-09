@@ -14,6 +14,9 @@ que ya existe un cliente, un baseline de mercado o datos licenciados.
 
 ## Gate de cliente
 
+El runtime local exige al menos cinco entrevistas estructuradas antes de marcar
+`customerReady`; una sola revisión no es suficiente.
+
 `customerReady` permanece en `false` hasta contar con entrevistas estructuradas,
 un evento real autorizado, baseline histórico y criterio de valor aceptado por el
 cliente. Esta decisión es deliberada: el sistema no convierte fixtures demo en

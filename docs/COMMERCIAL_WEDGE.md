@@ -118,7 +118,9 @@ Registrar cada entrevista en el pilot kit con rol, resumen, problema,
 severidad, proceso actual, datos disponibles, presupuesto probable y siguiente
 paso. El gate externo requiere al menos cinco entrevistas estructuradas y dos
 problemas con urgencia, acceso a datos y presupuesto probable. Hasta entonces,
-el estado local correcto es `ready_for_customer_validation`, no `customer_ready`.
+el estado local correcto es `ready_for_customer_validation`, no
+`customer_ready`. El runtime local también exige explícitamente el umbral de
+cinco entrevistas antes de marcar el gate de cliente.
 
 ## Traducción al producto local
 
