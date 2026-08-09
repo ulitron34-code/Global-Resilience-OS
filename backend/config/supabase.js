@@ -34,3 +34,23 @@ export function getSupabaseReadiness(env = process.env) {
     disclaimer: 'La configuración no valida credenciales contra la red; la prueba de conexión se ejecuta al habilitar el adaptador remoto.',
   };
 }
+
+export async function checkSupabaseConnection(env = process.env, fetchImpl = fetch) {
+  const readiness = getSupabaseReadiness(env);
+  if (!readiness.ready) return { ...readiness, reachable: false, checked: false, error: 'Supabase no está configurado para persistencia remota.' };
+  const config = readiness.config;
+  const key = env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_ANON_KEY;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), Number(env.SUPABASE_TIMEOUT_MS || 5000));
+  try {
+    const response = await fetchImpl(`${config.projectUrl}/rest/v1/organizations?select=id&limit=1`, {
+      headers: { apikey: key, authorization: `Bearer ${key}` },
+      signal: controller.signal,
+    });
+    return { ...readiness, reachable: response.ok, checked: true, status: response.status, error: response.ok ? null : `Supabase respondió HTTP ${response.status}.` };
+  } catch (error) {
+    return { ...readiness, reachable: false, checked: true, error: error.name === 'AbortError' ? 'Tiempo de espera agotado al contactar Supabase.' : 'No fue posible contactar Supabase.' };
+  } finally {
+    clearTimeout(timer);
+  }
+}
