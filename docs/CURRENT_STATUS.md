@@ -38,7 +38,7 @@ Enterprise Readiness.
   `npm run check:supabase`, `npm run verify` y `npm run verify:install`.
 - Auditoría de instalación limpia con lockfiles aceptados por `npm ci
   --dry-run` en backend y frontend.
-- Última evidencia local: 101 pruebas, lint, build, smoke, rendimiento,
+- Última evidencia local: 103 pruebas, lint, build, smoke, rendimiento,
   auditoría portable, esquema, plan maestro, release gate y paridad OpenAPI:
   todo PASS.
 - Incluye Decision Room compartible en solo lectura y blueprint de staging para
