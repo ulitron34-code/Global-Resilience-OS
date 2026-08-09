@@ -36,7 +36,8 @@ test('decision share API creates, serves and revokes a read-only package', async
   assert.equal(sharedBody.package.organizationId, undefined);
   assert.equal(sharedBody.package.alert.payload, undefined);
   assert.equal(sharedBody.package.shareExposure.policyVersion, 'local-share-redaction-v1');
-  assert.equal(JSON.stringify(sharedBody).includes('tokenHash'), false);
+  assert.equal(sharedBody.package.tokenHash, undefined);
+  assert.ok(sharedBody.package.shareExposure.redactedFields.includes('tokenHash'));
   const sharedMarkdown = await fetch(`${baseUrl}${created.apiPath}?format=markdown`);
   assert.equal(sharedMarkdown.status, 200);
   assert.equal(sharedMarkdown.headers.get('content-type'), 'text/markdown; charset=utf-8');

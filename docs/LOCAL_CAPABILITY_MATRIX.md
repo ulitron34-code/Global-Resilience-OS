@@ -49,13 +49,18 @@ externas se mantienen fuera de alcance por decisión del proyecto.
 | UX | Cola de casos con filtros de estado, prioridad, responsable y orden SLA | `/api/cases` + CasesView | Implementado local |
 
 | Operacion | Monitor de salud, latencia y frescura de fuentes | `/api/ops/source-health` + panel Operacion | Implementado local |
+| Gobernanza | Preview de retencion parametrizable y siempre dry-run | `/api/governance/retention?retentionDays=...` | Implementado local; politica legal y almacenamiento productivo pendientes |
 | Gobernanza | Procedencia, linaje y clasificación de fuentes/modelos | `/api/governance/provenance` + panel Operacion | Implementado local |
 | Gobernanza | Vista previa de retención no destructiva | `/api/governance/retention` + panel Operacion | Implementado local |
 | Calidad de modelos | Invariantes locales y carga de fixtures de calibración | `/api/models/validation`, `/api/models/calibration` | Implementado local; datos históricos pendientes |
 
 | Producto | Impact Graph local con nodos y aristas explicables | `/api/graph` + `/api/graph/paths` | Implementado local |
+| Calidad de modelos | Perfiles regionales y verticales con abstencion explicita | `/api/models/profiles` + `ModelProfilesPanel` | Implementado local; datos licenciados y calibracion pendientes |
 | Producto | Playbooks Scenario-to-Action con economía, pasos, fuente de evidencia y estado del gate | `/api/playbooks` + `/api/action-plans/preview` | Implementado local |
 | Documentación | Requisitos de producto, contratos de datos y bitácora de implementación | `docs/PRODUCT_REQUIREMENTS.md`, `docs/DATA_CONTRACTS.md`, `docs/IMPLEMENTATION_LOG.md` | Implementado |
+
+| Piloto | Caso economico con gate de evidencia para priorizar una prueba | `/api/pilots/value-case` + `PilotValueCasePanel` | Implementado local; costos evitados y validacion con cliente pendientes |
+| Seguridad | Redaccion de paquetes de decision compartidos | `local-share-redaction-v1` + Decision Room | Implementado local; revision legal y DPA externos pendientes |
 
 ## Gates locales
 

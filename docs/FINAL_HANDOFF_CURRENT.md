@@ -25,6 +25,11 @@ jobs aislados por tenant, y el esquema normalizado preparado en
 `docs/supabase/004_operational_extensions.sql` y
 `docs/supabase/005_control_plane_extensions.sql`.
 
+Los bloques mas recientes tambien incluyen perfiles regionales y verticales
+con abstencion explicita, caso economico de piloto gated por evidencia,
+preview de retencion parametrizable en modo dry-run y redaccion de paquetes
+compartidos bajo la politica `local-share-redaction-v1`.
+
 ## Validacion externa aun requerida
 
 Estas tareas no se deben declarar terminadas por el estado local:

@@ -31,6 +31,9 @@ Enterprise Readiness.
   auditoría portable, reproducibilidad, auditoría de esquema Supabase local,
   auditoría del plan, release gate y CI preparado.
 - Acciones externas desactivadas por defecto y conectores en `dry_run_only`.
+- Perfiles regionales y verticales con abstencion explicita, caso de valor para
+  pilotos gated por evidencia, preview de retencion parametrizable sin borrado
+  y redaccion de paquetes compartidos bajo `local-share-redaction-v1`.
 - Punto de entrada raíz con `npm test`, `npm run lint`, `npm run build`,
   `npm run check:supabase`, `npm run verify` y `npm run verify:install`.
 - Auditoría de instalación limpia con lockfiles aceptados por `npm ci
