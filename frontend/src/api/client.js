@@ -470,6 +470,10 @@ export async function getRetentionOverview(retentionDays = '') {
   try { const query = retentionDays ? `?retentionDays=${encodeURIComponent(retentionDays)}` : ''; return await fetchWithTimeout(`${BACKEND_URL}/api/governance/retention${query}`); } catch (error) { return localFallback({ dryRun: true, collections: [], error: error.message }, error); }
 }
 
+export async function getSectorBenchmark(minCohort = 3) {
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/benchmarks/sectors?minCohort=${encodeURIComponent(minCohort)}`); } catch (error) { return localFallback({ sectors: [], totals: { completedOutcomes: 0, publishedSectors: 0 }, readiness: { status: 'unavailable' }, evidencePolicy: { marketClaimAllowed: false }, error: error.message }, error); }
+}
+
 export async function runDemoIngestionJob() {
   const data = await fetchWithTimeout(`${BACKEND_URL}/api/jobs/demo-ingest`, { method: 'POST' });
   setBackendStatus('online');

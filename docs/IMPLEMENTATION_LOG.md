@@ -1,5 +1,12 @@
 # Implementation Log
 
+## Bloque: readiness explícito del benchmark sectorial (2026-08-09)
+
+- El benchmark devuelve estado de readiness, clase de evidencia y política de
+  claims; sin outcomes observados se abstiene y nunca permite claim de mercado.
+- La UI muestra cohortes publicables, mínimo k, MAE observado y el bloqueo de
+  referencia comercial.
+
 ## Bloque: conflicto de retención contra licencia (2026-08-09)
 
 - La revisión local compara la ventana configurada con `license.retentionDays`

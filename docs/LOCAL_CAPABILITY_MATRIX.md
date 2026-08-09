@@ -72,6 +72,9 @@ bloqueado por `dry_run_only`.
 La gobernanza de retencion tambien compara la ventana local contra los limites
 de licencia declarados por fuente y marca conflictos sin ejecutar borrado.
 
+El benchmark sectorial local expone readiness, clase de evidencia y bloqueo
+explícito de claims de mercado cuando no existen outcomes autorizados.
+
 ```powershell
 cd backend; npm test
 cd ..; node scripts/local-smoke-test.js

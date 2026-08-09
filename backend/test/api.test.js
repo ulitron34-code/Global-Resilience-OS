@@ -242,6 +242,11 @@ describe('Global Resilience OS API', () => {
     const benchmark = await fetch(`${baseUrl}/api/models/calibration/benchmark`);
     assert.equal(benchmark.status, 200);
     assert.equal((await benchmark.json()).gate, 'abstain_no_fixtures');
+    const sectorBenchmark = await fetch(`${baseUrl}/api/benchmarks/sectors?minCohort=3`);
+    assert.equal(sectorBenchmark.status, 200);
+    const sectorBenchmarkBody = await sectorBenchmark.json();
+    assert.equal(sectorBenchmarkBody.evidencePolicy.marketClaimAllowed, false);
+    assert.ok(['abstain_no_observed_outcomes', 'abstain_insufficient_cohort', 'local_descriptive_only'].includes(sectorBenchmarkBody.readiness.status));
     const cooperative = await fetch(`${baseUrl}/api/network/cooperative/preview`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ consent: false, minCohort: 3 }) });
     assert.equal(cooperative.status, 200);
     const cooperativeBody = await cooperative.json();

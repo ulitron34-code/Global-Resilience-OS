@@ -41,6 +41,7 @@ import { buildOperationalScorecard } from './domain/operationalScorecard.js';
 import { buildEnterpriseReadiness } from './domain/enterpriseReadiness.js';
 import { attachDecisionEvidence } from './domain/decisionEvidence.js';
 import { buildCooperativeIncidentPreview } from './domain/cooperativeNetwork.js';
+import { enrichAnonymousSectorBenchmark } from './domain/benchmarkReadiness.js';
 import { buildEvidenceManifest } from './domain/evidenceManifest.js';
 import { authIfConfigured, listRoles, listUsers, login, requireAuth, revokeToken, roleIfConfigured } from './auth/auth.js';
 import {
@@ -438,7 +439,7 @@ app.get('/api/tenancy/context', authIfConfigured, (req, res) => res.json({
 app.get('/api/action-plans', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(listActionPlans({ organizationId: req.user?.organizationId || DEFAULT_ORGANIZATION_ID, caseId: req.query.caseId, status: req.query.status, limit: req.query.limit })));
 app.get('/api/action-plans/metrics', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(getActionPlanOutcomeMetrics(req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
 app.get('/api/action-plans/timing', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(getActionPlanTimingMetrics(req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
-app.get('/api/benchmarks/sectors', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(getAnonymousSectorBenchmark(Math.max(3, Math.min(20, Number(req.query.minCohort) || 3)))));
+app.get('/api/benchmarks/sectors', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(enrichAnonymousSectorBenchmark(getAnonymousSectorBenchmark(Math.max(3, Math.min(20, Number(req.query.minCohort) || 3))))));
 app.post('/api/network/cooperative/preview', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(buildCooperativeIncidentPreview({ alerts: listAlerts({ limit: 200, organizationId: req.user?.organizationId || DEFAULT_ORGANIZATION_ID }), minCohort: req.body?.minCohort, consent: req.body?.consent, consentActor: req.user?.email || null, consentAt: req.body?.consent ? new Date().toISOString() : null, reidentificationReviewed: req.body?.reidentificationReviewed, reviewActor: req.user?.email || null, reviewAt: req.body?.reidentificationReviewed ? new Date().toISOString() : null })));
 app.post('/api/assistant/suggestion', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => {
   const validation = getModelValidationReport();

@@ -30,6 +30,7 @@ import CapacityMarketplacePanel from './CapacityMarketplacePanel';
 import EnterpriseReadinessPanel from './EnterpriseReadinessPanel';
 import EvidenceManifestPanel from './EvidenceManifestPanel';
 import CooperativeNetworkPanel from './CooperativeNetworkPanel';
+import SectorBenchmarkPanel from './SectorBenchmarkPanel';
 import { useSessionStore } from '../store/useSessionStore';
 
 export function NetworkExposureView({ onScenario }) {
@@ -222,6 +223,7 @@ export function OperationsView() {
     <ModelProfilesPanel />
     <OperationalScorecardPanel />
     <CooperativeNetworkPanel />
+    <SectorBenchmarkPanel />
     <AuditIntegrityPanel />
     <SlaPanel />
     <DeadLetterPanel />
