@@ -188,10 +188,13 @@ app.use((req, res, next) => {
   res.on('finish', () => {
     const durationMs = Math.round((performance.now() - startedAt) * 100) / 100;
     const route = `${req.method} ${req.route?.path || req.path}`;
-    const item = operationalMetrics.byRoute.get(route) || { route, count: 0, errors: 0, totalMs: 0, lastMs: 0 };
+    const item = operationalMetrics.byRoute.get(route) || { route, count: 0, errors: 0, totalMs: 0, lastMs: 0, samples: [] };
     item.count += 1;
     item.totalMs += durationMs;
     item.lastMs = durationMs;
+    if (!Array.isArray(item.samples)) item.samples = [];
+    item.samples.push(durationMs);
+    if (item.samples.length > 500) item.samples.shift();
     if (res.statusCode >= 400) { item.errors += 1; operationalMetrics.errors += 1; }
     operationalMetrics.byRoute.set(route, item);
     operationalMetrics.requests += 1;
@@ -301,9 +304,19 @@ app.post('/api/ops/reset-demo', authIfConfigured, roleIfConfigured('admin'), (re
   const actionPlans = resetActionPlans();
   res.json({ ...result, counts: { ...result.counts, actionPlansRemoved: actionPlans.removed } });
 });
+function percentile(values, percentileRank) {
+  if (!values.length) return 0;
+  const sorted = [...values].sort((a, b) => a - b);
+  const index = Math.min(sorted.length - 1, Math.max(0, Math.ceil(percentileRank * sorted.length) - 1));
+  return sorted[index];
+}
+
 app.get('/api/ops/metrics', authIfConfigured, roleIfConfigured('admin'), (req, res) => {
   const routes = [...operationalMetrics.byRoute.values()]
-    .map((item) => ({ ...item, averageMs: item.count ? Math.round((item.totalMs / item.count) * 100) / 100 : 0 }))
+    .map((item) => {
+      const samples = Array.isArray(item.samples) ? item.samples : [];
+      return { route: item.route, count: item.count, errors: item.errors, totalMs: item.totalMs, lastMs: item.lastMs, averageMs: item.count ? Math.round((item.totalMs / item.count) * 100) / 100 : 0, p50Ms: percentile(samples, 0.5), p95Ms: percentile(samples, 0.95), maxMs: samples.length ? Math.max(...samples) : item.lastMs || 0 };
+    })
     .sort((a, b) => b.count - a.count);
   res.json({ startedAt: operationalMetrics.startedAt, uptimeSeconds: Math.round(process.uptime()), requests: operationalMetrics.requests, errors: operationalMetrics.errors, memory: process.memoryUsage(), routes, generatedAt: new Date().toISOString() });
 });

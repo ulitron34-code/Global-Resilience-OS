@@ -383,3 +383,6 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
 - La interfaz de Scenario-to-Action ahora permite declarar la fuente de
   evidencia y muestra de forma explícita si el preview queda apto para gate
   productivo o solo como borrador con abstención material.
+- Observabilidad local ahora conserva hasta 500 muestras de latencia por ruta y
+  expone promedio, p50, p95 y máximo para detectar degradaciones sin proveedor
+  externo.

@@ -734,6 +734,7 @@ describe('Global Resilience OS API', () => {
     const metricsBody = await metrics.json();
     assert.ok(metricsBody.requests > 0);
     assert.ok(Array.isArray(metricsBody.routes));
+    assert.ok(metricsBody.routes.some((route) => Number.isFinite(route.p50Ms) && Number.isFinite(route.p95Ms) && Number.isFinite(route.maxMs)));
 
     const snapshotResponse = await fetch(`${baseUrl}/api/ops/snapshot`);
     const snapshot = await snapshotResponse.json();
