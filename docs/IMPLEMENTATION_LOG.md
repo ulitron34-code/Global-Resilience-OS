@@ -9,6 +9,13 @@
 
 ## Bloque: integridad criptográfica del paquete de piloto (2026-08-09)
 
+## Bloque: capacidad enlazada al paquete de decisión (2026-08-09)
+
+- Las inquiries asociadas a un caso aparecen en el paquete JSON y en la
+  exportación Markdown de decisión.
+- Los paquetes compartidos de solo lectura conservan el estado de la inquiry
+  y la marca `externalAction=blocked`; no se interpreta como compra.
+
 - JSON y Markdown parten del mismo paquete con huella SHA-256 basada en JSON
   canónico ordenado.
 - La prueba de API recalcula y verifica el digest; el artefacto sigue marcado

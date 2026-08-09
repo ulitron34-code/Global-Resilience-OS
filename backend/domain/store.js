@@ -447,6 +447,7 @@ export function getDecisionPackageByShareToken(token) {
   share.lastAccessedAt = accessedAt;
   const packageData = getDecisionPackage(share.caseId, share.organizationId || DEFAULT_ORGANIZATION_ID);
   if (!packageData) return null;
+  packageData.capacityInquiries = state.capacityInquiries.filter((item) => item.caseId === share.caseId && (item.organizationId || DEFAULT_ORGANIZATION_ID) === (share.organizationId || DEFAULT_ORGANIZATION_ID)).map((item) => ({ ...item, offer: getCapacityOffer(item.offerId) }));
   auditLog.unshift({ id: `AUD-${String(auditLog.length + 1).padStart(4, '0')}`, entityType: 'decision_share', entityId: share.id, action: 'decision_share_accessed', actor: 'share_token', message: `Paquete de decisión consultado para ${share.caseId}.`, createdAt: accessedAt });
   persistState(state, auditLog, notifications, comments, webhooks, webhookDeliveries, jobRuns);
   return { share: { id: share.id, caseId: share.caseId, audience: share.audience, status: share.status, expiresAt: share.expiresAt, accessedAt }, package: packageData, disclaimer: 'Vista de solo lectura; los datos demo y las limitaciones del paquete siguen vigentes.' };

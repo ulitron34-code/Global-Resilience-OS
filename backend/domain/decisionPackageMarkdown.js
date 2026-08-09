@@ -9,6 +9,7 @@ export function decisionPackageToMarkdown(result = {}) {
   const scenarios = Array.isArray(item.scenarios) ? item.scenarios : [];
   const sources = Array.isArray(item.sources) ? item.sources : [];
   const evidence = item.evidenceChain || {};
+  const capacityInquiries = Array.isArray(item.capacityInquiries) ? item.capacityInquiries : [];
   return [
     `# Paquete de decisión — ${value(caseItem.id)}`,
     '',
@@ -29,6 +30,8 @@ export function decisionPackageToMarkdown(result = {}) {
     `- Modelos inferidos: ${Array.isArray(evidence.inferredModelIds) ? evidence.inferredModelIds.length : 0}`,
     `- Supuestos de escenario: ${Number(evidence.assumedScenarioCount || 0)}`,
     `- Planes de acción: ${Number(evidence.actionPlanCount || 0)}`,
+    `- Inquiries de capacidad: ${capacityInquiries.length}`,
+    ...capacityInquiries.map((inquiry) => `- Capacidad ${value(inquiry.offer?.name, inquiry.offerId)}: ${value(inquiry.status)}; accion externa=${value(inquiry.externalAction)}`),
     sources.length ? sources.map((source) => `- Fuente: ${value(source.name, source.id)}`).join('\n') : '- No hay fuentes detalladas.',
     '', '## Limitaciones', '',
     value(result.disclaimer, 'Vista compartida de solo lectura. Requiere validación antes de uso productivo.'),
