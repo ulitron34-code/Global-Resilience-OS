@@ -263,10 +263,11 @@ export function getSourceHealthOverview(referenceTime = Date.now(), organization
   const sources = listSources(organizationId).map((source) => {
     const catalog = catalogMap.get(source.id) || {};
     const ageMinutes = source.lastEventAt ? Math.max(0, Math.round((referenceTime - Date.parse(source.lastEventAt)) / 60_000)) : null;
-    let health = source.status === 'demo' ? 'demo' : 'unknown';
+    const illustrativeSeed = source.status === 'demo' || source.id.endsWith('-demo');
+    let health = illustrativeSeed ? 'demo' : 'unknown';
     if (source.status === 'error') health = 'error';
-    else if (source.latencySeconds !== null && source.latencySeconds !== undefined) health = source.latencySeconds > 180 ? 'degraded' : 'healthy';
-    if (health !== 'demo' && catalog.refreshSlaHours !== null && (ageMinutes === null || ageMinutes > catalog.refreshSlaHours * 60)) health = 'stale';
+    else if (!illustrativeSeed && source.latencySeconds !== null && source.latencySeconds !== undefined) health = source.latencySeconds > 180 ? 'degraded' : 'healthy';
+    if (!illustrativeSeed && health !== 'demo' && catalog.refreshSlaHours !== null && (ageMinutes === null || ageMinutes > catalog.refreshSlaHours * 60)) health = 'stale';
     return { id: source.id, name: source.name, kind: source.kind, connectorStatus: source.status, health, latencySeconds: source.latencySeconds ?? null, lastEventAt: source.lastEventAt || null, ageMinutes, coverage: catalog.coverage || null, licenseStatus: catalog.licenseStatus || 'unknown', refreshSlaHours: catalog.refreshSlaHours ?? null };
   });
   const counts = { healthy: 0, degraded: 0, stale: 0, demo: 0, unknown: 0, error: 0 };

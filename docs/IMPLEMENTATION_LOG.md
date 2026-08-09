@@ -230,6 +230,14 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
   `resilienceScoreStatus: not_calibrated` hasta contar con datos históricos,
   benchmark y revisión experta.
 
+## Bloque: health de fuentes demo sin falsa señal de producción (2026-08-09)
+
+- Las fuentes semilla con ID `*-demo` ahora aparecen como `health: demo`, aun
+  cuando tengan latencia simulada.
+- La interfaz conserva la diferencia entre conector local disponible y fuente
+  licenciada apta para producción; las fuentes demo no se presentan como
+  saludables en sentido enterprise.
+
 - Una revisiÃ³n `approved_local` puede crear una fuente tenant-scoped en estado
   `pending_external` mediante `POST /api/data-catalog/intake-reviews/:id/register-local`.
 - El registro conserva la ficha contractual, enlaza la fuente con su revisiÃ³n y

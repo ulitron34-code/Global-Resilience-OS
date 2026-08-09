@@ -263,11 +263,12 @@ describe('Global Resilience OS API', () => {
     const slaBody = await sla.json();
     assert.equal(slaBody.cases.length, 3);
     assert.ok(slaBody.cases.every((item) => item.sla && item.sla.status));
-    const sourceHealth = await fetch(`${baseUrl}/api/ops/source-health`);
-    assert.equal(sourceHealth.status, 200);
-    const sourceHealthBody = await sourceHealth.json();
-    assert.equal(sourceHealthBody.sources.length, 4);
-    assert.ok(sourceHealthBody.sources.every((source) => source.health));
+      const sourceHealth = await fetch(`${baseUrl}/api/ops/source-health`);
+      assert.equal(sourceHealth.status, 200);
+      const sourceHealthBody = await sourceHealth.json();
+      assert.equal(sourceHealthBody.sources.length, 4);
+      assert.ok(sourceHealthBody.sources.every((source) => source.health));
+      assert.ok(sourceHealthBody.sources.some((source) => source.id === 'ais-demo' && source.health === 'demo'));
     const failedIngest = await fetch(`${baseUrl}/api/ingest/events`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ externalId: 'dlq-test-001', sourceId: 'missing-source', eventType: 'test', title: 'Señal inválida', severity: 'high', impactUsd: 10 }) });
     assert.equal(failedIngest.status, 400);
     const deadLetters = await fetch(`${baseUrl}/api/ingest/dead-letters?status=queued`);
