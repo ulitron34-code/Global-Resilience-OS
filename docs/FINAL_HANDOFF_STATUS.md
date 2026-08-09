@@ -4,58 +4,56 @@ Fecha de corte: 2026-08-08
 
 ## Resultado
 
-La base local de Global Resilience OS queda implementada y verificable para continuar con el despliegue. El producto cubre ingesta individual y batch, correlación temporal, simulación, impacto económico, Action OS con aprobación humana, gobernanza de modelos, incertidumbre, backtesting, sensibilidad, fuentes, SLA, DLQ, webhooks, notificaciones, pilotos, incidentes, seguridad, auditoría, recuperación portable, enlaces temporales de decisión y una vista pública de solo lectura.
+La base local de Global Resilience OS queda implementada y verificable para
+continuar con el despliegue. El producto cubre ingesta individual y batch,
+correlación temporal, simulación, impacto económico, Action OS con aprobación
+humana, gobernanza de modelos, incertidumbre, backtesting, sensibilidad,
+fuentes, SLA, DLQ, webhooks, notificaciones, pilotos, incidentes, seguridad,
+auditoría, recuperación portable, enlaces temporales de decisión y vista
+pública de solo lectura.
 
 ## Evidencia ejecutada
 
-- Backend: `npm.cmd test` — 45 pruebas correctas.
-- Frontend: `npm.cmd run lint` y `npm.cmd run build` — correctos.
+- Backend: `npm.cmd test` — 48 pruebas correctas.
+- Frontend: `npm.cmd run lint` y `npm.cmd run build` — correctos cuando se
+  ejecutan directamente desde la raíz.
 - Smoke end-to-end local: `LOCAL SMOKE TEST: PASS`.
-- Release evidence: `npm.cmd run verify` — PASS.
-- Rendimiento local: 60 solicitudes, 0 errores, p95 119.82 ms.
-- Auditoría portable: 0 hallazgos.
-- Dependencias de producción backend/frontend: 0 vulnerabilidades reportadas.
-- Reproducibilidad: manifests, lockfiles, `.env.example`, exclusiones y entrypoints: PASS.
-- Instalación limpia: backend y frontend aceptan `npm ci --dry-run`.
-- Auditoría ejecutable del Plan Maestro: fases 0–7 y salvaguardas locales: PASS.
-- OpenAPI: 134 rutas Express con 134 operaciones documentadas, sin faltantes ni duplicados.
-- Paquete de piloto exportable disponible en `GET /api/pilots/package` y en Operations.
-- Enterprise Readiness disponible en `GET /api/readiness/enterprise`.
-- Decision Room disponible en `/share/<token>`, con expiración, revocación, hash de token y auditoría de accesos.
-- Blueprint de Render disponible en `render.yaml`, con autenticación obligatoria y acciones externas deshabilitadas.
-- `APP_MODE=production` bloquea el login y el listado de usuarios demo; el gate está cubierto por prueba automatizada.
+- Auditoría Supabase local: migraciones 001–003, RLS y políticas de snapshots:
+  `PASS`.
+- Auditoría ejecutable del Plan Maestro: fases 0–7 y salvaguardas locales:
+  `PASS`.
+- OpenAPI: 137 rutas Express con 137 operaciones documentadas, sin faltantes ni
+  duplicados.
+- Auditoría portable, reproducibilidad, instalación limpia y release gate:
+  `PASS` en sus ejecuciones individuales.
+- `APP_MODE=production` bloquea login y usuarios demo; el contrato de producción
+  exige ahora autenticación, datos no ilustrativos, CORS y persistencia Supabase
+  con tenant explícito.
 
-## Actualización del tramo externo
+## Estado externo comprobado
 
-- GitHub ya tiene la rama `main` sincronizada hasta `016192c`.
-- Supabase ya tiene tres migraciones aplicadas, 13 tablas principales y `platform_snapshots` verificada con RLS.
-- Vercel está sirviendo la interfaz pública con el mini-backend conectado.
-- El backend incluye `/api/runtime/supabase` y `/api/runtime/supabase/check` para validar configuración y conectividad sin exponer secretos.
-- Render todavía requiere confirmar variables privadas y redeploy.
-- El adaptador transaccional Supabase ya está implementado y validado localmente; falta confirmar su activación efectiva en Render y ejecutar la prueba RLS con dos organizaciones.
+- GitHub: el remoto permanece en `8a0cfc2`; el checkout local está en
+  `c6c32b8`, 14 commits adelante y pendiente de publicación.
+- Supabase: tres migraciones aplicadas; `platform_snapshots` verificada con RLS
+  y tres políticas.
+- Vercel: interfaz pública activa.
+- Render: variables privadas configuradas y redeploy realizado, pero el
+  servicio responde con el commit remoto anterior y todavía devuelve 404 para
+  `/api/runtime/supabase/persistence`.
 
 ## Pendientes externos deliberados
 
-Estos puntos requieren credenciales, cuentas, datos reales o validación humana:
-
-1. Publicar y verificar los últimos commits en GitHub y configurar CI/secrets.
-2. Crear el proyecto Supabase, ejecutar el esquema, probar RLS con dos organizaciones y cargar variables.
-3. Configurar Render/Vercel, variables de entorno, dominio y staging real.
-4. Sustituir conectores dry-run por proveedores reales y validar contratos en sandbox.
-5. Configurar observabilidad externa, correo/webhooks productivos y retención.
-6. Ejecutar backtesting con eventos históricos y analistas expertos.
-7. Ejecutar piloto con organizaciones reales y medir valor.
+1. Publicar los commits locales en GitHub y confirmar CI verde.
+2. Verificar en Render el endpoint de persistencia y la escritura de un
+   snapshot Supabase.
+3. Ejecutar una prueba RLS real con dos organizaciones y claims de sesión.
+4. Confirmar `VITE_BACKEND_URL`, CORS, TLS, healthcheck y readiness desde
+   Vercel.
+5. Sustituir conectores dry-run por proveedores reales en sandbox.
+6. Configurar observabilidad, correo/webhooks productivos y retención.
+7. Ejecutar backtesting con eventos históricos y un piloto real.
 8. Completar revisión legal, DPA, certificaciones y claims comerciales.
 
-## Orden recomendado de cierre
-
-Nota de corte: GitHub y la aplicación inicial de Supabase ya están cerrados. El cierre restante de este tramo es CI/secrets, prueba RLS con dos organizaciones, variables privadas y redeploy de Render/Vercel.
-
-1. GitHub y CI.
-2. Supabase y migraciones/RLS.
-3. Render/Vercel y preview deployment.
-4. Conectores externos en sandbox.
-5. Piloto controlado y evidencia de aceptación.
-6. Producción con revisión de seguridad y continuidad.
-
-El estado local PASS no equivale a producción enterprise ni a cumplimiento regulatorio. Cada pendiente externo debe cerrarse con evidencia verificable antes de comercializar la plataforma.
+El estado local PASS no equivale a producción enterprise ni a cumplimiento
+regulatorio. Cada pendiente externo requiere evidencia verificable antes de
+comercializar la plataforma.
