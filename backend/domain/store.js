@@ -203,6 +203,24 @@ export function updateSourceIntakeReview(id, input = {}, actor = 'operator', org
   persistState(state, auditLog, notifications, comments, webhooks, webhookDeliveries, jobRuns);
   return clone(item);
 }
+export function registerSourceFromIntakeReview(id, actor = 'operator', organizationId = DEFAULT_ORGANIZATION_ID) {
+  const item = state.sourceIntakeReviews.find((candidate) => candidate.id === id && (candidate.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId);
+  if (!item) return null;
+  if (item.status !== 'approved_local') throw new Error('La revisiÃ³n debe estar aprobada localmente antes de registrar la fuente');
+  if (item.registeredSourceId) return { review: clone(item), source: getSource(item.registeredSourceId, organizationId) };
+  const preview = validateSourceIntake(item.candidate);
+  if (!preview.ready) throw new Error('La fuente ya no pasa el preview contractual');
+  if (state.sources.some((source) => source.id === preview.candidate.id && (source.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId)) throw new Error('Ya existe una fuente con ese ID en la organizaciÃ³n activa');
+  const createdAt = new Date().toISOString();
+  const source = { id: preview.candidate.id, name: preview.candidate.name, kind: preview.candidate.sourceClass, domain: preview.candidate.domain, coverage: preview.candidate.coverage, requiredFor: preview.candidate.requiredFor, licenseStatus: preview.candidate.licenseStatus, license: preview.candidate.license, status: 'pending_external', activationStatus: 'blocked_external', latencySeconds: null, lastEventAt: null, sourceIntakeReviewId: item.id, organizationId, createdAt, updatedAt: createdAt };
+  state.sources.unshift(source);
+  item.registeredSourceId = source.id;
+  item.activationStatus = 'blocked_external';
+  item.updatedAt = createdAt;
+  auditLog.unshift({ id: `AUD-${String(auditLog.length + 1).padStart(4, '0')}`, entityType: 'source_intake_review', entityId: id, action: 'source_registered_local', actor, message: `Fuente ${source.id} registrada localmente; activaciÃ³n externa bloqueada.`, createdAt });
+  persistState(state, auditLog, notifications, comments, webhooks, webhookDeliveries, jobRuns);
+  return { review: clone(item), source: clone(source) };
+}
 export function listPilotFeedback(organizationId = DEFAULT_ORGANIZATION_ID) { return clone(state.pilotFeedback.filter((item) => (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId)); }
 export function recordPilotFeedback(input, actor = 'operator', organizationId = DEFAULT_ORGANIZATION_ID) {
   const item = { id: `PFB-${randomBytes(4).toString('hex').toUpperCase()}`, organizationId, ...input, createdAt: new Date().toISOString(), createdBy: actor };
@@ -546,8 +564,9 @@ export function ingestEvent(input, actor = 'connector', organizationId = DEFAULT
   input = validateEventEnvelope(input);
   const required = ['externalId', 'sourceId', 'eventType', 'title', 'severity', 'impactUsd'];
   if (required.some((field) => input[field] === undefined)) throw new Error('Faltan campos requeridos del evento');
-  const source = state.sources.find((item) => item.id === input.sourceId);
-  if (!source) throw new Error(`Fuente desconocida: ${input.sourceId}`);
+  const source = state.sources.find((item) => item.id === input.sourceId && (item.organizationId || DEFAULT_ORGANIZATION_ID) === organizationId);
+  if (source && source.status !== 'connected') throw new Error(`Fuente no activa para ingesta: ${input.sourceId}`);
+  if (!source) throw new Error(`Fuente no registrada para la organización activa: ${input.sourceId}`);
   if (typeof input.externalId !== 'string' || input.externalId.trim().length < 2 || input.externalId.length > 200) throw new Error('externalId debe tener entre 2 y 200 caracteres');
   if (typeof input.title !== 'string' || input.title.trim().length < 2 || input.title.length > 300) throw new Error('title debe tener entre 2 y 300 caracteres');
   if (typeof input.eventType !== 'string' || input.eventType.trim().length < 2 || input.eventType.length > 100) throw new Error('eventType inválido');

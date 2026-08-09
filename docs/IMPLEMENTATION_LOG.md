@@ -198,6 +198,16 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
   `organizationId` correcto y ausencia de filtración de fuentes.
 ## Bloque: snapshots y readiness tenant-scoped (2026-08-09)
 
+## Bloque: registro local de fuentes aprobado por intake (2026-08-09)
+
+- Una revisiÃ³n `approved_local` puede crear una fuente tenant-scoped en estado
+  `pending_external` mediante `POST /api/data-catalog/intake-reviews/:id/register-local`.
+- El registro conserva la ficha contractual, enlaza la fuente con su revisiÃ³n y
+  mantiene `activationStatus: blocked_external`; no ejecuta llamadas externas.
+- La ingesta exige coincidencia de tenant y `status: connected`, por lo que una
+  fuente pendiente no puede generar eventos hasta el alta externa.
+- La cobertura sube a 55 pruebas y el nuevo endpoint queda en OpenAPI local.
+
 - `GET /api/ops/snapshot` ahora exporta únicamente el estado de la
   organización autenticada e incluye `organizationId` en el artefacto.
 - `POST /api/ops/restore` rechaza snapshots de otro tenant y reemplaza sólo la

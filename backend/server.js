@@ -102,6 +102,7 @@ import {
   listSourceIntakeReviews,
   createSourceIntakeReview,
   updateSourceIntakeReview,
+  registerSourceFromIntakeReview,
   listIncidents,
   createIncident,
   updateIncident,
@@ -329,6 +330,7 @@ app.post('/api/data-catalog/intake-preview', authIfConfigured, roleIfConfigured(
 app.get('/api/data-catalog/intake-reviews', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(listSourceIntakeReviews({ ...req.query, organizationId: req.user?.organizationId || DEFAULT_ORGANIZATION_ID })));
 app.post('/api/data-catalog/intake-reviews', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => { try { res.status(201).json(createSourceIntakeReview(req.body || {}, req.user?.email || 'operator', req.user?.organizationId || DEFAULT_ORGANIZATION_ID)); } catch (error) { res.status(400).json({ error: error.message }); } });
 app.patch('/api/data-catalog/intake-reviews/:id', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => { try { const item = updateSourceIntakeReview(req.params.id, req.body || {}, req.user?.email || 'operator', req.user?.organizationId || DEFAULT_ORGANIZATION_ID); if (!item) return res.status(404).json({ error: 'Revisión de fuente no encontrada' }); res.json(item); } catch (error) { res.status(400).json({ error: error.message }); } });
+app.post('/api/data-catalog/intake-reviews/:id/register-local', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => { try { const result = registerSourceFromIntakeReview(req.params.id, req.user?.email || 'operator', req.user?.organizationId || DEFAULT_ORGANIZATION_ID); if (!result) return res.status(404).json({ error: 'RevisiÃ³n de fuente no encontrada' }); res.status(201).json(result); } catch (error) { res.status(400).json({ error: error.message }); } });
 app.get('/api/data-quality/gate', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(evaluateDataQuality({ catalog: listDataCatalog(), sources: listSources(req.user?.organizationId || DEFAULT_ORGANIZATION_ID) })));
 app.post('/api/data-quality/validate', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => { const source = listSources(req.user?.organizationId || DEFAULT_ORGANIZATION_ID).find((item) => item.id === req.body?.sourceId) || {}; res.json(validateDataRecord(req.body || {}, source)); });
 app.get('/api/contracts', (req, res) => res.json(listSchemas()));

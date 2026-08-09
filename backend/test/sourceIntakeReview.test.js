@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createSourceIntakeReview, listSourceIntakeReviews, updateSourceIntakeReview } from '../domain/store.js';
+import { createSourceIntakeReview, listSourceIntakeReviews, registerSourceFromIntakeReview, updateSourceIntakeReview } from '../domain/store.js';
 
 const candidate = {
   id: `licensed-review-${Date.now()}`, name: 'Proveedor revisable', domain: 'maritime', coverage: 'licensed_global_events', sourceClass: 'licensed_feed', licenseStatus: 'active', requiredFor: ['maritime_alerts'],
@@ -16,6 +16,12 @@ test('source intake review persists locally, remains externally blocked and supp
   assert.equal(approved.status, 'approved_local');
   assert.equal(approved.activationStatus, 'blocked_external');
   assert.equal(approved.reviewedBy, 'approver@example.com');
+  const registered = registerSourceFromIntakeReview(created.id, 'registrar@example.com');
+  assert.equal(registered.source.id, candidate.id);
+  assert.equal(registered.source.status, 'pending_external');
+  assert.equal(registered.source.activationStatus, 'blocked_external');
+  assert.equal(registered.review.registeredSourceId, candidate.id);
+  assert.equal(registerSourceFromIntakeReview(created.id, 'registrar@example.com').source.id, candidate.id);
 });
 
 test('rejected source intake review requires a note', () => {
@@ -29,4 +35,9 @@ test('source intake reviews are isolated by organization', () => {
   assert.equal(listSourceIntakeReviews({ organizationId: 'tenant-b-demo' }).some((item) => item.id === created.id), false);
   assert.equal(updateSourceIntakeReview(created.id, { status: 'approved_local' }, 'tenant-b@example.com', 'tenant-b-demo'), null);
   assert.ok(listSourceIntakeReviews({ organizationId: 'tenant-a-demo' }).some((item) => item.id === created.id));
+});
+
+test('source registration requires local approval', () => {
+  const created = createSourceIntakeReview({ candidate: { ...candidate, id: `${candidate.id}-pending` } }, 'tenant-a@example.com', 'tenant-a-demo');
+  assert.throws(() => registerSourceFromIntakeReview(created.id, 'tenant-a@example.com', 'tenant-a-demo'), /debe estar aprobada/);
 });
