@@ -8,7 +8,9 @@ Cada `POST /api/action-plans/preview` devuelve:
   para producción.
 
 - `dataQualityGate` con licencia, cobertura y frescura por fuente;
-- `materialRecommendationAllowed`;
+- `materialRecommendationAllowed`, que solo es verdadero cuando pasan el gate
+  de calidad, la decisión no abstiene y la evidencia enlaza una fuente
+  productiva no ilustrativa;
 - la decision original del motor y el descargo correspondiente.
 
 El plan puede seguir guardandose como borrador local para demostracion y revision,

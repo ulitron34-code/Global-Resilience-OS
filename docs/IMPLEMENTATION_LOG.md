@@ -374,3 +374,6 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
 - El paquete de decision JSON ahora resume elegibilidad productiva de los planes
   por caso, manteniendo los borradores locales y haciendo visible cualquier
   fuente ilustrativa o ausencia de procedencia.
+- El preview de Action OS ahora exige tambien `evidence.productionEligible`
+  para habilitar recomendaciones materiales; la ausencia de fuente conserva el
+  plan como borrador revisable y no como recomendacion productiva.

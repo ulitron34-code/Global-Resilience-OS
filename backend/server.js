@@ -373,7 +373,7 @@ app.post('/api/action-plans/preview', authIfConfigured, roleIfConfigured('admin'
   try {
     const plan = attachDecisionEvidence(buildActionPlan(req.body || {}), req.body || {});
     const dataQualityGate = evaluateDataQuality({ catalog: listDataCatalogForOrganization(req.user?.organizationId || DEFAULT_ORGANIZATION_ID), sources: listSources(req.user?.organizationId || DEFAULT_ORGANIZATION_ID) });
-    res.json({ ...plan, dataQualityGate, materialRecommendationAllowed: dataQualityGate.ready && !plan.decision.startsWith('abstain') });
+    res.json({ ...plan, dataQualityGate, materialRecommendationAllowed: dataQualityGate.ready && plan.evidence.productionEligible === true && !plan.decision.startsWith('abstain') });
   }
   catch (error) { res.status(400).json({ error: error.message }); }
 });
