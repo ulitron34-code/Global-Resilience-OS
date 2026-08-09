@@ -862,7 +862,8 @@ export function getOverviewMetrics(filters = {}) {
   const alerts = state.alerts.filter((item) => belongs(item) && (!filters.vertical || itemVertical(item) === filters.vertical));
   const cases = state.cases.filter((item) => belongs(item) && (!filters.vertical || itemVertical(item) === filters.vertical));
   return {
-    resilienceScore: 72,
+    resilienceScore: null,
+    resilienceScoreStatus: 'not_calibrated',
     vertical: filters.vertical || 'all',
     openAlerts: alerts.filter((item) => item.status === 'open').length,
     openCases: cases.filter((item) => item.status !== 'closed').length,
@@ -929,7 +930,8 @@ export function getLatestBrief(options = {}) {
     id: 'BRIEF-LATEST',
     generatedAt: new Date().toISOString(),
     audience,
-    resilienceScore: 72,
+    resilienceScore: null,
+    resilienceScoreStatus: 'not_calibrated',
     exposureUsd,
     materialEvents: state.alerts.filter((item) => item.status === 'open').length,
     decisionRequired: 'Autorizar reruteo preventivo del corredor Suez–Mar Rojo.',

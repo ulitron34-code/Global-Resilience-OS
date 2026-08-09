@@ -581,6 +581,8 @@ describe('Global Resilience OS API', () => {
     assert.ok(brief.materialEvents >= 1);
     assert.ok(brief.confidence > 0 && brief.confidence <= 1);
     assert.equal(brief.evidenceClass, 'assumed');
+    assert.equal(brief.resilienceScore, null);
+    assert.equal(brief.resilienceScoreStatus, 'not_calibrated');
 
     const operatorResponse = await fetch(`${baseUrl}/api/briefs/latest?audience=operator`);
     const operatorBrief = await operatorResponse.json();

@@ -223,6 +223,13 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
 - Se agregó el cliente frontend para `register-local`; la interfaz mantiene el
   límite explícito de que ninguna licencia ni activación externa se ejecuta.
 
+## Bloque: eliminación de score de resiliencia no calibrado (2026-08-09)
+
+- Overview y Brief dejan de exponer el valor fijo `72` como score de resiliencia.
+- La API conserva el campo por compatibilidad, pero devuelve `null` y
+  `resilienceScoreStatus: not_calibrated` hasta contar con datos históricos,
+  benchmark y revisión experta.
+
 - Una revisiÃ³n `approved_local` puede crear una fuente tenant-scoped en estado
   `pending_external` mediante `POST /api/data-catalog/intake-reviews/:id/register-local`.
 - El registro conserva la ficha contractual, enlaza la fuente con su revisiÃ³n y
