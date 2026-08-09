@@ -2,7 +2,7 @@
 
 ## Corte externo actual — 2026-08-08
 
-- GitHub: el remoto sigue en `8a0cfc2`; el checkout local está en `c14fc40` y
+- GitHub: el remoto sigue en `8a0cfc2`; el checkout local está en `ebd0e46` y
   contiene los cambios de persistencia, gates y CI pendientes de publicación.
 - Supabase: proyecto real configurado; migraciones base, enterprise/RLS y
   `003_platform_snapshots.sql` aplicadas; `platform_snapshots` verificada con
