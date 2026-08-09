@@ -14,7 +14,7 @@ pública de solo lectura.
 
 ## Evidencia ejecutada
 
-- Backend: `npm.cmd test` — 54 pruebas correctas.
+- Backend: `npm.cmd test` — 55 pruebas correctas.
 - Frontend: `npm.cmd run lint` y `npm.cmd run build` — correctos cuando se
   ejecutan directamente desde la raíz.
 - Smoke end-to-end local: `LOCAL SMOKE TEST: PASS`.
@@ -22,7 +22,7 @@ pública de solo lectura.
   `PASS`.
 - Auditoría ejecutable del Plan Maestro: fases 0–7 y salvaguardas locales:
   `PASS`.
-- OpenAPI: 138 rutas Express con 138 operaciones documentadas, sin faltantes ni
+- OpenAPI: 139 rutas Express con 139 operaciones documentadas, sin faltantes ni
   duplicados.
 - Auditoría portable, reproducibilidad, instalación limpia y release gate:
   `PASS` en sus ejecuciones individuales.
@@ -33,7 +33,7 @@ pública de solo lectura.
 ## Estado externo comprobado
 
 - GitHub: el remoto permanece en `8a0cfc2`; el checkout local está en
-  `94a00a3`, 66 commits adelante y pendiente de publicación.
+  `c14fc40`, 68 commits adelante y pendiente de publicación.
 - Supabase: tres migraciones aplicadas; `platform_snapshots` verificada con RLS
   y tres políticas.
 - Vercel: interfaz pública activa.

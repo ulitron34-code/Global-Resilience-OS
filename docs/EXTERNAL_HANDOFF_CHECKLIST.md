@@ -2,7 +2,7 @@
 
 ## Estado confirmado
 
-- GitHub: el repositorio remoto sigue en `8a0cfc2`; el checkout local está en `94a00a3` con los bloques de persistencia, auditoría, aislamiento tenant, proyección normalizada y release gate listos; falta publicar los commits locales.
+- GitHub: el repositorio remoto sigue en `8a0cfc2`; el checkout local está en `c14fc40` con el bloque de intake, aislamiento tenant y release gate listos; falta publicar los commits locales.
 - Supabase: migraciones `001` a `005_control_plane_extensions.sql` preparadas localmente; falta aplicar 004-005 y validar el backfill en staging.
 - Supabase: tablas principales y `platform_snapshots` verificadas; RLS activo con 3 políticas de organización.
 - Vercel: interfaz pública activa y mini-backend conectado.
