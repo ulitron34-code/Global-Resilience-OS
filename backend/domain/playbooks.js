@@ -6,9 +6,10 @@ const PLAYBOOKS = [
   { id: 'regulatory-evidence-pack', name: 'Paquete de evidencia regulatoria', category: 'governance', ownerRole: 'risk_analyst', defaultSlaMinutes: 240, triggers: ['audit', 'regulatory', 'third_party'], steps: ['Seleccionar alcance y jurisdicción.', 'Reunir fuentes, supuestos y versión de modelo.', 'Vincular controles y evidencia de ejecución.', 'Revisión humana del paquete.', 'Exportar y sellar el artefacto.'] },
 ];
 const PLAYBOOK_VERSION = '1.0.0';
+const INITIAL_VERTICALS = ['digital-infrastructure', 'maritime-corridors', 'critical-commodities'];
 const DEFAULT_EVIDENCE = ['source_ids', 'model_version', 'assumptions', 'human_approval', 'outcome_after_action'];
 function versioned(playbook) {
-  return { ...playbook, schemaVersion: '1.0.0-local', version: PLAYBOOK_VERSION, reviewStatus: 'local_seed', requiredEvidence: [...DEFAULT_EVIDENCE] };
+  return { ...playbook, verticals: [...INITIAL_VERTICALS], schemaVersion: '1.0.0-local', version: PLAYBOOK_VERSION, reviewStatus: 'local_seed', requiredEvidence: [...DEFAULT_EVIDENCE] };
 }
 function clone(value) { return structuredClone(value); }
 export function listPlaybooks() { return clone(PLAYBOOKS.map(versioned)); }

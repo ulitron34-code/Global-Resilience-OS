@@ -15,6 +15,9 @@ Endpoints:
   cada vertical inicial: infraestructura digital, corredores marítimos y
   commodities críticos.
 
+Cada playbook expone esas tres verticales en su contrato; la cobertura no se
+infiere por nombre o categoria.
+
 El catalogo es intencionalmente no ejecutable. Antes de produccion debe sustituirse
 por proveedores, contratos, disponibilidad y precios verificados; la recomendacion
 requiere aprobacion humana y el resultado debe registrarse en Action OS.

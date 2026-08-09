@@ -104,6 +104,7 @@ describe('Global Resilience OS API', () => {
     const playbookBody = await playbooks.json();
     assert.ok(playbookBody.length >= 5);
     assert.ok(playbookBody.every((item) => item.version === '1.0.0' && item.reviewStatus === 'local_seed' && item.requiredEvidence.includes('human_approval')));
+    assert.ok(playbookBody.every((item) => item.verticals?.length === 3 && item.verticals.includes('digital-infrastructure')));
     const playbookReadiness = await fetch(`${baseUrl}/api/playbooks/readiness`);
     assert.equal(playbookReadiness.status, 200);
     const playbookReadinessBody = await playbookReadiness.json();
