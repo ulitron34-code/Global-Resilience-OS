@@ -120,6 +120,7 @@ const API_VERSION = 'v1';
 const SERVICE_VERSION = '0.9.0';
 const requestCounts = new Map();
 const operationalMetrics = { startedAt: new Date().toISOString(), requests: 0, errors: 0, byRoute: new Map() };
+const organizationMetrics = new Map();
 const loginAttempts = new Map();
 const shareRequestCounts = new Map();
 const SHARE_RATE_WINDOW_MS = 60_000;
@@ -199,6 +200,20 @@ app.use((req, res, next) => {
     operationalMetrics.byRoute.set(route, item);
     operationalMetrics.requests += 1;
     if (operationalMetrics.byRoute.size > 100) operationalMetrics.byRoute.delete(operationalMetrics.byRoute.keys().next().value);
+    const organizationId = req.user?.organizationId || DEFAULT_ORGANIZATION_ID;
+    const scoped = organizationMetrics.get(organizationId) || { requests: 0, errors: 0, byRoute: new Map() };
+    const scopedItem = scoped.byRoute.get(route) || { route, count: 0, errors: 0, totalMs: 0, lastMs: 0, samples: [] };
+    scopedItem.count += 1;
+    scopedItem.totalMs += durationMs;
+    scopedItem.lastMs = durationMs;
+    if (!Array.isArray(scopedItem.samples)) scopedItem.samples = [];
+    scopedItem.samples.push(durationMs);
+    if (scopedItem.samples.length > 500) scopedItem.samples.shift();
+    if (res.statusCode >= 400) { scopedItem.errors += 1; scoped.errors += 1; }
+    scoped.byRoute.set(route, scopedItem);
+    scoped.requests += 1;
+    if (scoped.byRoute.size > 100) scoped.byRoute.delete(scoped.byRoute.keys().next().value);
+    organizationMetrics.set(organizationId, scoped);
   });
   next();
 });
@@ -312,13 +327,15 @@ function percentile(values, percentileRank) {
 }
 
 app.get('/api/ops/metrics', authIfConfigured, roleIfConfigured('admin'), (req, res) => {
-  const routes = [...operationalMetrics.byRoute.values()]
+  const organizationId = req.user?.organizationId || DEFAULT_ORGANIZATION_ID;
+  const scoped = organizationMetrics.get(organizationId) || { requests: 0, errors: 0, byRoute: new Map() };
+  const routes = [...scoped.byRoute.values()]
     .map((item) => {
       const samples = Array.isArray(item.samples) ? item.samples : [];
       return { route: item.route, count: item.count, errors: item.errors, totalMs: item.totalMs, lastMs: item.lastMs, averageMs: item.count ? Math.round((item.totalMs / item.count) * 100) / 100 : 0, p50Ms: percentile(samples, 0.5), p95Ms: percentile(samples, 0.95), maxMs: samples.length ? Math.max(...samples) : item.lastMs || 0 };
     })
     .sort((a, b) => b.count - a.count);
-  res.json({ startedAt: operationalMetrics.startedAt, uptimeSeconds: Math.round(process.uptime()), requests: operationalMetrics.requests, errors: operationalMetrics.errors, memory: process.memoryUsage(), routes, generatedAt: new Date().toISOString() });
+  res.json({ startedAt: operationalMetrics.startedAt, organizationId, scope: 'organization', uptimeSeconds: Math.round(process.uptime()), requests: scoped.requests, errors: scoped.errors, memory: process.memoryUsage(), routes, generatedAt: new Date().toISOString() });
 });
 app.get('/api/compliance/readiness', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(getComplianceReadiness(req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
 app.get('/api/quality/report', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(getDataQualityReport(req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));

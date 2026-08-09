@@ -733,6 +733,8 @@ describe('Global Resilience OS API', () => {
     assert.equal(metrics.status, 200);
     const metricsBody = await metrics.json();
     assert.ok(metricsBody.requests > 0);
+    assert.equal(metricsBody.scope, 'organization');
+    assert.equal(metricsBody.organizationId, 'nashadi-demo');
     assert.ok(Array.isArray(metricsBody.routes));
     assert.ok(metricsBody.routes.some((route) => Number.isFinite(route.p50Ms) && Number.isFinite(route.p95Ms) && Number.isFinite(route.maxMs)));
 

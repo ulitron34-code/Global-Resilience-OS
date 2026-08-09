@@ -12,8 +12,9 @@ El esquema OpenAPI resumido está en `docs/openapi.local.json`.
 - `POST /api/ops/restore` — restaura un snapshot validado sólo dentro del tenant autenticado, preservando otras organizaciones; requiere admin en modo protegido.
 - `POST /api/ops/control-plane/projection` — genera una proyección determinista y validada de notificaciones, webhooks, entregas y jobs para backfill hacia el esquema normalizado; requiere admin en modo protegido.
 - `GET /api/ops/metrics` — solicitudes, errores, latencia por ruta (promedio,
-  p50, p95 y máximo sobre una ventana local acotada) y memoria del proceso;
-  requiere admin en modo protegido.
+  p50, p95 y máximo sobre una ventana local acotada) y memoria del proceso,
+  acotadas a la organización del administrador autenticado; requiere admin en
+  modo protegido.
 - `GET /api/ops/sla` — estado de ventanas SLA por caso (`on_track`, `at_risk`, `overdue`, `closed`).
 - `GET /api/ops/source-health` — salud de fuentes por latencia, estado del conector y frescura del último evento; aislada por tenant y protegida por rol en modo autenticado.
 - `GET /api/metrics/overview` — exposición, alertas, casos y fuentes del tenant autenticado.

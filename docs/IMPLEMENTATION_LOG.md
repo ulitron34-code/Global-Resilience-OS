@@ -386,3 +386,6 @@ incompletas y el gate de muestra suficiente; no fabrica historial.
 - Observabilidad local ahora conserva hasta 500 muestras de latencia por ruta y
   expone promedio, p50, p95 y máximo para detectar degradaciones sin proveedor
   externo.
+- Las métricas operativas expuestas al administrador ahora se agrupan por
+  `organizationId`; se evita mezclar solicitudes y errores de distintos tenants
+  en el panel de operación.
