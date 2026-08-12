@@ -786,7 +786,7 @@ app.get('/api/cables/:id', (req, res) => {
   res.json(cable);
 });
 
-app.post('/api/simulate-rupture', authIfConfigured, (req, res) => {
+app.post('/api/simulate-rupture', authIfConfigured, roleIfConfigured('admin', 'risk_analyst'), (req, res) => {
   try {
     const input = validateSimulationInput(req.body);
     const result = computeImpact(input.cableId, input.severity, input.durationHours);

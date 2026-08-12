@@ -12,7 +12,9 @@ export default function ScenarioBuilder() {
   const setSeverity = useAppStore((s) => s.setSeverity);
   const setDurationHours = useAppStore((s) => s.setDurationHours);
   const runSimulation = useAppStore((s) => s.runSimulation);
+  const user = useAppStore((s) => s.user);
 
+  const canOperate = !user || user.role !== 'viewer';
   const cable = cables.find((c) => c.id === selectedCableId);
 
   const selectCable = useAppStore((s) => s.selectCable);
@@ -82,8 +84,9 @@ export default function ScenarioBuilder() {
 
       <button
         onClick={runSimulation}
-        disabled={isSimulating}
-        className="mt-1 flex items-center justify-center gap-2 bg-alert text-void font-semibold text-sm py-2.5 rounded hover:bg-alert-glow transition-colors disabled:opacity-60"
+        disabled={isSimulating || !canOperate}
+        title={!canOperate ? 'No tienes permisos para simular rupturas' : ''}
+        className="mt-1 flex items-center justify-center gap-2 bg-alert text-void font-semibold text-sm py-2.5 rounded hover:bg-alert-glow transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {isSimulating ? (
           <>
@@ -95,6 +98,11 @@ export default function ScenarioBuilder() {
           </>
         )}
       </button>
+      {!canOperate && (
+        <div className="text-center text-[10px] text-alert mt-1">
+          Solo analistas o administradores pueden simular escenarios.
+        </div>
+      )}
     </div>
   );
 }
