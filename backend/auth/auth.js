@@ -103,7 +103,18 @@ export function requireAuth(req, res, next) {
 }
 
 export function authIfConfigured(req, res, next) {
-  return process.env.AUTH_REQUIRED === 'true' ? requireAuth(req, res, next) : next();
+  const tenantId = req.get('x-tenant-id') || process.env.VITE_TENANT_ID;
+  if (process.env.AUTH_REQUIRED === 'true') {
+    return requireAuth(req, res, (err) => {
+      if (err) return next(err);
+      if (req.user && tenantId) req.user.organizationId = tenantId;
+      next();
+    });
+  } else {
+    req.user = req.user || { role: 'admin' };
+    if (tenantId) req.user.organizationId = tenantId;
+    return next();
+  }
 }
 
 export function roleIfConfigured(...roles) {

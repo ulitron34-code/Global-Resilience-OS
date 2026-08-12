@@ -40,6 +40,8 @@ async function fetchWithTimeout(url, options = {}, timeout = BACKEND_TIMEOUT_MS)
     const token = typeof localStorage !== 'undefined' ? localStorage.getItem('resilience_token') : null;
     const headers = { ...(options.headers || {}) };
     if (token) headers.Authorization = `Bearer ${token}`;
+    const tenantId = String(import.meta.env.VITE_TENANT_ID || '').trim();
+    if (tenantId) headers['x-tenant-id'] = tenantId;
     const res = await fetch(url, { ...options, headers, signal: controller.signal });
     clearTimeout(id);
     if (!res.ok) {

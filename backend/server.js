@@ -98,6 +98,7 @@ import {
   processWebhookDeliveries,
   listWebhooks,
   rotateWebhookSecret,
+  dispatchWebhook,
   listJobRuns,
   runDemoIngestionJob,
   ingestEvent,
@@ -476,8 +477,9 @@ app.post('/api/action-plans/:id/outcome', authIfConfigured, roleIfConfigured('ad
   } catch (error) { res.status(400).json({ error: error.message }); }
 });
 
-app.get('/api/verticals', (req, res) => {
-  res.json(VERTICALS);
+app.get('/api/verticals', authIfConfigured, async (req, res) => {
+  const { getVerticalsForTenant } = await import('./data/verticals.js');
+  res.json(getVerticalsForTenant(req.user?.organizationId || req.get('x-tenant-id') || DEFAULT_ORGANIZATION_ID));
 });
 
 app.get('/api/cables', (req, res) => {
@@ -784,10 +786,12 @@ app.get('/api/cables/:id', (req, res) => {
   res.json(cable);
 });
 
-app.post('/api/simulate-rupture', (req, res) => {
+app.post('/api/simulate-rupture', authIfConfigured, (req, res) => {
   try {
     const input = validateSimulationInput(req.body);
     const result = computeImpact(input.cableId, input.severity, input.durationHours);
+    const organizationId = req.user?.organizationId || req.get('x-tenant-id') || DEFAULT_ORGANIZATION_ID;
+    dispatchWebhook('simulation.completed', { ...result, cableId: input.cableId, severity: input.severity }, organizationId);
     res.json(result);
   } catch (err) {
     res.status(400).json({ error: err.message });
