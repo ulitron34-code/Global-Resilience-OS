@@ -115,3 +115,17 @@ export const VERTICALS = [
 ];
 
 export const VERTICAL_MAP = Object.fromEntries(VERTICALS.map(v => [v.id, v]));
+
+export function getVerticalsForTenant(tenantId) {
+  if (tenantId === 'maritime-demo') {
+    return VERTICALS.filter((v) => ['petroleo', 'lng', 'gas'].includes(v.id));
+  }
+  if (tenantId === 'agri-demo') {
+    return VERTICALS.filter((v) => ['trigo', 'electricidad'].includes(v.id));
+  }
+  if (tenantId === 'acme-corp') {
+    return VERTICALS.filter((v) => ['semiconductores', 'cobre', 'litio', 'cobalto'].includes(v.id));
+  }
+  // Default (e.g. nashadi-demo or unknown) gets all verticals
+  return VERTICALS;
+}
