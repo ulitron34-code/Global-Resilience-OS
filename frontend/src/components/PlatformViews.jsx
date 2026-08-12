@@ -200,7 +200,7 @@ export function OperationsView() {
   const downloadSnapshot = async () => { setSnapshotError(''); try { await downloadLocalSnapshot(); } catch (error) { setSnapshotError(error.message); } };
   const resetDemo = async () => { if (!window.confirm('¿Reiniciar la demo local y eliminar los registros operativos creados?')) return; setSnapshotError(''); try { const result = await resetLocalDemo(); await refresh(); setMessage(`Demo reiniciada: ${result.counts.alerts} alertas y ${result.counts.cases} casos semilla.`); } catch (error) { setSnapshotError(error.message); } };
   return <section className="flex flex-col gap-4">
-    <SectionIntro eyebrow="OperaciÃ³n Â· jobs Â· conectores Â· trazabilidad" title="La plataforma tambiÃ©n se opera." description="Ejecuta una ingesta controlada, inspecciona su historial y registra destinos de eventos. La entrega externa queda preparada como cola local hasta conectar la infraestructura de producciÃ³n." />
+    <SectionIntro eyebrow="Operación · jobs · conectores · trazabilidad" title="La plataforma también se opera." description="Ejecuta una ingesta controlada, inspecciona su historial y registra destinos de eventos. La entrega externa queda preparada como cola local hasta conectar la infraestructura de producción." />
     <ReadinessPanel />
     <RuntimeReadinessPanel />
     <CompliancePanel />

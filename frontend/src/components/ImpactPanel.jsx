@@ -118,6 +118,59 @@ export default function ImpactPanel() {
         </div>
       </div>
 
+      <div className="mt-4 border-t border-line pt-4">
+        <div className="font-mono text-[10px] uppercase tracking-widest text-ink-dim mb-3">Recomendaciones Operativas (Playbook)</div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+          <div className="border border-line rounded p-3 bg-panel-elevated">
+            <div className="text-xs font-semibold text-ink mb-1">Ruta Alternativa Terrestre</div>
+            <div className="font-mono text-[10px] text-signal mb-2">Logística · 48h lead time</div>
+            <div className="flex justify-between text-[11px]">
+              <span className="text-ink-muted">Costo Mitigación:</span>
+              <span className="text-ink">{formatUsd(result.totalUsdLoss * 0.12)}</span>
+            </div>
+            <div className="flex justify-between text-[11px] font-semibold mt-1">
+              <span className="text-ink-dim">Ahorro Esperado:</span>
+              <span className="text-signal">{formatUsd(result.totalUsdLoss * 0.40)}</span>
+            </div>
+          </div>
+          <div className="border border-line rounded p-3 bg-panel-elevated">
+            <div className="text-xs font-semibold text-ink mb-1">Activar Proveedor B</div>
+            <div className="font-mono text-[10px] text-signal mb-2">Sourcing · 24h lead time</div>
+            <div className="flex justify-between text-[11px]">
+              <span className="text-ink-muted">Costo Mitigación:</span>
+              <span className="text-ink">{formatUsd(result.totalUsdLoss * 0.05)}</span>
+            </div>
+            <div className="flex justify-between text-[11px] font-semibold mt-1">
+              <span className="text-ink-dim">Ahorro Esperado:</span>
+              <span className="text-signal">{formatUsd(result.totalUsdLoss * 0.25)}</span>
+            </div>
+          </div>
+          <div className="border border-line rounded p-3 bg-panel-elevated">
+            <div className="text-xs font-semibold text-ink mb-1">Racionamiento Controlado</div>
+            <div className="font-mono text-[10px] text-signal mb-2">Operación · Inmediato</div>
+            <div className="flex justify-between text-[11px]">
+              <span className="text-ink-muted">Costo Mitigación:</span>
+              <span className="text-ink">$0</span>
+            </div>
+            <div className="flex justify-between text-[11px] font-semibold mt-1">
+              <span className="text-ink-dim">Ahorro Esperado:</span>
+              <span className="text-signal">{formatUsd(result.totalUsdLoss * 0.15)}</span>
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center justify-between p-3 bg-alert/5 border border-alert/20 rounded mb-4">
+          <div className="flex flex-col">
+            <span className="text-[10px] font-mono uppercase text-alert mb-0.5">Costo de hacer nada</span>
+            <span className="text-lg font-bold text-alert leading-none">{formatUsd(result.totalUsdLoss)}</span>
+          </div>
+          <div className="text-alert/40 text-xl font-light">vs</div>
+          <div className="flex flex-col text-right">
+            <span className="text-[10px] font-mono uppercase text-signal mb-0.5">Costo con recomendación</span>
+            <span className="text-lg font-bold text-signal leading-none">{formatUsd(result.totalUsdLoss * 0.37)}</span>
+          </div>
+        </div>
+      </div>
+
       <div className="flex items-center justify-between gap-3">
         <div className="font-mono text-[10px] uppercase tracking-widest text-ink-dim mb-1.5">Lectura del escenario</div>
         <button onClick={handleSaveScenario} disabled={!canOperate || saving || saved} className="flex items-center gap-1.5 border border-signal/40 text-signal rounded px-2 py-1 text-[10px] disabled:opacity-60">{saved ? <Check size={12} /> : <Save size={12} />}{!canOperate ? 'Solo lectura' : saved ? 'Guardado' : saving ? 'Guardando...' : 'Guardar escenario'}</button>

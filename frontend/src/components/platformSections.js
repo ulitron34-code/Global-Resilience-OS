@@ -6,5 +6,5 @@ export const SECTIONS = [
   { id: 'scenario-lab', label: 'Scenario Lab', icon: FlaskConical },
   { id: 'cases', label: 'Casos', icon: ClipboardList },
   { id: 'brief', label: 'Executive Brief', icon: FileText },
-  { id: 'operations', label: 'OperaciÃ³n', icon: Activity },
+  { id: 'operations', label: 'Operaciones', icon: Activity },
 ];

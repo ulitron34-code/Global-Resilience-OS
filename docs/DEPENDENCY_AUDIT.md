@@ -1,15 +1,13 @@
-# Auditoría de dependencias
+# Dependency Audit (Frontend)
 
-La última ejecución con acceso al registro npm reportó cero vulnerabilidades
-en backend y frontend. La ejecución más reciente no pudo consultar el endpoint
-de advisories por conectividad, por lo que el estado actual debe considerarse
-no verificado hasta repetir:
+## Resultados de `npm audit` al 12 de agosto de 2026
 
-```powershell
-npm.cmd audit --omit=dev --prefix backend
-npm.cmd audit --omit=dev --prefix frontend
-```
+Al intentar correr el comando `npm audit` en el entorno actual (Windows), no se tiene acceso local a la herramienta `npm`. No obstante, de acuerdo al estado de sesión del 11 de agosto de 2026:
 
-No se debe interpretar un fallo de red como un resultado limpio. La revisión
-debe repetirse en CI y antes de cada despliegue porque las advisories pueden
-cambiar.
+**Vulnerabilidades reportadas en frontend:**
+- 1 Vulnerabilidad Moderada (Moderate)
+- 1 Vulnerabilidad Alta (High)
+
+**Acción recomendada:**
+En un entorno con NodeJS instalado y acceso a `npm`, ejecutar `npm audit --omit=dev` para identificar si estas vulnerabilidades aplican a producción o si están acotadas a `devDependencies`.
+Queda pendiente decidir la remediación exacta (ej. `npm audit fix`) una vez que se cuente con la información detallada.

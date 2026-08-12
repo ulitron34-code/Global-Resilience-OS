@@ -15,11 +15,19 @@ export default function ScenarioBuilder() {
 
   const cable = cables.find((c) => c.id === selectedCableId);
 
+  const selectCable = useAppStore((s) => s.selectCable);
+
   if (!cable) {
     return (
       <div className="bg-panel border border-line rounded-lg p-6 flex flex-col items-center justify-center text-center h-full">
         <Zap size={20} className="text-ink-dim mb-2" />
-        <p className="text-ink-muted text-sm">Selecciona un cable en el mapa o en la lista para construir un escenario de ruptura.</p>
+        <p className="text-ink-muted text-sm mb-4">Selecciona un punto en el mapa o en la lista para construir un escenario de ruptura.</p>
+        <button 
+          onClick={() => { selectCable('suez'); setTimeout(runSimulation, 0); }}
+          className="border border-signal text-signal text-xs font-semibold py-1.5 px-3 rounded hover:bg-signal/10 transition-colors flex items-center gap-2"
+        >
+          <Zap size={13} /> ¿Qué pasa si Suez cierra?
+        </button>
       </div>
     );
   }
