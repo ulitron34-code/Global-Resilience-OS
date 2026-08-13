@@ -1,10 +1,114 @@
 import { useState } from 'react';
 import { getAssistiveSuggestion } from '../api/client';
+import { Sparkles, Brain } from 'lucide-react';
+import { useAppStore } from '../store/useAppStore';
 
 export default function AssistiveSuggestionPanel() {
+  const result = useAppStore((s) => s.result);
   const [suggestion, setSuggestion] = useState(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const run = async () => { setBusy(true); setError(''); try { setSuggestion(await getAssistiveSuggestion({ eventType: 'cable_degradation', severity: 'high', confidence: 0.8, impactUsd: 800000 })); } catch (err) { setError(err.message); } finally { setBusy(false); } };
-  return <div className="bg-panel border border-line rounded-lg p-4"><div className="flex items-center justify-between gap-3"><div><div className="font-mono text-[10px] uppercase tracking-widest text-signal">Assistive triage</div><h2 className="font-display text-lg font-semibold text-ink mt-1">Sugerencia con límites</h2></div><span className="font-mono text-[10px] text-ink-dim">HUMAN IN THE LOOP</span></div><p className="text-xs text-ink-muted mt-2">Propone un playbook y siguientes pasos; no ejecuta acciones ni sustituye al analista.</p><button type="button" onClick={run} disabled={busy} className="bg-signal text-void rounded px-3 py-2 text-xs font-semibold mt-3 disabled:opacity-50">{busy ? 'Analizando...' : 'Generar sugerencia local'}</button>{error && <div role="alert" className="text-xs text-alert mt-3">{error}</div>}{suggestion && <div className="mt-4 border border-line rounded p-3"><div className="flex justify-between gap-2 text-xs"><span className="text-ink">Resultado</span><span className={suggestion.decision === 'suggest' ? 'text-signal' : 'text-alert'}>{suggestion.decision}</span></div><div className="text-sm text-ink mt-2">{suggestion.suggestion.playbookName}</div><div className="text-xs text-ink-muted mt-2">{suggestion.suggestion.rationale}</div>{suggestion.abstainReasons.length > 0 && <div className="text-[10px] text-alert mt-2">Abstenciones: {suggestion.abstainReasons.join(', ')}</div>}<div className="mt-3 space-y-1">{suggestion.suggestion.nextSteps.map((step, index) => <div key={`${step}-${index}`} className="text-[10px] text-ink-dim">{index + 1}. {step}</div>)}</div><div className="font-mono text-[10px] text-ink-dim mt-3">Aprobacion humana: requerida · acciones externas: deshabilitadas</div></div>}</div>;
+
+  const run = async () => {
+    setBusy(true);
+    setError('');
+    try {
+      const payload = result 
+        ? { eventType: 'cable_degradation', severity: result.severity, confidence: 0.9, impactUsd: result.totalUsdLoss }
+        : { eventType: 'cable_degradation', severity: 'high', confidence: 0.8, impactUsd: 800000 };
+      
+      const data = await getAssistiveSuggestion(payload);
+      setSuggestion(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="bg-panel border border-line rounded-lg p-4">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded bg-signal/15 border border-signal/30 flex items-center justify-center text-signal">
+            <Brain size={14} />
+          </div>
+          <div>
+            <div className="font-mono text-[9px] uppercase tracking-widest text-signal">Copiloto IA</div>
+            <h2 className="font-display text-sm font-semibold text-ink leading-none mt-0.5">Asistente de Resiliencia</h2>
+          </div>
+        </div>
+        <span className="font-mono text-[8px] border border-signal/30 text-signal rounded px-1.5 py-0.5">
+          HUMAN-IN-THE-LOOP
+        </span>
+      </div>
+
+      <p className="text-[11px] text-ink-muted mt-2">
+        Analiza el impacto del escenario activo y propone playbooks optimizados, desvíos y mitigación logística.
+      </p>
+
+      {!suggestion ? (
+        <button
+          type="button"
+          onClick={run}
+          disabled={busy}
+          className="w-full bg-signal text-void rounded py-2 px-3 text-xs font-semibold mt-3 disabled:opacity-50 flex items-center justify-center gap-1.5 hover:bg-signal/80 transition-colors"
+        >
+          {busy ? (
+            <>Analizando...</>
+          ) : (
+            <>
+              <Sparkles size={13} /> Analizar con Copiloto IA
+            </>
+          )}
+        </button>
+      ) : (
+        <div className="mt-3 border border-line rounded p-3 bg-void/40 flex flex-col gap-2.5">
+          <div className="flex justify-between items-center text-[10px] font-mono border-b border-line/60 pb-1.5">
+            <span className="text-ink-muted">RECOMENDACIÓN IA</span>
+            <span className="text-signal uppercase font-bold">{suggestion.decision}</span>
+          </div>
+
+          <div>
+            <h4 className="text-xs font-semibold text-ink">{suggestion.suggestion.playbookName}</h4>
+            <p className="text-[11px] text-ink-muted mt-1 leading-normal">{suggestion.suggestion.rationale}</p>
+          </div>
+
+          {suggestion.abstainReasons?.length > 0 && (
+            <div className="text-[10px] text-alert bg-alert/5 border border-alert/20 rounded p-1.5 font-mono">
+              Abstenciones: {suggestion.abstainReasons.join(', ')}
+            </div>
+          )}
+
+          <div className="bg-panel rounded p-2 border border-line">
+            <div className="text-[9px] font-mono text-ink-dim uppercase mb-1">Siguientes Pasos Operativos:</div>
+            <div className="space-y-1">
+              {suggestion.suggestion.nextSteps.map((step, index) => (
+                <div key={`${step}-${index}`} className="text-[10px] text-ink leading-relaxed flex gap-1.5 items-start">
+                  <span className="text-signal shrink-0">{index + 1}.</span>
+                  <span>{step}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex justify-between items-center mt-1 pt-2 border-t border-line/60">
+            <span className="text-[9px] font-mono text-ink-dim">Integración de APIs: Deshabilitada</span>
+            <button
+              onClick={() => setSuggestion(null)}
+              className="text-[9px] font-mono text-signal hover:underline"
+            >
+              Nuevo análisis
+            </button>
+          </div>
+        </div>
+      )}
+
+      {error && (
+        <div role="alert" className="text-xs text-alert mt-3 bg-alert/5 border border-alert/20 p-2 rounded">
+          Error en triage: {error}
+        </div>
+      )}
+    </div>
+  );
 }

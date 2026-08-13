@@ -18,7 +18,16 @@ export default function WorldMap() {
 
   const dots = useMemo(() => generateWorldDots(2.4).map((d) => project(d, WIDTH, HEIGHT)), []);
 
-  const isRuptured = (cableId) => result?.cable?.id === cableId;
+  const selectedCableIds = useMemo(() => {
+    return selectedCableId ? String(selectedCableId).split(',').map(x => x.trim()).filter(Boolean) : [];
+  }, [selectedCableId]);
+
+  const isCableSelected = (id) => selectedCableIds.includes(id);
+
+  const isRuptured = (cableId) => {
+    const rupturedIds = result?.cable?.id ? String(result.cable.id).split(',').map(x => x.trim()) : [];
+    return rupturedIds.includes(cableId);
+  };
 
   const detourPoints = useMemo(() => [
     [80.0, 6.0], [56.3, 10.0], [39.2, -6.8], [18.4, -33.9], [-15.0, -10.0], [-17.0, 15.0], [-9.1, 38.7]
@@ -84,7 +93,7 @@ export default function WorldMap() {
           const points = cable.waypoints.map((wp) => project(wp, WIDTH, HEIGHT));
           const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p[0]} ${p[1]}`).join(' ');
           const ruptured = isRuptured(cable.id);
-          const selected = selectedCableId === cable.id;
+          const selected = isCableSelected(cable.id);
           const hovered = hoveredCableId === cable.id;
           const active = selected || hovered;
 
@@ -97,7 +106,18 @@ export default function WorldMap() {
                 stroke="transparent"
                 strokeWidth="12"
                 className="cursor-pointer"
-                onClick={() => selectCable(cable.id)}
+                onClick={(event) => {
+                  const currentIds = selectedCableId ? String(selectedCableId).split(',').map(x => x.trim()).filter(Boolean) : [];
+                  if (event.shiftKey || event.ctrlKey || event.metaKey) {
+                    if (currentIds.includes(cable.id)) {
+                      selectCable(currentIds.filter(x => x !== cable.id).join(',') || null);
+                    } else {
+                      selectCable([...currentIds, cable.id].join(','));
+                    }
+                  } else {
+                    selectCable(cable.id);
+                  }
+                }}
                 onMouseEnter={() => setHoveredCableId(cable.id)}
                 onMouseLeave={() => setHoveredCableId(null)}
               />
@@ -186,13 +206,24 @@ export default function WorldMap() {
         {/* Chokepoints Marítimos Clave */}
         {Object.entries(CHOKEPOINTS).map(([id, cp]) => {
           const [x, y] = project([cp.lon, cp.lat], WIDTH, HEIGHT);
-          const isSelected = selectedCableId === id;
+          const isSelected = isCableSelected(id);
           const isHovered = hoveredChokepointId === id;
           return (
             <g
               key={id}
               className="cursor-pointer"
-              onClick={() => selectCable(id)}
+              onClick={(event) => {
+                const currentIds = selectedCableId ? String(selectedCableId).split(',').map(x => x.trim()).filter(Boolean) : [];
+                if (event.shiftKey || event.ctrlKey || event.metaKey) {
+                  if (currentIds.includes(id)) {
+                    selectCable(currentIds.filter(x => x !== id).join(',') || null);
+                  } else {
+                    selectCable([...currentIds, id].join(','));
+                  }
+                } else {
+                  selectCable(id);
+                }
+              }}
               onMouseEnter={() => setHoveredChokepointId(id)}
               onMouseLeave={() => setHoveredChokepointId(null)}
             >
