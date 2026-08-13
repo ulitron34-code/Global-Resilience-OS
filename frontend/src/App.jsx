@@ -17,7 +17,7 @@ import { useSessionStore } from './store/useSessionStore';
 export default function App() {
   const shareToken = window.location.pathname.match(/^\/share\/([^/]+)$/)?.[1];
   const [activeSection, setActiveSection] = useState('command-center');
-  const [context, setContext] = useState({ vertical: 'Oil & Gas', region: 'global', horizon: '72' });
+  const [context, setContext] = useState({ vertical: 'Todas', region: 'global', horizon: '72' });
   const initBackendCheck = useAppStore((s) => s.initBackendCheck);
   const user = useSessionStore((s) => s.user);
 

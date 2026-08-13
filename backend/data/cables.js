@@ -165,6 +165,18 @@ export const CABLES = [
     landings: 8,
     vertical_weights: { ...HEAVY_TECH, ...HEAVY_METALS },
   },
+  {
+    id: 'suez',
+    name: 'Canal de Suez (Bloqueo Completo)',
+    route: 'Canal de Suez (Tránsito Marítimo Bloqueado)',
+    chokepoints: ['suez'],
+    waypoints: [
+      [32.2, 29.5], [32.5, 30.6], [32.3, 31.5]
+    ],
+    criticality: 9.8,
+    landings: 0,
+    vertical_weights: { ...HEAVY_ENERGY, ...HEAVY_TECH, ...HEAVY_AGRO, ...HEAVY_METALS },
+  },
 ];
 
 export const CABLE_MAP = Object.fromEntries(CABLES.map(c => [c.id, c]));
