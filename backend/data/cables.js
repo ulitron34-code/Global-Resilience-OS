@@ -177,6 +177,42 @@ export const CABLES = [
     landings: 0,
     vertical_weights: { ...HEAVY_ENERGY, ...HEAVY_TECH, ...HEAVY_AGRO, ...HEAVY_METALS },
   },
+  {
+    id: 'ormuz',
+    name: 'Estrecho de Ormuz (Bloqueo Completo)',
+    route: 'Estrecho de Ormuz (Tránsito Marítimo Bloqueado)',
+    chokepoints: ['ormuz'],
+    waypoints: [
+      [55.8, 25.8], [56.3, 26.6], [56.8, 27.2]
+    ],
+    criticality: 9.9,
+    landings: 0,
+    vertical_weights: { ...HEAVY_ENERGY, ...HEAVY_METALS },
+  },
+  {
+    id: 'malaca',
+    name: 'Estrecho de Malaca (Bloqueo Completo)',
+    route: 'Estrecho de Malaca (Tránsito Marítimo Bloqueado)',
+    chokepoints: ['malaca'],
+    waypoints: [
+      [99.8, 2.0], [100.5, 2.8], [101.2, 3.5]
+    ],
+    criticality: 9.5,
+    landings: 0,
+    vertical_weights: { ...HEAVY_TECH, ...HEAVY_ENERGY, ...HEAVY_AGRO },
+  },
+  {
+    id: 'bab',
+    name: 'Bab-el-Mandeb (Bloqueo Completo)',
+    route: 'Estrecho de Bab-el-Mandeb (Tránsito Marítimo Bloqueado)',
+    chokepoints: ['bab'],
+    waypoints: [
+      [42.8, 12.0], [43.3, 12.6], [43.8, 13.2]
+    ],
+    criticality: 9.0,
+    landings: 0,
+    vertical_weights: { ...HEAVY_ENERGY, cobalto: 0.8, cobre: 0.6 },
+  },
 ];
 
 export const CABLE_MAP = Object.fromEntries(CABLES.map(c => [c.id, c]));

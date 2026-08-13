@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { generateWorldDots, project } from '../utils/worldDots';
 import { useAppStore } from '../store/useAppStore';
+import { CHOKEPOINTS } from '../data/cables';
 
 const WIDTH = 960;
 const HEIGHT = 480;
@@ -110,6 +111,47 @@ export default function WorldMap() {
           const [x, y] = project(wp, WIDTH, HEIGHT);
           return <circle key={i} cx={x} cy={y} r="2.2" fill="#5EEAD4" className="pointer-events-none" />;
         })}
+
+        {/* Chokepoints Marítimos Clave */}
+        {Object.entries(CHOKEPOINTS).map(([id, cp]) => {
+          const [x, y] = project([cp.lon, cp.lat], WIDTH, HEIGHT);
+          const isSelected = selectedCableId === id;
+          return (
+            <g key={id} className="cursor-pointer" onClick={() => selectCable(id)}>
+              <circle
+                cx={x}
+                cy={y}
+                r="7"
+                fill="none"
+                stroke={isSelected ? '#EF4444' : '#FB7185'}
+                strokeWidth="1.5"
+                opacity="0.85"
+                className="animate-ping"
+                style={{ transformOrigin: `${x}px ${y}px`, animationDuration: '3s' }}
+              />
+              <circle
+                cx={x}
+                cy={y}
+                r="4.5"
+                fill={isSelected ? '#DC2626' : '#FDA4AF'}
+                stroke="#4C0519"
+                strokeWidth="1"
+                opacity="0.95"
+              />
+              <text
+                x={x + 7}
+                y={y + 3}
+                fill={isSelected ? '#F43F5E' : '#FDA4AF'}
+                fontSize="8"
+                fontWeight={isSelected ? 'bold' : 'normal'}
+                fontFamily="monospace"
+                className="pointer-events-none select-none opacity-80 hover:opacity-100 transition-opacity"
+              >
+                {cp.label}
+              </text>
+            </g>
+          );
+        })}
       </svg>
 
       {/* Overlay de estado de simulación */}
@@ -122,9 +164,10 @@ export default function WorldMap() {
       )}
 
       {/* Leyenda */}
-      <div className="absolute bottom-3 left-3 flex items-center gap-4 font-mono text-[10px] text-ink-muted bg-void/60 backdrop-blur px-3 py-1.5 rounded border border-line">
+      <div className="absolute bottom-3 left-3 flex flex-wrap items-center gap-4 font-mono text-[10px] text-ink-muted bg-void/60 backdrop-blur px-3 py-1.5 rounded border border-line">
         <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-signal inline-block" /> Cable activo</span>
         <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-alert inline-block" /> Ruptura simulada</span>
+        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#FDA4AF] inline-block border border-[#4C0519]" /> Chokepoint clave</span>
       </div>
     </div>
   );
