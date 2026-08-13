@@ -19,6 +19,14 @@ export default function WorldMap() {
 
   const isRuptured = (cableId) => result?.cable?.id === cableId;
 
+  const detourPoints = useMemo(() => [
+    [80.0, 6.0], [56.3, 10.0], [39.2, -6.8], [18.4, -33.9], [-15.0, -10.0], [-17.0, 15.0], [-9.1, 38.7]
+  ].map(wp => project(wp, WIDTH, HEIGHT)), []);
+
+  const detourPathD = useMemo(() => detourPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p[0]} ${p[1]}`).join(' '), [detourPoints]);
+
+  const showAlternateRoute = result && !isSimulating && (result.cable?.id === 'suez' || result.chokepoints?.includes('Canal de Suez') || result.chokepoints?.includes('Suez / Mar Rojo'));
+
   return (
     <div className="relative w-full h-full overflow-hidden rounded-lg border border-line bg-panel">
       {/* Scanline ambient effect */}
@@ -41,6 +49,16 @@ export default function WorldMap() {
               <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
+          <style>{`
+            @keyframes dash {
+              to {
+                stroke-dashoffset: -40;
+              }
+            }
+            .animate-dash {
+              animation: dash 5s linear infinite;
+            }
+          `}</style>
         </defs>
 
         <rect x="0" y="0" width={WIDTH} height={HEIGHT} fill="url(#oceanGlow)" />
@@ -152,6 +170,46 @@ export default function WorldMap() {
             </g>
           );
         })}
+
+        {/* Ruta Alternativa Animada */}
+        {showAlternateRoute && (
+          <g>
+            <path
+              d={detourPathD}
+              fill="none"
+              stroke="#10B981"
+              strokeWidth="2"
+              strokeOpacity="0.85"
+              strokeDasharray="6 4"
+              className="animate-dash"
+              filter="url(#glow)"
+            />
+            {/* Detour text label along route */}
+            <rect
+              x={detourPoints[3][0] - 65}
+              y={detourPoints[3][1] - 25}
+              width="130"
+              height="16"
+              fill="#0A1120"
+              stroke="#10B981"
+              strokeWidth="0.5"
+              rx="3"
+              opacity="0.9"
+            />
+            <text
+              x={detourPoints[3][0]}
+              y={detourPoints[3][1] - 14}
+              fill="#34D399"
+              fontSize="7"
+              fontWeight="bold"
+              fontFamily="monospace"
+              textAnchor="middle"
+              className="pointer-events-none select-none"
+            >
+              DESVÍO CABO BUENA ESPERANZA
+            </text>
+          </g>
+        )}
       </svg>
 
       {/* Overlay de estado de simulación */}
@@ -168,6 +226,7 @@ export default function WorldMap() {
         <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-signal inline-block" /> Cable activo</span>
         <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-alert inline-block" /> Ruptura simulada</span>
         <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#FDA4AF] inline-block border border-[#4C0519]" /> Chokepoint clave</span>
+        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#10B981] inline-block" /> Ruta alternativa</span>
       </div>
     </div>
   );

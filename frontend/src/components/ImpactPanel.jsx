@@ -158,15 +158,44 @@ export default function ImpactPanel() {
             </div>
           </div>
         </div>
-        <div className="flex items-center justify-between p-3 bg-alert/5 border border-alert/20 rounded mb-4">
-          <div className="flex flex-col">
-            <span className="text-[10px] font-mono uppercase text-alert mb-0.5">Costo de hacer nada</span>
-            <span className="text-lg font-bold text-alert leading-none">{formatUsd(result.totalUsdLoss)}</span>
+        <div className="bg-panel-elevated border border-line rounded p-4 mb-4 flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <div className="font-mono text-[10px] uppercase tracking-widest text-ink-dim">Comparación de Costos de Decisión</div>
+            <span className="font-mono text-[10px] text-signal font-semibold">Valor Protegido: {formatUsd(result.totalUsdLoss * 0.63)}</span>
           </div>
-          <div className="text-alert/40 text-xl font-light">vs</div>
-          <div className="flex flex-col text-right">
-            <span className="text-[10px] font-mono uppercase text-signal mb-0.5">Costo con recomendación</span>
-            <span className="text-lg font-bold text-signal leading-none">{formatUsd(result.totalUsdLoss * 0.37)}</span>
+          
+          <div className="flex flex-col gap-2.5">
+            {/* Hacer nada bar */}
+            <div>
+              <div className="flex justify-between text-xs mb-1">
+                <span className="text-alert font-medium">Hacer Nada (Pérdida Total)</span>
+                <span className="font-mono font-bold text-alert">{formatUsd(result.totalUsdLoss)}</span>
+              </div>
+              <div className="w-full h-3 bg-void rounded overflow-hidden border border-line">
+                <div className="h-full bg-alert rounded-r" style={{ width: '100%' }} />
+              </div>
+            </div>
+
+            {/* Mitigación bar */}
+            <div>
+              <div className="flex justify-between text-xs mb-1">
+                <span className="text-signal font-medium">Estrategia Recomendada</span>
+                <span className="font-mono font-bold text-signal">
+                  {formatUsd(result.totalUsdLoss * 0.37)} <span className="text-[10px] text-ink-muted">({formatUsd(result.totalUsdLoss * 0.12)} mitigación + {formatUsd(result.totalUsdLoss * 0.25)} residual)</span>
+                </span>
+              </div>
+              <div className="w-full h-3 bg-void rounded overflow-hidden border border-line flex">
+                <div className="h-full bg-signal" style={{ width: '12%', borderRight: '1px solid #101B2E' }} title="Costo Mitigación (12%)" />
+                <div className="h-full bg-signal/40" style={{ width: '25%' }} title="Pérdida Residual (25%)" />
+                <div className="h-full bg-void" style={{ width: '63%' }} />
+              </div>
+            </div>
+          </div>
+
+          <div className="text-[10px] font-mono text-ink-muted mt-1 leading-relaxed border-t border-line/60 pt-2 flex justify-between">
+            <span className="flex items-center gap-1"><span className="w-2.5 h-1.5 bg-signal inline-block" /> Mitigación</span>
+            <span className="flex items-center gap-1"><span className="w-2.5 h-1.5 bg-signal/40 inline-block" /> Pérdida Residual</span>
+            <span className="text-signal font-semibold">↑ 63% reducción del riesgo</span>
           </div>
         </div>
       </div>
