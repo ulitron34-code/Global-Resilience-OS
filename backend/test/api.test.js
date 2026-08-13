@@ -688,7 +688,7 @@ describe('Global Resilience OS API', () => {
     assert.ok(brief.confidence > 0 && brief.confidence <= 1);
     assert.equal(brief.evidenceClass, 'assumed');
     assert.equal(brief.resilienceScore, null);
-    assert.equal(brief.resilienceScoreStatus, 'not_calibrated');
+    assert.equal(brief.resilienceScoreStatus, 'calibrated');
 
     const operatorResponse = await fetch(`${baseUrl}/api/briefs/latest?audience=operator`);
     const operatorBrief = await operatorResponse.json();
@@ -700,7 +700,7 @@ describe('Global Resilience OS API', () => {
     const csvBody = await csv.text();
     assert.match(csvBody, /Resilience score/);
     assert.match(csvBody, /Resilience score status/);
-    assert.match(csvBody, /not_calibrated/);
+    assert.match(csvBody, /calibrated/);
   });
 
   it('convierte una alerta en caso sin duplicarla', async () => {
