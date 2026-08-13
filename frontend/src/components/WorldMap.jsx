@@ -14,6 +14,7 @@ export default function WorldMap() {
   const isSimulating = useAppStore((s) => s.isSimulating);
 
   const [hoveredCableId, setHoveredCableId] = useState(null);
+  const [hoveredChokepointId, setHoveredChokepointId] = useState(null);
 
   const dots = useMemo(() => generateWorldDots(2.4).map((d) => project(d, WIDTH, HEIGHT)), []);
 
@@ -127,15 +128,37 @@ export default function WorldMap() {
         {/* Marcadores de landing points para el cable seleccionado */}
         {selectedCableId && cables.find((c) => c.id === selectedCableId)?.waypoints.map((wp, i) => {
           const [x, y] = project(wp, WIDTH, HEIGHT);
-          return <circle key={i} cx={x} cy={y} r="2.2" fill="#5EEAD4" className="pointer-events-none" />;
+          return (
+            <g key={i} className="pointer-events-none">
+              <circle
+                cx={x}
+                cy={y}
+                r="6"
+                fill="none"
+                stroke="#5EEAD4"
+                strokeWidth="1"
+                className="animate-ping"
+                style={{ transformOrigin: `${x}px ${y}px`, animationDuration: '2s' }}
+                opacity="0.6"
+              />
+              <circle cx={x} cy={y} r="2.2" fill="#5EEAD4" />
+            </g>
+          );
         })}
 
         {/* Chokepoints Marítimos Clave */}
         {Object.entries(CHOKEPOINTS).map(([id, cp]) => {
           const [x, y] = project([cp.lon, cp.lat], WIDTH, HEIGHT);
           const isSelected = selectedCableId === id;
+          const isHovered = hoveredChokepointId === id;
           return (
-            <g key={id} className="cursor-pointer" onClick={() => selectCable(id)}>
+            <g
+              key={id}
+              className="cursor-pointer"
+              onClick={() => selectCable(id)}
+              onMouseEnter={() => setHoveredChokepointId(id)}
+              onMouseLeave={() => setHoveredChokepointId(null)}
+            >
               <circle
                 cx={x}
                 cy={y}
@@ -161,12 +184,37 @@ export default function WorldMap() {
                 y={y + 3}
                 fill={isSelected ? '#F43F5E' : '#FDA4AF'}
                 fontSize="8"
-                fontWeight={isSelected ? 'bold' : 'normal'}
+                fontWeight={isSelected || isHovered ? 'bold' : 'normal'}
                 fontFamily="monospace"
                 className="pointer-events-none select-none opacity-80 hover:opacity-100 transition-opacity"
               >
                 {cp.label}
               </text>
+              {/* Tooltip táctico de exposición */}
+              {isHovered && (
+                <g className="pointer-events-none" style={{ zIndex: 100 }}>
+                  <rect
+                    x={x + 7}
+                    y={y - 22}
+                    width="145"
+                    height="18"
+                    fill="#101B2E"
+                    stroke="#FDA4AF"
+                    strokeWidth="0.5"
+                    rx="3"
+                    opacity="0.95"
+                  />
+                  <text
+                    x={x + 12}
+                    y={y - 10}
+                    fill="#FDA4AF"
+                    fontSize="7"
+                    fontFamily="monospace"
+                  >
+                    Exposición: {cp.globalShare}
+                  </text>
+                </g>
+              )}
             </g>
           );
         })}

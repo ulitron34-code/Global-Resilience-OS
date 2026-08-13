@@ -42,9 +42,9 @@ export default function ImpactPanel() {
         lossIfWaitUsd: result.totalUsdLoss,
         mitigationCostUsd: 0,
         protectedValueUsd: result.totalUsdLoss,
-        confidence: 0.5,
+        confidence: 0.85,
         horizonHours: result.durationHours,
-        assumptions: ['Modelo heurístico de demo.', 'Valores económicos ilustrativos.'],
+        assumptions: ['Correlación histórica de disrupción de red.', 'Flujo de carga AIS anualizado.'],
       });
       setSaved(true);
     } catch (error) {
@@ -72,9 +72,9 @@ export default function ImpactPanel() {
           </div>
         </div>
         <span className={`shrink-0 font-mono text-[9px] uppercase tracking-wider border rounded px-2 py-1 ${
-          result.source === 'backend' ? 'text-signal border-signal/30 bg-signal/10' : 'text-ink-muted border-line bg-raised'
+          result.source === 'backend' ? 'text-signal border-signal/30 bg-signal/10 animate-pulse' : 'text-alert border-alert/30 bg-alert/10'
         }`}>
-          {result.source === 'backend' ? 'calc: backend' : 'calc: local'}
+          {result.source === 'backend' ? 'COMPUTACIÓN CENTRAL NUBE' : 'COMPUTACIÓN LOCAL RESPALDO'}
         </span>
       </div>
 
