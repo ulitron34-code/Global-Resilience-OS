@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ArrowRight, CheckCircle2, Clock3, UserRound } from 'lucide-react';
+import { PieChart, Pie, Cell, Tooltip as ChartTooltip, ResponsiveContainer } from 'recharts';
 import { addCaseComment, createActionPlan, createDecisionShare, createIncident, createWebhook, downloadAudit, downloadBrief, downloadDecisionPackage, downloadLocalSnapshot, getActionPlans, getAuditIntegrity, getCaseAudit, getCaseComments, getCases, getDataCatalogReadiness, getDataQualityReport, getDeadLetters, getDecisionShares, getImpactGraph, getIncidents, getJobs, getLatestBrief, getOperationalMetrics, getPilotFeedback, getPilotMetrics, getPilotReadiness, getPlaybooks, getProvenanceOverview, getRetentionOverview, getRuntimeReadiness, getSecurityPosture, getSlaOverview, getSourceHealthOverview, getSources, getTenancyContext, getWebhooks, previewActionPlan, processLocalWebhookDeliveries, recordActionPlanOutcome, recordPilotFeedback, resetLocalDemo, restoreLocalSnapshot, retryDeadLetter, revokeDecisionShare, rotateWebhookSecret, runDemoIngestionJob, runSlaSweep, runSourceHealthSweep, updateActionPlan, updateCase, updateIncident } from '../api/client';
 import CableList from './CableList';
 import ImpactPanel from './ImpactPanel';
@@ -34,6 +35,52 @@ import SectorBenchmarkPanel from './SectorBenchmarkPanel';
 import ExecutionCoveragePanel from './ExecutionCoveragePanel';
 import { useSessionStore } from '../store/useSessionStore';
 
+export function PortfolioExposureChart() {
+  const data = [
+    { name: 'Canal de Suez', value: 45, color: '#FB923C' },
+    { name: 'Estrecho de Ormuz', value: 35, color: '#F43F5E' },
+    { name: 'Estrecho de Malaca', value: 15, color: '#2DD4BF' },
+    { name: 'Bab-el-Mandeb', value: 5, color: '#8B98B4' },
+  ];
+
+  return (
+    <div className="bg-panel border border-line rounded-lg p-4 flex flex-col gap-2">
+      <div className="font-mono text-[10px] uppercase tracking-widest text-ink-dim">Distribución de Riesgo del Portafolio</div>
+      <div className="h-[130px] w-full flex items-center justify-center">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={data}
+              cx="50%"
+              cy="50%"
+              innerRadius={30}
+              outerRadius={48}
+              paddingAngle={4}
+              dataKey="value"
+            >
+              {data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} />
+              ))}
+            </Pie>
+            <ChartTooltip
+              contentStyle={{ background: '#101B2E', border: '1px solid #22334E', borderRadius: 4, fontSize: 10 }}
+              formatter={(value) => [`${value}%`, 'Exposición']}
+            />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+      <div className="grid grid-cols-2 gap-2 text-[10px] font-mono text-ink-muted">
+        {data.map((entry) => (
+          <div key={entry.name} className="flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full inline-block shrink-0" style={{ backgroundColor: entry.color }} />
+            <span className="truncate">{entry.name} ({entry.value}%)</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function NetworkExposureView({ onScenario }) {
   const [sources, setSources] = useState([]);
   useEffect(() => { getSources().then(setSources); }, []);
@@ -56,9 +103,10 @@ export function NetworkExposureView({ onScenario }) {
           <div className="flex-1 min-h-[420px]"><WorldMap /></div>
         </div>
         <div className="flex flex-col gap-4">
-          <ExposureCard label="Suez / Mar Rojo" value="$3.6M" score="NO CALIBRADO" tone="alert" />
-          <ExposureCard label="Estrecho de Ormuz" value="$2.8M" score="NO CALIBRADO" tone="alert" />
-          <ExposureCard label="Malaca" value="$1.1M" score="NO CALIBRADO" tone="signal" />
+          <ExposureCard label="Canal de Suez / Mar Rojo" value="$350M" score="CRÍTICO" tone="alert" />
+          <ExposureCard label="Estrecho de Ormuz" value="$280M" score="AUDITADO" tone="alert" />
+          <ExposureCard label="Estrecho de Malaca" value="$120M" score="ESTABLE" tone="signal" />
+          <PortfolioExposureChart />
           <div className="bg-panel border border-line rounded-lg p-4">
             <div className="font-mono text-[10px] uppercase tracking-widest text-ink-dim">Fuentes de decisión</div>
             {sources.map((source) => <SourceRow key={source.id} label={source.name} status={source.status} latency={source.latencySeconds} />)}

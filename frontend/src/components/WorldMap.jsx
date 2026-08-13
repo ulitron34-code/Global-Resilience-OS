@@ -121,6 +121,43 @@ export default function WorldMap() {
                   <circle r="4" fill="none" stroke="#FB923C" strokeWidth="1.5" className="animate-pulse-ring" style={{ animationDelay: '0.6s' }} />
                 </g>
               )}
+              {/* Tooltip táctico del cable al pasar el cursor */}
+              {hovered && !ruptured && (
+                <g className="pointer-events-none" style={{ zIndex: 90 }}>
+                  <rect
+                    x={points[Math.floor(points.length / 2)][0] - 60}
+                    y={points[Math.floor(points.length / 2)][1] - 28}
+                    width="120"
+                    height="24"
+                    fill="#0A1120"
+                    stroke="#5EEAD4"
+                    strokeWidth="0.5"
+                    rx="3"
+                    opacity="0.95"
+                  />
+                  <text
+                    x={points[Math.floor(points.length / 2)][0]}
+                    y={points[Math.floor(points.length / 2)][1] - 17}
+                    fill="#E7ECF5"
+                    fontSize="7.5"
+                    fontWeight="bold"
+                    fontFamily="monospace"
+                    textAnchor="middle"
+                  >
+                    {cable.name}
+                  </text>
+                  <text
+                    x={points[Math.floor(points.length / 2)][0]}
+                    y={points[Math.floor(points.length / 2)][1] - 8}
+                    fill="#2DD4BF"
+                    fontSize="6.5"
+                    fontFamily="monospace"
+                    textAnchor="middle"
+                  >
+                    Criticidad: {cable.criticality} · Landings: {cable.landings}
+                  </text>
+                </g>
+              )}
             </g>
           );
         })}
