@@ -4,8 +4,9 @@ import { getCalibrationOverview, recordCalibrationFixtures } from '../domain/sto
 
 test('conserva fixtures incompletas pero las excluye de métricas de calibración', () => {
   const suffix = Date.now();
+  const modelId = 'alert-correlation';
   const result = recordCalibrationFixtures({
-    modelId: 'impact-cascade',
+    modelId,
     fixtures: [{
       id: `incomplete-${suffix}`,
       eventDate: '2024-02-01',
@@ -25,8 +26,9 @@ test('conserva fixtures incompletas pero las excluye de métricas de calibració
 
 test('marca fixture completa cuando conserva la cadena histórica mínima', () => {
   const suffix = Date.now();
+  const modelId = 'alert-correlation';
   const result = recordCalibrationFixtures({
-    modelId: 'impact-cascade',
+    modelId,
     fixtures: [{
       id: `complete-${suffix}`,
       eventDate: '2024-03-01',
@@ -45,7 +47,7 @@ test('marca fixture completa cuando conserva la cadena histórica mínima', () =
   assert.deepEqual(fixture.missingEvidence, []);
   assert.equal(result.overview.completeFixtureCount, 1);
   assert.equal(result.overview.metrics.maeUsd, 20);
-  assert.equal(getCalibrationOverview('impact-cascade').completeFixtureCount >= 1, true);
+  assert.equal(getCalibrationOverview(modelId).completeFixtureCount >= 1, true);
 });
 
 test('calibracion expone fixtures ilustrativas excluidas', () => {
