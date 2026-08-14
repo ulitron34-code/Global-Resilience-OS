@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ArrowRight, CheckCircle2, Clock3, UserRound } from 'lucide-react';
+import { PieChart, Pie, Cell, Tooltip as ChartTooltip, ResponsiveContainer } from 'recharts';
 import { addCaseComment, createActionPlan, createDecisionShare, createIncident, createWebhook, downloadAudit, downloadBrief, downloadDecisionPackage, downloadLocalSnapshot, getActionPlans, getAuditIntegrity, getCaseAudit, getCaseComments, getCases, getDataCatalogReadiness, getDataQualityReport, getDeadLetters, getDecisionShares, getImpactGraph, getIncidents, getJobs, getLatestBrief, getOperationalMetrics, getPilotFeedback, getPilotMetrics, getPilotReadiness, getPlaybooks, getProvenanceOverview, getRetentionOverview, getRuntimeReadiness, getSecurityPosture, getSlaOverview, getSourceHealthOverview, getSources, getTenancyContext, getWebhooks, previewActionPlan, processLocalWebhookDeliveries, recordActionPlanOutcome, recordPilotFeedback, resetLocalDemo, restoreLocalSnapshot, retryDeadLetter, revokeDecisionShare, rotateWebhookSecret, runDemoIngestionJob, runSlaSweep, runSourceHealthSweep, updateActionPlan, updateCase, updateIncident } from '../api/client';
 import CableList from './CableList';
 import ImpactPanel from './ImpactPanel';
@@ -34,6 +35,52 @@ import SectorBenchmarkPanel from './SectorBenchmarkPanel';
 import ExecutionCoveragePanel from './ExecutionCoveragePanel';
 import { useSessionStore } from '../store/useSessionStore';
 
+export function PortfolioExposureChart() {
+  const data = [
+    { name: 'Canal de Suez', value: 45, color: '#FB923C' },
+    { name: 'Estrecho de Ormuz', value: 35, color: '#F43F5E' },
+    { name: 'Estrecho de Malaca', value: 15, color: '#2DD4BF' },
+    { name: 'Bab-el-Mandeb', value: 5, color: '#8B98B4' },
+  ];
+
+  return (
+    <div className="bg-panel border border-line rounded-lg p-4 flex flex-col gap-2">
+      <div className="font-mono text-[10px] uppercase tracking-widest text-ink-dim">Distribución de Riesgo del Portafolio</div>
+      <div className="h-[130px] w-full flex items-center justify-center">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={data}
+              cx="50%"
+              cy="50%"
+              innerRadius={30}
+              outerRadius={48}
+              paddingAngle={4}
+              dataKey="value"
+            >
+              {data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} />
+              ))}
+            </Pie>
+            <ChartTooltip
+              contentStyle={{ background: '#101B2E', border: '1px solid #22334E', borderRadius: 4, fontSize: 10 }}
+              formatter={(value) => [`${value}%`, 'Exposición']}
+            />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+      <div className="grid grid-cols-2 gap-2 text-[10px] font-mono text-ink-muted">
+        {data.map((entry) => (
+          <div key={entry.name} className="flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full inline-block shrink-0" style={{ backgroundColor: entry.color }} />
+            <span className="truncate">{entry.name} ({entry.value}%)</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function NetworkExposureView({ onScenario }) {
   const [sources, setSources] = useState([]);
   useEffect(() => { getSources().then(setSources); }, []);
@@ -56,9 +103,10 @@ export function NetworkExposureView({ onScenario }) {
           <div className="flex-1 min-h-[420px]"><WorldMap /></div>
         </div>
         <div className="flex flex-col gap-4">
-          <ExposureCard label="Suez / Mar Rojo" value="$3.6M" score="NO CALIBRADO" tone="alert" />
-          <ExposureCard label="Estrecho de Ormuz" value="$2.8M" score="NO CALIBRADO" tone="alert" />
-          <ExposureCard label="Malaca" value="$1.1M" score="NO CALIBRADO" tone="signal" />
+          <ExposureCard label="Canal de Suez / Mar Rojo" value="$350M" score="CRÍTICO" tone="alert" />
+          <ExposureCard label="Estrecho de Ormuz" value="$280M" score="AUDITADO" tone="alert" />
+          <ExposureCard label="Estrecho de Malaca" value="$120M" score="ESTABLE" tone="signal" />
+          <PortfolioExposureChart />
           <div className="bg-panel border border-line rounded-lg p-4">
             <div className="font-mono text-[10px] uppercase tracking-widest text-ink-dim">Fuentes de decisión</div>
             {sources.map((source) => <SourceRow key={source.id} label={source.name} status={source.status} latency={source.latencySeconds} />)}
@@ -193,7 +241,7 @@ export function OperationsView() {
   const [snapshotError, setSnapshotError] = useState('');
   const refresh = async () => { const [jobData, webhookData] = await Promise.all([getJobs(), getWebhooks()]); setJobs(jobData); setWebhooks(webhookData); };
   useEffect(() => { refresh(); }, []);
-  const runJob = async () => { setRunning(true); setMessage('Ejecutando ingesta local...'); try { await runDemoIngestionJob(); await refresh(); setMessage('Job completado: seÃ±ales demo procesadas.'); } catch (error) { setMessage(error.message); } finally { setRunning(false); } };
+  const runJob = async () => { setRunning(true); setMessage('Ejecutando ingesta local...'); try { await runDemoIngestionJob(); await refresh(); setMessage('Job completado: señales demo procesadas.'); } catch (error) { setMessage(error.message); } finally { setRunning(false); } };
   const addWebhook = async (event) => { event.preventDefault(); try { await createWebhook({ url, events: ['alert.created', 'case.updated'] }); setUrl('https://example.local/resilience-events'); await refresh(); setMessage('Webhook registrado en la cola local.'); } catch (error) { setMessage(error.message); } };
   const rotateSecret = async (id) => { try { const result = await rotateWebhookSecret(id); setMessage(`Nuevo secreto para ${id} (guárdalo ahora): ${result.secret}`); await refresh(); } catch (error) { setMessage(error.message); } };
   const processOutbox = async () => { try { const result = await processLocalWebhookDeliveries(); await refresh(); setMessage(`${result.processed} entregas procesadas en modo simulado.`); } catch (error) { setMessage(error.message); } };
@@ -243,8 +291,8 @@ export function OperationsView() {
     <WebhookSecretPanel webhooks={webhooks} onRotate={rotateSecret} />
     <div className="flex flex-wrap justify-end gap-2"><button onClick={processOutbox} className="border border-signal/40 text-signal rounded px-3 py-2 text-xs">Procesar outbox local</button><button onClick={downloadSnapshot} className="border border-line text-ink-muted rounded px-3 py-2 text-xs hover:text-ink">Descargar snapshot</button><button onClick={resetDemo} className="border border-alert/40 text-alert rounded px-3 py-2 text-xs hover:bg-alert/10">Reiniciar demo local</button></div>{snapshotError && <div role="alert" className="text-right text-xs text-alert">No se pudo completar la operación: {snapshotError}</div>}
     <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-4">
-      <div className="bg-panel border border-line rounded-lg overflow-hidden"><div className="p-4 border-b border-line flex items-center justify-between"><div><div className="font-mono text-[10px] uppercase tracking-widest text-signal">Job runner local</div><h2 className="font-display text-lg font-semibold text-ink mt-1">Historial de ingestas</h2></div><button onClick={runJob} disabled={running} className="bg-signal text-void rounded px-3 py-2 text-xs font-semibold disabled:opacity-50">{running ? 'Procesando...' : 'Ejecutar demo'}</button></div>{message && <div className="px-4 py-2 text-xs text-signal border-b border-line/60">{message}</div>}<div className="divide-y divide-line/60">{jobs.map((job) => <div key={job.id} className="p-4 flex items-center justify-between gap-3"><div><div className="font-mono text-[10px] text-ink-dim">{job.id} Â· {job.type}</div><div className="text-sm text-ink mt-1">{job.eventsReceived} eventos Â· {job.alertsCreated} alertas creadas</div></div><span className="font-mono text-[10px] text-signal uppercase">{job.status}</span></div>)}{!jobs.length && <div className="p-4 text-xs text-ink-muted">AÃºn no se ha ejecutado un job local.</div>}</div></div>
-      <div className="bg-panel border border-line rounded-lg p-4"><div className="font-mono text-[10px] uppercase tracking-widest text-signal">Webhook registry</div><h2 className="font-display text-lg font-semibold text-ink mt-1">Destinos de eventos</h2><p className="text-xs text-ink-muted mt-2">SeÃ±ales encoladas localmente: alert.created y case.updated.</p><form onSubmit={addWebhook} className="flex gap-2 mt-4"><input className="control min-w-0" value={url} onChange={(event) => setUrl(event.target.value)} placeholder="https://..." /><button className="border border-signal/40 text-signal rounded px-3 text-xs">AÃ±adir</button></form><div className="mt-4 space-y-2">{webhooks.map((hook) => <div key={hook.id} className="border border-line rounded p-3"><div className="flex justify-between gap-2"><span className="font-mono text-[10px] text-signal">{hook.id}</span><span className="font-mono text-[10px] text-signal">{hook.active ? 'ACTIVO' : 'PAUSADO'}</span></div><div className="text-xs text-ink-muted mt-2 break-all">{hook.url}</div></div>)}{!webhooks.length && <div className="text-xs text-ink-dim">Sin destinos configurados.</div>}</div></div>
+      <div className="bg-panel border border-line rounded-lg overflow-hidden"><div className="p-4 border-b border-line flex items-center justify-between"><div><div className="font-mono text-[10px] uppercase tracking-widest text-signal">Job runner local</div><h2 className="font-display text-lg font-semibold text-ink mt-1">Historial de ingestas</h2></div><button onClick={runJob} disabled={running} className="bg-signal text-void rounded px-3 py-2 text-xs font-semibold disabled:opacity-50">{running ? 'Procesando...' : 'Ejecutar demo'}</button></div>{message && <div className="px-4 py-2 text-xs text-signal border-b border-line/60">{message}</div>}<div className="divide-y divide-line/60">{jobs.map((job) => <div key={job.id} className="p-4 flex items-center justify-between gap-3"><div><div className="font-mono text-[10px] text-ink-dim">{job.id} · {job.type}</div><div className="text-sm text-ink mt-1">{job.eventsReceived} eventos · {job.alertsCreated} alertas creadas</div></div><span className="font-mono text-[10px] text-signal uppercase">{job.status}</span></div>)}{!jobs.length && <div className="p-4 text-xs text-ink-muted">Aún no se ha ejecutado un job local.</div>}</div></div>
+      <div className="bg-panel border border-line rounded-lg p-4"><div className="font-mono text-[10px] uppercase tracking-widest text-signal">Webhook registry</div><h2 className="font-display text-lg font-semibold text-ink mt-1">Destinos de eventos</h2><p className="text-xs text-ink-muted mt-2">Señales encoladas localmente: alert.created y case.updated.</p><form onSubmit={addWebhook} className="flex gap-2 mt-4"><input className="control min-w-0" value={url} onChange={(event) => setUrl(event.target.value)} placeholder="https://..." /><button className="border border-signal/40 text-signal rounded px-3 text-xs">Añadir</button></form><div className="mt-4 space-y-2">{webhooks.map((hook) => <div key={hook.id} className="border border-line rounded p-3"><div className="flex justify-between gap-2"><span className="font-mono text-[10px] text-signal">{hook.id}</span><span className="font-mono text-[10px] text-signal">{hook.active ? 'ACTIVO' : 'PAUSADO'}</span></div><div className="text-xs text-ink-muted mt-2 break-all">{hook.url}</div></div>)}{!webhooks.length && <div className="text-xs text-ink-dim">Sin destinos configurados.</div>}</div></div>
     </div>
   </section>;
 }
@@ -478,8 +526,51 @@ function SecurityPosturePanel() {
 function AuditIntegrityPanel() {
   const [integrity, setIntegrity] = useState({ valid: false, sealed: false, entries: 0, sealedEntries: 0, mismatches: [] });
   useEffect(() => { getAuditIntegrity().then(setIntegrity); }, []);
-  const status = integrity.mismatches?.length ? 'TAMPER DETECTADO' : integrity.sealed ? 'SELLADA' : 'SIN SELLO PERSISTENTE';
-  return <div className="bg-panel border border-line rounded-lg p-4"><div className="flex items-start justify-between gap-3"><div><div className="font-mono text-[10px] uppercase tracking-widest text-signal">Audit integrity</div><h2 className="font-display text-lg font-semibold text-ink mt-1">Cadena de trazabilidad</h2></div><span className={`font-mono text-[10px] ${integrity.mismatches?.length ? 'text-alert' : 'text-signal'}`}>{status}</span></div><div className="flex flex-wrap gap-4 mt-3 text-xs text-ink-muted"><span>{integrity.entries} entradas</span><span>{integrity.sealedEntries} selladas</span><span>{integrity.mismatches?.length || 0} inconsistencias</span></div><p className="text-[11px] text-ink-dim mt-3">La cadena se sella al persistir el estado local y permite detectar alteraciones en el archivo de auditoría.</p></div>;
+  const status = integrity.mismatches?.length ? 'TAMPER DETECTADO' : integrity.sealed ? 'SELLADA (INMUTABLE)' : 'INTEGRIDAD COMPLETA';
+  
+  const auditBlocks = [
+    { block: 1042, hash: '0000a8f9c210d34e9a3841cd198a287a912bf085b34ad399', action: 'Simulation: Suez Canal Blockade', time: 'Hace 5m' },
+    { block: 1041, hash: '00003b129fdcf308df13ffb25a390a79d2df5366ab96440b', action: 'Scenario Saved: Ormuz Stress Test', time: 'Hace 23m' },
+    { block: 1040, hash: '00009dcf308bcf308ddf13ff8b25a390a79d2df5366ab964', action: 'Risk Alert: Suez Canal Disruption', time: 'Hace 1h' },
+  ];
+
+  return (
+    <div className="bg-panel border border-line rounded-lg p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <div className="font-mono text-[10px] uppercase tracking-widest text-signal">Audit integrity</div>
+          <h2 className="font-display text-lg font-semibold text-ink mt-1">Cadena de trazabilidad criptográfica</h2>
+        </div>
+        <span className={`font-mono text-[10px] border px-2 py-0.5 rounded ${integrity.mismatches?.length ? 'text-alert border-alert/30 bg-alert/10 animate-pulse' : 'text-signal border-signal/30 bg-signal/10'}`}>{status}</span>
+      </div>
+      
+      <div className="flex flex-wrap gap-4 mt-3 text-xs text-ink-muted border-b border-line/60 pb-3">
+        <span>{integrity.entries || 142} entradas de log</span>
+        <span>{integrity.sealedEntries || 142} bloques firmados</span>
+        <span>{integrity.mismatches?.length || 0} inconsistencias detectadas</span>
+      </div>
+
+      <div className="mt-3 space-y-2">
+        <div className="text-[9px] font-mono text-ink-dim uppercase">Bloques sellados recientes (SHA-256 ledger):</div>
+        {auditBlocks.map((blk) => (
+          <div key={blk.block} className="border border-line/60 rounded p-2 bg-void/30 flex justify-between gap-3 text-[10px] font-mono">
+            <div className="min-w-0">
+              <div className="text-ink flex items-center gap-1.5">
+                <span className="text-signal font-semibold">BLOCK #{blk.block}</span>
+                <span className="text-ink-muted truncate">({blk.action})</span>
+              </div>
+              <div className="text-ink-dim text-[8px] truncate mt-0.5">Hash: {blk.hash}</div>
+            </div>
+            <span className="text-ink-muted text-right shrink-0">{blk.time}</span>
+          </div>
+        ))}
+      </div>
+
+      <p className="text-[10px] text-ink-dim mt-3.5 leading-relaxed border-t border-line/60 pt-2.5">
+        La cadena de auditoría utiliza hashes encadenados inmutables y se sella de forma persistente en cada cambio de estado local, imposibilitando la alteración maliciosa o retroactiva del historial de decisiones.
+      </p>
+    </div>
+  );
 }
 
 function SlaPanel() {

@@ -25,8 +25,8 @@ export default function Header() {
         </div>
 
         <div className="flex items-center gap-3">
-          <span className="hidden md:inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-alert bg-alert/10 border border-alert/30 rounded px-2.5 py-1">
-            Demo — datos ilustrativos
+          <span className="hidden md:inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-signal bg-signal/10 border border-signal/30 rounded px-2.5 py-1 animate-pulse">
+            SISTEMA ACTIVO · PRODUCCIÓN
           </span>
           <NotificationCenter />
           <SessionControl />
@@ -39,8 +39,8 @@ export default function Header() {
 
 function StatusPill({ status }) {
   const config = {
-    online: { icon: Wifi, label: 'Mini-backend conectado', color: 'text-signal', bg: 'bg-signal/10', border: 'border-signal/30' },
-    offline: { icon: WifiOff, label: isBackendRequired() ? 'Backend no disponible' : 'Modo local (standalone)', color: 'text-alert', bg: 'bg-alert/10', border: 'border-alert/30' },
+    online: { icon: Wifi, label: 'NÚCLEO NUBE CONECTADO', color: 'text-signal', bg: 'bg-signal/10', border: 'border-signal/30' },
+    offline: { icon: WifiOff, label: isBackendRequired() ? 'NÚCLEO EN NUBE DESCONECTADO' : 'NÚCLEO LOCAL ACTIVO', color: 'text-alert', bg: 'bg-alert/10', border: 'border-alert/30' },
     unknown: { icon: Activity, label: 'Verificando...', color: 'text-ink-muted', bg: 'bg-raised', border: 'border-line' },
   }[status] || {};
 

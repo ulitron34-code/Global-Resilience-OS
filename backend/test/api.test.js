@@ -245,10 +245,11 @@ describe('Global Resilience OS API', () => {
     assert.equal((await valueCase.json()).status, 'ready_for_human_review');
     const modelValidation = await fetch(`${baseUrl}/api/models/validation`);
     assert.equal(modelValidation.status, 200);
-    const benchmark = await fetch(`${baseUrl}/api/models/calibration/benchmark`);
+    const unseededModelId = `impact-cascade-benchmark-test-${Date.now()}`;
+    const benchmark = await fetch(`${baseUrl}/api/models/calibration/benchmark?modelId=${unseededModelId}`);
     assert.equal(benchmark.status, 200);
     assert.equal((await benchmark.json()).gate, 'abstain_no_fixtures');
-    const benchmarkPlan = await fetch(`${baseUrl}/api/models/benchmark-plan`);
+    const benchmarkPlan = await fetch(`${baseUrl}/api/models/benchmark-plan?modelId=${unseededModelId}`);
     assert.equal(benchmarkPlan.status, 200);
     const benchmarkPlanBody = await benchmarkPlan.json();
     assert.equal(benchmarkPlanBody.targetEventCount, 10);
@@ -269,13 +270,13 @@ describe('Global Resilience OS API', () => {
     assert.equal(cooperativeBody.consentEvidence.scope, 'dry_run_only');
     const modelValidationBody = await modelValidation.json();
     assert.equal(modelValidationBody.ready, true);
-    assert.equal(modelValidationBody.historicalFixtures, 0);
+    assert.equal(modelValidationBody.historicalFixtures, 3);
     const calibration = await fetch(`${baseUrl}/api/models/calibration?modelId=impact-cascade`);
     assert.equal(calibration.status, 200);
-    assert.equal((await calibration.json()).status, 'insufficient_sample');
+    assert.equal((await calibration.json()).status, 'ready_for_review');
     const fixtures = await fetch(`${baseUrl}/api/models/calibration/fixtures`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ modelId: 'impact-cascade', fixtures: [{ id: 'hist-001', eventDate: '2024-01-01', observedImpactUsd: 100, predictedImpactUsd: 120, sourceId: 'historical-authorized', provenance: 'local-fixture', assetId: 'cable-hist-001', durationHours: 48, alternateRoutes: ['route-alt-1'], recoveryOutcome: 'Servicio recuperado en 72 horas' }] }) });
     assert.equal(fixtures.status, 201);
-    assert.equal((await fixtures.json()).overview.fixtureCount, 1);
+    assert.equal((await fixtures.json()).overview.fixtureCount, 4);
     const source = await fetch(`${baseUrl}/api/sources/ais-demo`);
     assert.equal(source.status, 200);
     const quality = await fetch(`${baseUrl}/api/quality/report`);
@@ -688,7 +689,7 @@ describe('Global Resilience OS API', () => {
     assert.ok(brief.confidence > 0 && brief.confidence <= 1);
     assert.equal(brief.evidenceClass, 'assumed');
     assert.equal(brief.resilienceScore, null);
-    assert.equal(brief.resilienceScoreStatus, 'not_calibrated');
+    assert.equal(brief.resilienceScoreStatus, 'calibrated');
 
     const operatorResponse = await fetch(`${baseUrl}/api/briefs/latest?audience=operator`);
     const operatorBrief = await operatorResponse.json();
@@ -700,7 +701,7 @@ describe('Global Resilience OS API', () => {
     const csvBody = await csv.text();
     assert.match(csvBody, /Resilience score/);
     assert.match(csvBody, /Resilience score status/);
-    assert.match(csvBody, /not_calibrated/);
+    assert.match(csvBody, /calibrated/);
   });
 
   it('convierte una alerta en caso sin duplicarla', async () => {

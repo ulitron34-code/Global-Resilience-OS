@@ -3,6 +3,13 @@ import { useAppStore } from '../store/useAppStore';
 
 const DURATIONS = [6, 12, 24, 48, 72];
 
+const GEOPOLITICAL_SCENARIOS = [
+  { id: 'suez', name: 'Bloqueo del Canal de Suez', desc: 'Disrupción total de comercio y logística intercontinental.', duration: 72, severity: 'total' },
+  { id: 'ormuz', name: 'Bloqueo del Estrecho de Ormuz', desc: 'Crisis de suministro energético físico global.', duration: 48, severity: 'total' },
+  { id: 'malaca', name: 'Cierre del Estrecho de Malaca', desc: 'Cuello de botella digital y físico para tecnología.', duration: 24, severity: 'total' },
+  { id: 'bab', name: 'Disrupción en Bab-el-Mandeb', desc: 'Inestabilidad que impacta rutas de metales y crudo.', duration: 72, severity: 'parcial' },
+];
+
 export default function ScenarioBuilder() {
   const cables = useAppStore((s) => s.cables);
   const selectedCableId = useAppStore((s) => s.selectedCableId);
@@ -21,25 +28,53 @@ export default function ScenarioBuilder() {
 
   if (!cable) {
     return (
-      <div className="bg-panel border border-line rounded-lg p-6 flex flex-col items-center justify-center text-center h-full">
-        <Zap size={20} className="text-ink-dim mb-2" />
-        <p className="text-ink-muted text-sm mb-4">Selecciona un punto en el mapa o en la lista para construir un escenario de ruptura.</p>
-        <button 
-          onClick={() => { selectCable('suez'); setTimeout(runSimulation, 0); }}
-          className="border border-signal text-signal text-xs font-semibold py-1.5 px-3 rounded hover:bg-signal/10 transition-colors flex items-center gap-2"
-        >
-          <Zap size={13} /> ¿Qué pasa si Suez cierra?
-        </button>
+      <div className="bg-panel border border-line rounded-lg p-4 flex flex-col gap-3 h-full justify-between">
+        <div>
+          <div className="font-mono text-[10px] uppercase tracking-widest text-ink-dim mb-1">Escenarios Rápidos</div>
+          <h3 className="font-display font-semibold text-ink text-sm">Biblioteca de Estrés Geopolítico</h3>
+          <p className="text-[11px] text-ink-muted mt-1">Selecciona una plantilla o haz clic en el mapa para simular:</p>
+        </div>
+        <div className="flex flex-col gap-2 overflow-y-auto max-h-[220px]">
+          {GEOPOLITICAL_SCENARIOS.map((sc) => (
+            <button
+              key={sc.id}
+              onClick={() => {
+                selectCable(sc.id);
+                setSeverity(sc.severity);
+                setDurationHours(sc.duration);
+                setTimeout(runSimulation, 50);
+              }}
+              className="border border-line hover:border-signal/50 bg-panel-elevated p-2 rounded text-left transition-colors flex flex-col gap-0.5 group"
+            >
+              <div className="flex justify-between items-center">
+                <span className="text-xs font-semibold text-ink group-hover:text-signal transition-colors">{sc.name}</span>
+                <span className="font-mono text-[9px] text-signal uppercase">{sc.severity} · {sc.duration}h</span>
+              </div>
+              <p className="text-[10px] text-ink-muted leading-snug">{sc.desc}</p>
+            </button>
+          ))}
+        </div>
+        <div className="border-t border-line/60 pt-2 text-center">
+          <p className="text-[9px] text-ink-dim font-mono">Monitoreo activo de 4 chokepoints marítimos.</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="bg-panel border border-line rounded-lg p-4 flex flex-col gap-4">
-      <div>
-        <div className="font-mono text-[10px] uppercase tracking-widest text-ink-dim mb-1">Escenario</div>
-        <div className="font-display font-semibold text-ink text-lg leading-tight">{cable.name}</div>
-        <div className="text-xs text-ink-muted mt-0.5">{cable.route}</div>
+      <div className="flex justify-between items-start gap-2">
+        <div>
+          <div className="font-mono text-[10px] uppercase tracking-widest text-ink-dim mb-1">Escenario</div>
+          <div className="font-display font-semibold text-ink text-lg leading-tight">{cable.name}</div>
+          <div className="text-xs text-ink-muted mt-0.5">{cable.route}</div>
+        </div>
+        <button
+          onClick={() => selectCable(null)}
+          className="font-mono text-[9px] uppercase border border-line hover:border-ink-muted text-ink-muted rounded px-1.5 py-0.5 shrink-0"
+        >
+          Reset
+        </button>
       </div>
 
       <div>
