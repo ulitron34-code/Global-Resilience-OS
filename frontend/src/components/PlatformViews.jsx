@@ -225,7 +225,7 @@ export function ExecutiveBriefView({ onScenario, vertical = 'Oil & Gas', region 
       <div className="bg-panel border border-line rounded-lg p-6 md:p-8">
         <div className="flex items-start justify-between gap-4 border-b border-line pb-5"><div><div className="font-mono text-[10px] text-signal tracking-widest">GLOBAL RESILIENCE OS</div><h2 className="font-display text-2xl font-bold text-ink mt-2">Situation Brief · {vertical}</h2><p className="text-xs text-ink-muted mt-1">{region === 'global' ? 'Global' : region} · Ventana de análisis: próximas {horizon}h · Demo ilustrativa</p></div><div className="text-right"><div className="font-mono text-[10px] text-ink-dim">RESILIENCE</div><div className="font-display text-4xl font-bold text-signal">{brief?.resilienceScore ?? 'N/D'}{brief?.resilienceScore !== null && brief?.resilienceScore !== undefined && <span className="text-sm text-ink-muted">/100</span>}</div><div className="font-mono text-[9px] text-ink-dim mt-1">{brief?.resilienceScoreStatus === 'not_calibrated' ? 'NO CALIBRADO' : 'ESTADO NO DISPONIBLE'}</div></div></div>
         <div className="my-6 border border-alert/30 bg-alert/5 rounded-lg p-4"><div className="font-mono text-[10px] text-alert tracking-widest">DECISIÓN REQUERIDA</div><h3 className="font-display text-lg font-semibold text-ink mt-2">{brief?.decisionRequired || 'Cargando recomendación...'}</h3><p className="text-sm text-ink-muted mt-2">Valor protegido estimado: {formatUsd(brief?.protectedValueUsd)} bajo el escenario actual.</p></div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6"><Metric label="Exposición total" value={formatUsd(brief?.exposureUsd)} /><Metric label="Eventos materiales" value={brief?.materialEvents || '—'} /><Metric label="Valor mitigable" value={formatUsd(brief?.protectedValueUsd)} /><Metric label="Confianza modelo" value={Number.isFinite(brief?.confidence) ? `${Math.round(brief.confidence * 100)}%` : 'N/D'} /></div>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6"><Metric label="Exposición total" value={formatUsd(brief?.exposureUsd)} /><Metric label="Eventos materiales" value={brief?.materialEvents || '—'} /><Metric label="Valor mitigable" value={formatUsd(brief?.protectedValueUsd)} /><Metric label="Suscripción Sugerida (2%)" value={formatUsd((brief?.protectedValueUsd || 0) * 0.02)} /><Metric label="Confianza modelo" value={Number.isFinite(brief?.confidence) ? `${Math.round(brief.confidence * 100)}%` : 'N/D'} /></div>
         <div className="grid md:grid-cols-3 gap-6 border-t border-line pt-5"><BriefPoint index="01" title="Qué cambió" text="Una degradación anómala en SMW-5 coincide con congestión creciente. La exposición combinada supera el umbral P1." /><BriefPoint index="02" title="Qué hacer" text="Activar ruta alternativa, elevar monitoreo de Ormuz y congelar nominaciones sensibles al corredor." /><BriefPoint index="03" title="Qué vigilar" text="Estado de cable, prima spot de flete y capacidad disponible en ruta alterna." /></div><div className="flex flex-wrap gap-2 mt-6"><button onClick={() => exportBrief('json')} className="border border-line text-ink-muted rounded px-3 py-2 text-xs hover:text-ink">Descargar JSON</button><button onClick={() => exportBrief('csv')} className="border border-signal/40 text-signal rounded px-3 py-2 text-xs hover:bg-signal/10">Descargar CSV</button></div>
       </div>
     </section>
@@ -239,6 +239,7 @@ export function OperationsView() {
   const [running, setRunning] = useState(false);
   const [message, setMessage] = useState('');
   const [snapshotError, setSnapshotError] = useState('');
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const refresh = async () => { const [jobData, webhookData] = await Promise.all([getJobs(), getWebhooks()]); setJobs(jobData); setWebhooks(webhookData); };
   useEffect(() => { refresh(); }, []);
   const runJob = async () => { setRunning(true); setMessage('Ejecutando ingesta local...'); try { await runDemoIngestionJob(); await refresh(); setMessage('Job completado: señales demo procesadas.'); } catch (error) { setMessage(error.message); } finally { setRunning(false); } };
@@ -251,43 +252,59 @@ export function OperationsView() {
     <SectionIntro eyebrow="Operación · jobs · conectores · trazabilidad" title="La plataforma también se opera." description="Ejecuta una ingesta controlada, inspecciona su historial y registra destinos de eventos. La entrega externa queda preparada como cola local hasta conectar la infraestructura de producción." />
     <ReadinessPanel />
     <RuntimeReadinessPanel />
-    <CompliancePanel />
-    <RegulatoryEvidencePanel />
-    <DataQualityPanel />
-    <GovernancePanel />
-    <RetentionPolicyConflictPanel />
     <SourceHealthPanel />
-    <SourceHealthSweepPanel />
-    <PilotReadinessPanel />
-    <StructuredPilotEvidencePanel />
-    <PilotPackagePanel />
-    <PilotMeasurementPanel />
-    <PilotValueCasePanel />
-    <CapacityMarketplacePanel />
-    <EnterpriseReadinessPanel />
-    <EvidenceManifestPanel />
-    <IncidentResponsePanel />
-    <SecurityPosturePanel />
-    <ModelUncertaintyPanel />
-    <ModelProfilesPanel />
-    <OperationalScorecardPanel />
-    <CooperativeNetworkPanel />
-    <SectorBenchmarkPanel />
-    <ExecutionCoveragePanel />
     <AuditIntegrityPanel />
-    <SlaPanel />
-    <DeadLetterPanel />
-    <ImpactGraphPanel />
-    <TemporalGraphQueryPanel />
-    <RecoveryProfilePanel />
-    <ActionLibraryPanel />
-    <NotificationPolicyPanel />
-    <DataQualityGatePanel />
-    <SourceIntakePanel />
-    <AssistiveSuggestionPanel />
-    <ActionPlanPanel />
-    <ActionOutcomePanel />
-    <LocalRecoveryPanel />
+
+    <div className="flex justify-center my-4">
+      <button 
+        type="button" 
+        onClick={() => setShowAdvanced(!showAdvanced)} 
+        className="px-4 py-2 text-xs font-semibold rounded border border-signal text-signal hover:bg-signal/10 transition-colors"
+      >
+        {showAdvanced ? "Ocultar paneles operativos avanzados" : "Mostrar paneles operativos avanzados (+25)"}
+      </button>
+    </div>
+
+    {showAdvanced && (
+      <div className="flex flex-col gap-4">
+        <CompliancePanel />
+        <RegulatoryEvidencePanel />
+        <DataQualityPanel />
+        <GovernancePanel />
+        <RetentionPolicyConflictPanel />
+        <SourceHealthSweepPanel />
+        <PilotReadinessPanel />
+        <StructuredPilotEvidencePanel />
+        <PilotPackagePanel />
+        <PilotMeasurementPanel />
+        <PilotValueCasePanel />
+        <CapacityMarketplacePanel />
+        <EnterpriseReadinessPanel />
+        <EvidenceManifestPanel />
+        <IncidentResponsePanel />
+        <SecurityPosturePanel />
+        <ModelUncertaintyPanel />
+        <ModelProfilesPanel />
+        <OperationalScorecardPanel />
+        <CooperativeNetworkPanel />
+        <SectorBenchmarkPanel />
+        <ExecutionCoveragePanel />
+        <SlaPanel />
+        <DeadLetterPanel />
+        <ImpactGraphPanel />
+        <TemporalGraphQueryPanel />
+        <RecoveryProfilePanel />
+        <ActionLibraryPanel />
+        <NotificationPolicyPanel />
+        <DataQualityGatePanel />
+        <SourceIntakePanel />
+        <AssistiveSuggestionPanel />
+        <ActionPlanPanel />
+        <ActionOutcomePanel />
+        <LocalRecoveryPanel />
+      </div>
+    )}
+
     <WebhookSecretPanel webhooks={webhooks} onRotate={rotateSecret} />
     <div className="flex flex-wrap justify-end gap-2"><button onClick={processOutbox} className="border border-signal/40 text-signal rounded px-3 py-2 text-xs">Procesar outbox local</button><button onClick={downloadSnapshot} className="border border-line text-ink-muted rounded px-3 py-2 text-xs hover:text-ink">Descargar snapshot</button><button onClick={resetDemo} className="border border-alert/40 text-alert rounded px-3 py-2 text-xs hover:bg-alert/10">Reiniciar demo local</button></div>{snapshotError && <div role="alert" className="text-right text-xs text-alert">No se pudo completar la operación: {snapshotError}</div>}
     <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-4">
@@ -314,7 +331,7 @@ function ActionPlanPanel() {
   const save = async () => { if (!preview) return; try { await createActionPlan(input()); setMessage('Plan guardado como borrador para aprobación humana.'); await refresh(); } catch (error) { setMessage(error.message); } };
   const approve = async (plan) => { try { await updateActionPlan(plan.id, { status: 'approved', humanApproval: 'approved' }); setMessage(`${plan.id} aprobado por el operador local.`); await refresh(); } catch (error) { setMessage(error.message); } };
   const materialAllowed = preview?.materialRecommendationAllowed === true;
-  return <div className="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-4"><div className="bg-panel border border-line rounded-lg p-4"><div className="font-mono text-[10px] uppercase tracking-widest text-signal">Scenario-to-Action Engine</div><h2 className="font-display text-lg font-semibold text-ink mt-1">De señal a decisión auditable</h2><p className="text-xs text-ink-muted mt-2">Calcula economía y confianza, revisa procedencia y guarda el plan como borrador hasta la aprobación humana.</p><form onSubmit={calculate} className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-4"><select className="control col-span-2 md:col-span-4" value={selectedPlaybook} onChange={(event) => setSelectedPlaybook(event.target.value)}>{playbooks.map((playbook) => <option key={playbook.id} value={playbook.id}>{playbook.name}</option>)}</select><input className="control col-span-2" value={sourceId} onChange={(event) => setSourceId(event.target.value)} aria-label="Fuente de evidencia" placeholder="Fuente de evidencia (opcional)" /><input className="control" type="number" min="0" value={lossIfWaitUsd} onChange={(event) => setLossIfWaitUsd(event.target.value)} aria-label="Pérdida por esperar" placeholder="Pérdida por esperar" /><input className="control" type="number" min="0" value={mitigationCostUsd} onChange={(event) => setMitigationCostUsd(event.target.value)} aria-label="Costo de mitigación" placeholder="Costo mitigación" /><input className="control" type="number" min="0" max="1" step="0.05" value={confidence} onChange={(event) => setConfidence(event.target.value)} aria-label="Confianza" placeholder="Confianza" /><button className="bg-signal text-void rounded px-3 py-2 text-xs font-semibold">Calcular preview</button></form>{message && <div className="text-xs text-signal mt-3" role="status">{message}</div>}{preview && <div className="border border-line rounded p-3 mt-4"><div className="flex justify-between text-xs"><span className="text-ink-muted">Decisión</span><span className={preview.decision?.startsWith('abstain') ? 'text-alert' : 'text-signal'}>{preview.decision}</span></div><div className={`mt-3 border rounded p-2 text-xs ${materialAllowed ? 'border-signal/40 text-signal' : 'border-alert/40 text-alert'}`} role="status"><div className="font-mono text-[10px] uppercase tracking-widest">{materialAllowed ? 'Apto para gate productivo' : 'Abstención material'}</div><div className="mt-1">{materialAllowed ? 'La evidencia enlazada y la calidad de datos permiten continuar a revisión humana.' : 'El plan puede guardarse como borrador, pero no se presenta como recomendación productiva.'}</div><div className="font-mono text-[10px] mt-2">Fuente: {preview.evidence?.sourceIds?.join(', ') || 'sin fuente enlazada'} · Gate: {preview.dataQualityGate?.scope || 'no disponible'}</div></div><div className="grid grid-cols-3 gap-2 mt-3"><Metric label="Pérdida espera" value={`$${Math.round(preview.economics.lossIfWaitUsd).toLocaleString()}`} /><Metric label="Costo acción" value={`$${Math.round(preview.economics.mitigationCostUsd).toLocaleString()}`} /><Metric label="Confianza" value={`${Math.round(preview.confidence * 100)}%`} /></div><div className="text-[10px] text-ink-dim mt-3">{preview.disclaimer}</div><button type="button" onClick={save} className="border border-signal/40 text-signal rounded px-3 py-2 text-xs mt-3">Guardar borrador</button></div>}</div><div className="bg-panel border border-line rounded-lg p-4"><div className="font-mono text-[10px] uppercase tracking-widest text-signal">Decision ledger</div><h2 className="font-display text-lg font-semibold text-ink mt-1">Planes recientes</h2><div className="mt-3 space-y-2">{plans.map((plan) => <div key={plan.id} className="border border-line rounded p-3"><div className="flex justify-between gap-2"><span className="font-mono text-[10px] text-signal">{plan.id}</span><span className="font-mono text-[10px] text-ink-muted">{plan.status}</span></div><div className="text-xs text-ink mt-2">{plan.playbook?.name}</div><div className="font-mono text-[10px] text-ink-dim mt-1">Evidencia: {plan.evidence?.productionDecision || 'pendiente'}</div>{plan.status === 'draft_for_human_approval' && <button type="button" onClick={() => approve(plan)} className="border border-line rounded px-2 py-1 text-[10px] text-ink-muted mt-2">Aprobar humanamente</button>}</div>)}{!plans.length && <div className="text-xs text-ink-dim">Aún no hay planes locales.</div>}</div></div></div>;
+  return <div className="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-4"><div className="bg-panel border border-line rounded-lg p-4"><div className="font-mono text-[10px] uppercase tracking-widest text-signal">Scenario-to-Action Engine</div><h2 className="font-display text-lg font-semibold text-ink mt-1">De señal a decisión auditable</h2><p className="text-xs text-ink-muted mt-2">Calcula economía y confianza, revisa procedencia y guarda el plan como borrador hasta la aprobación humana.</p><form onSubmit={calculate} className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-4"><select className="control col-span-2 md:col-span-4" value={selectedPlaybook} onChange={(event) => setSelectedPlaybook(event.target.value)}>{playbooks.map((playbook) => <option key={playbook.id} value={playbook.id}>{playbook.name}</option>)}</select><input className="control col-span-2" value={sourceId} onChange={(event) => setSourceId(event.target.value)} aria-label="Fuente de evidencia" placeholder="Fuente de evidencia (opcional)" /><input className="control" type="number" min="0" value={lossIfWaitUsd} onChange={(event) => setLossIfWaitUsd(event.target.value)} aria-label="Pérdida por esperar" placeholder="Pérdida por esperar" /><input className="control" type="number" min="0" value={mitigationCostUsd} onChange={(event) => setMitigationCostUsd(event.target.value)} aria-label="Costo de mitigación" placeholder="Costo mitigación" /><input className="control" type="number" min="0" max="1" step="0.05" value={confidence} onChange={(event) => setConfidence(event.target.value)} aria-label="Confianza" placeholder="Confianza" /><button className="bg-signal text-void rounded px-3 py-2 text-xs font-semibold">Calcular preview</button></form>{message && <div className="text-xs text-signal mt-3" role="status">{message}</div>}{preview && <div className="border border-line rounded p-3 mt-4"><div className="flex justify-between text-xs"><span className="text-ink-muted">Decisión</span><span className={preview.decision?.startsWith('abstain') ? 'text-alert' : 'text-signal'}>{preview.decision}</span></div><div className={`mt-3 border rounded p-2 text-xs ${materialAllowed ? 'border-signal/40 text-signal' : 'border-alert/40 text-alert'}`} role="status"><div className="font-mono text-[10px] uppercase tracking-widest">{materialAllowed ? 'Apto para gate productivo' : 'Abstención material'}</div><div className="mt-1">{materialAllowed ? 'La evidencia enlazada y la calidad de datos permiten continuar a revisión humana.' : 'El plan puede guardarse como borrador, pero no se presenta como recomendación productiva.'}</div><div className="font-mono text-[10px] mt-2">Fuente: {preview.evidence?.sourceIds?.join(', ') || 'sin fuente enlazada'} · Gate: {preview.dataQualityGate?.scope || 'no disponible'}</div></div><div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-3"><Metric label="Pérdida espera" value={`$${Math.round(preview.economics.lossIfWaitUsd).toLocaleString()}`} /><Metric label="Costo acción" value={`$${Math.round(preview.economics.mitigationCostUsd).toLocaleString()}`} /><Metric label="Suscripción Sugerida (2%)" value={`$${Math.round(Math.max(preview.economics.lossIfWaitUsd - preview.economics.mitigationCostUsd, 0) * 0.02).toLocaleString()}`} /><Metric label="Confianza" value={`${Math.round(preview.confidence * 100)}%`} /></div><div className="text-[10px] text-ink-dim mt-3">{preview.disclaimer}</div><button type="button" onClick={save} className="border border-signal/40 text-signal rounded px-3 py-2 text-xs mt-3">Guardar borrador</button></div>}</div><div className="bg-panel border border-line rounded-lg p-4"><div className="font-mono text-[10px] uppercase tracking-widest text-signal">Decision ledger</div><h2 className="font-display text-lg font-semibold text-ink mt-1">Planes recientes</h2><div className="mt-3 space-y-2">{plans.map((plan) => <div key={plan.id} className="border border-line rounded p-3"><div className="flex justify-between gap-2"><span className="font-mono text-[10px] text-signal">{plan.id}</span><span className="font-mono text-[10px] text-ink-muted">{plan.status}</span></div><div className="text-xs text-ink mt-2">{plan.playbook?.name}</div><div className="font-mono text-[10px] text-ink-dim mt-1">Evidencia: {plan.evidence?.productionDecision || 'pendiente'}</div>{plan.status === 'draft_for_human_approval' && <button type="button" onClick={() => approve(plan)} className="border border-line rounded px-2 py-1 text-[10px] text-ink-muted mt-2">Aprobar humanamente</button>}</div>)}{!plans.length && <div className="text-xs text-ink-dim">Aún no hay planes locales.</div>}</div></div></div>;
 }
 
 export function LegacyActionPlanPanel() {

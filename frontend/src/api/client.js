@@ -241,7 +241,7 @@ export async function getModels() {
 }
 
 export async function getModelProfiles({ vertical = '', region = 'global' } = {}) {
-  try { return await fetchWithTimeout(`${BACKEND_URL}/api/models/profiles?vertical=${encodeURIComponent(vertical)}&region=${encodeURIComponent(region)}`); } catch (error) { return localFallback({ selection: { vertical, region }, dataNeeds: [], readiness: { productionReady: false }, error: error.message }, error); }
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/models/profiles?vertical=${encodeURIComponent(vertical)}&region=${encodeURIComponent(region)}`); } catch (error) { return localFallback({ selection: { vertical, region }, region: { label: region === 'global' ? 'Global' : region, operatingContext: 'Contexto local standalone sin conexión' }, vertical: { label: vertical, decisionLenses: [] }, dataNeeds: [], readiness: { productionReady: false }, error: error.message }, error); }
 }
 
 export async function buildPilotValueCase(input) {

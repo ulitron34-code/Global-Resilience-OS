@@ -445,13 +445,18 @@ app.get('/api/action-plans/metrics', authIfConfigured, roleIfConfigured('admin',
 app.get('/api/action-plans/timing', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(getActionPlanTimingMetrics(req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
 app.get('/api/benchmarks/sectors', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(enrichAnonymousSectorBenchmark(getAnonymousSectorBenchmark(Math.max(3, Math.min(20, Number(req.query.minCohort) || 3))))));
 app.post('/api/network/cooperative/preview', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => res.json(buildCooperativeIncidentPreview({ alerts: listAlerts({ limit: 200, organizationId: req.user?.organizationId || DEFAULT_ORGANIZATION_ID }), minCohort: req.body?.minCohort, consent: req.body?.consent, consentActor: req.user?.email || null, consentAt: req.body?.consent ? new Date().toISOString() : null, reidentificationReviewed: req.body?.reidentificationReviewed, reviewActor: req.user?.email || null, reviewAt: req.body?.reidentificationReviewed ? new Date().toISOString() : null })));
-app.post('/api/assistant/suggestion', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => {
+app.post('/api/assistant/suggestion', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), async (req, res) => {
   const validation = getModelValidationReport();
   const model = listModels().find((item) => item.id === 'impact-cascade');
   const calibration = getCalibrationOverview('impact-cascade');
   const modelGovernance = buildModelGovernance(model, validation, calibration, benchmarkCalibration(calibration));
-    const dataQualityGate = evaluateDataQuality({ catalog: listDataCatalogForOrganization(req.user?.organizationId || DEFAULT_ORGANIZATION_ID), sources: listSources(req.user?.organizationId || DEFAULT_ORGANIZATION_ID) });
-  res.json(buildAssistiveSuggestion(req.body || {}, { dataQualityGate, modelGovernance }));
+  const dataQualityGate = evaluateDataQuality({ catalog: listDataCatalogForOrganization(req.user?.organizationId || DEFAULT_ORGANIZATION_ID), sources: listSources(req.user?.organizationId || DEFAULT_ORGANIZATION_ID) });
+  try {
+    const result = await buildAssistiveSuggestion(req.body || {}, { dataQualityGate, modelGovernance });
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 app.get('/api/action-plans/:id', authIfConfigured, roleIfConfigured('admin', 'risk_analyst', 'viewer'), (req, res) => {
   const result = getActionPlan(req.params.id, req.user?.organizationId || DEFAULT_ORGANIZATION_ID);
