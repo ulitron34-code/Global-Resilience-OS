@@ -77,7 +77,7 @@ try {
   check(contracts.status === 200 && contractItems.some((item) => item.id === 'event-envelope' && item.version === '1.0.0'), 'schema registry');
   const { response: modelGovernance, body: modelGovernanceBody } = await request(baseUrl, '/api/models/governance');
   check(modelGovernance.status === 200 && modelGovernanceBody.length >= 2 && modelGovernanceBody.every((item) => item.decision === 'abstain_for_production'), 'model governance abstention');
-  const { response: backtest, body: backtestBody } = await request(baseUrl, '/api/models/backtest', { headers: authHeaders });
+  const { response: backtest, body: backtestBody } = await request(baseUrl, `/api/models/backtest?modelId=impact-cascade-smoke-test-${Date.now()}`, { headers: authHeaders });
   check(backtest.status === 200 && backtestBody.decision === 'abstain_for_production' && backtestBody.baseline.method === 'median_observed_impact', 'backtest baseline abstention');
   const { response: sensitivity, body: sensitivityBody } = await request(baseUrl, '/api/models/sensitivity', { method: 'POST', headers: authHeaders, body: JSON.stringify({ cableId: 'seamewe3', durations: [6, 24, 72] }) });
   check(sensitivity.status === 200 && sensitivityBody.checks.durationMonotonic && sensitivityBody.scenarios.length === 6, 'sensitivity monotonicity');
