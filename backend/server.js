@@ -757,6 +757,7 @@ app.post('/api/webhooks/:id/rotate-secret', authIfConfigured, roleIfConfigured('
   if (!result) return res.status(404).json({ error: 'Webhook no encontrado' });
   res.status(200).json(result);
 });
+app.get('/api/webhooks/deliveries', authIfConfigured, roleIfConfigured('admin'), (req, res) => res.json(listWebhookDeliveries(undefined, req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
 app.get('/api/webhooks/:id/deliveries', authIfConfigured, roleIfConfigured('admin'), (req, res) => res.json(listWebhookDeliveries(req.params.id, req.user?.organizationId || DEFAULT_ORGANIZATION_ID)));
 app.post('/api/webhooks/:id/deliveries/:deliveryId/retry', authIfConfigured, roleIfConfigured('admin'), (req, res) => {
   const item = retryWebhookDelivery(req.params.id, req.params.deliveryId, req.user?.organizationId || DEFAULT_ORGANIZATION_ID);

@@ -518,6 +518,10 @@ export async function getWebhookDeliveries(id) {
   try { return await fetchWithTimeout(`${BACKEND_URL}/api/webhooks/${id}/deliveries`); } catch (error) { return localFallback([], error); }
 }
 
+export async function getWebhookDeliveriesAll() {
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/webhooks/deliveries`); } catch (error) { return localFallback([], error); }
+}
+
 export async function downloadBrief(format = 'json') {
   const token = localStorage.getItem('resilience_token');
   const response = await fetch(`${BACKEND_URL}/api/briefs/latest/export?format=${format}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });

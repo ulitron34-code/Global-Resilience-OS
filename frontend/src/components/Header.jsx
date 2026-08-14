@@ -25,8 +25,12 @@ export default function Header() {
         </div>
 
         <div className="flex items-center gap-3">
-          <span className="hidden md:inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-signal bg-signal/10 border border-signal/30 rounded px-2.5 py-1 animate-pulse">
-            SISTEMA ACTIVO · PRODUCCIÓN
+          <span className={`hidden md:inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest border rounded px-2.5 py-1 animate-pulse ${
+            backendStatus === 'online' 
+              ? 'text-signal bg-signal/10 border-signal/30' 
+              : 'text-alert bg-alert/10 border-alert/30'
+          }`}>
+            {backendStatus === 'online' ? 'SISTEMA ACTIVO · NUBE' : 'SISTEMA CONTINGENCIA · STANDALONE'}
           </span>
           <NotificationCenter />
           <SessionControl />

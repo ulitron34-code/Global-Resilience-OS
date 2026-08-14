@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ArrowRight, CheckCircle2, Clock3, UserRound } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip as ChartTooltip, ResponsiveContainer } from 'recharts';
-import { addCaseComment, createActionPlan, createDecisionShare, createIncident, createWebhook, downloadAudit, downloadBrief, downloadDecisionPackage, downloadLocalSnapshot, getActionPlans, getAuditIntegrity, getCaseAudit, getCaseComments, getCases, getDataCatalogReadiness, getDataQualityReport, getDeadLetters, getDecisionShares, getImpactGraph, getIncidents, getJobs, getLatestBrief, getOperationalMetrics, getPilotFeedback, getPilotMetrics, getPilotReadiness, getPlaybooks, getProvenanceOverview, getRetentionOverview, getRuntimeReadiness, getSecurityPosture, getSlaOverview, getSourceHealthOverview, getSources, getTenancyContext, getWebhooks, previewActionPlan, processLocalWebhookDeliveries, recordActionPlanOutcome, recordPilotFeedback, resetLocalDemo, restoreLocalSnapshot, retryDeadLetter, revokeDecisionShare, rotateWebhookSecret, runDemoIngestionJob, runSlaSweep, runSourceHealthSweep, updateActionPlan, updateCase, updateIncident } from '../api/client';
+import { addCaseComment, createActionPlan, createDecisionShare, createIncident, createWebhook, downloadAudit, downloadBrief, downloadDecisionPackage, downloadLocalSnapshot, getActionPlans, getAuditIntegrity, getCaseAudit, getCaseComments, getCases, getDataCatalogReadiness, getDataQualityReport, getDeadLetters, getDecisionShares, getImpactGraph, getIncidents, getJobs, getLatestBrief, getOperationalMetrics, getPilotFeedback, getPilotMetrics, getPilotReadiness, getPlaybooks, getProvenanceOverview, getRetentionOverview, getRuntimeReadiness, getSecurityPosture, getSlaOverview, getSourceHealthOverview, getSources, getTenancyContext, getWebhooks, getWebhookDeliveriesAll, previewActionPlan, processLocalWebhookDeliveries, recordActionPlanOutcome, recordPilotFeedback, resetLocalDemo, restoreLocalSnapshot, retryDeadLetter, revokeDecisionShare, rotateWebhookSecret, runDemoIngestionJob, runSlaSweep, runSourceHealthSweep, updateActionPlan, updateCase, updateIncident } from '../api/client';
 import CableList from './CableList';
 import ImpactPanel from './ImpactPanel';
 import ReportExport from './ReportExport';
@@ -235,12 +235,13 @@ export function ExecutiveBriefView({ onScenario, vertical = 'Oil & Gas', region 
 export function OperationsView() {
   const [jobs, setJobs] = useState([]);
   const [webhooks, setWebhooks] = useState([]);
+  const [deliveries, setDeliveries] = useState([]);
   const [url, setUrl] = useState('https://example.local/resilience-events');
   const [running, setRunning] = useState(false);
   const [message, setMessage] = useState('');
   const [snapshotError, setSnapshotError] = useState('');
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const refresh = async () => { const [jobData, webhookData] = await Promise.all([getJobs(), getWebhooks()]); setJobs(jobData); setWebhooks(webhookData); };
+  const refresh = async () => { const [jobData, webhookData, deliveryData] = await Promise.all([getJobs(), getWebhooks(), getWebhookDeliveriesAll()]); setJobs(jobData); setWebhooks(webhookData); setDeliveries(deliveryData || []); };
   useEffect(() => { refresh(); }, []);
   const runJob = async () => { setRunning(true); setMessage('Ejecutando ingesta local...'); try { await runDemoIngestionJob(); await refresh(); setMessage('Job completado: señales demo procesadas.'); } catch (error) { setMessage(error.message); } finally { setRunning(false); } };
   const addWebhook = async (event) => { event.preventDefault(); try { await createWebhook({ url, events: ['alert.created', 'case.updated'] }); setUrl('https://example.local/resilience-events'); await refresh(); setMessage('Webhook registrado en la cola local.'); } catch (error) { setMessage(error.message); } };
@@ -310,6 +311,35 @@ export function OperationsView() {
     <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-4">
       <div className="bg-panel border border-line rounded-lg overflow-hidden"><div className="p-4 border-b border-line flex items-center justify-between"><div><div className="font-mono text-[10px] uppercase tracking-widest text-signal">Job runner local</div><h2 className="font-display text-lg font-semibold text-ink mt-1">Historial de ingestas</h2></div><button onClick={runJob} disabled={running} className="bg-signal text-void rounded px-3 py-2 text-xs font-semibold disabled:opacity-50">{running ? 'Procesando...' : 'Ejecutar demo'}</button></div>{message && <div className="px-4 py-2 text-xs text-signal border-b border-line/60">{message}</div>}<div className="divide-y divide-line/60">{jobs.map((job) => <div key={job.id} className="p-4 flex items-center justify-between gap-3"><div><div className="font-mono text-[10px] text-ink-dim">{job.id} · {job.type}</div><div className="text-sm text-ink mt-1">{job.eventsReceived} eventos · {job.alertsCreated} alertas creadas</div></div><span className="font-mono text-[10px] text-signal uppercase">{job.status}</span></div>)}{!jobs.length && <div className="p-4 text-xs text-ink-muted">Aún no se ha ejecutado un job local.</div>}</div></div>
       <div className="bg-panel border border-line rounded-lg p-4"><div className="font-mono text-[10px] uppercase tracking-widest text-signal">Webhook registry</div><h2 className="font-display text-lg font-semibold text-ink mt-1">Destinos de eventos</h2><p className="text-xs text-ink-muted mt-2">Señales encoladas localmente: alert.created y case.updated.</p><form onSubmit={addWebhook} className="flex gap-2 mt-4"><input className="control min-w-0" value={url} onChange={(event) => setUrl(event.target.value)} placeholder="https://..." /><button className="border border-signal/40 text-signal rounded px-3 text-xs">Añadir</button></form><div className="mt-4 space-y-2">{webhooks.map((hook) => <div key={hook.id} className="border border-line rounded p-3"><div className="flex justify-between gap-2"><span className="font-mono text-[10px] text-signal">{hook.id}</span><span className="font-mono text-[10px] text-signal">{hook.active ? 'ACTIVO' : 'PAUSADO'}</span></div><div className="text-xs text-ink-muted mt-2 break-all">{hook.url}</div></div>)}{!webhooks.length && <div className="text-xs text-ink-dim">Sin destinos configurados.</div>}</div></div>
+    </div>
+    <div className="bg-panel border border-line rounded-lg p-4 mt-4">
+      <div className="font-mono text-[10px] uppercase tracking-widest text-signal">Webhook Delivery Logs</div>
+      <h2 className="font-display text-lg font-semibold text-ink mt-1">Historial de entregas externas</h2>
+      <p className="text-xs text-ink-muted mt-2">Trazabilidad en tiempo real de peticiones HTTP salientes para integraciones empresariales.</p>
+      <div className="mt-4 space-y-2">
+        {deliveries.slice(0, 5).map((del) => (
+          <div key={del.id} className="border border-line rounded p-3 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-[10px] text-signal">{del.id}</span>
+                <span className="font-mono text-[10px] text-ink-dim">· {del.event}</span>
+              </div>
+              <div className="text-ink-muted mt-1 break-all font-mono text-[10px]">{del.url}</div>
+            </div>
+            <div className="text-right flex flex-col items-end">
+              <span className={`font-mono text-[10px] uppercase px-2 py-0.5 rounded ${
+                del.status >= 200 && del.status < 300 
+                  ? 'text-signal bg-signal/10 border border-signal/30' 
+                  : 'text-alert bg-alert/10 border border-alert/30'
+              }`}>
+                HTTP {del.status || 'PENDIENTE'}
+              </span>
+              <div className="text-[10px] text-ink-dim mt-1">Intentos: {del.attempts || 1} · {new Date(del.createdAt).toLocaleTimeString('es-MX')}</div>
+            </div>
+          </div>
+        ))}
+        {!deliveries.length && <div className="text-xs text-ink-dim p-4 border border-dashed border-line rounded text-center">Sin entregas salientes registradas aún.</div>}
+      </div>
     </div>
   </section>;
 }
