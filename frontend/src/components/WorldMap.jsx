@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { generateWorldDots, project } from '../utils/worldDots';
+import { generateWorldDots, getContinentPaths, project } from '../utils/worldDots';
 import { useAppStore } from '../store/useAppStore';
 import { CHOKEPOINTS } from '../data/cables';
 
@@ -71,7 +71,8 @@ export default function WorldMap() {
   const [showPipelines, setShowPipelines] = useState(true);
   const [showRadar, setShowRadar] = useState(true);
 
-  const dots = useMemo(() => generateWorldDots(2.4).map((d) => project(d, WIDTH, HEIGHT)), []);
+  const dots = useMemo(() => generateWorldDots(1.8).map((d) => project(d, WIDTH, HEIGHT)), []);
+  const continentPaths = useMemo(() => getContinentPaths(WIDTH, HEIGHT), []);
 
   const selectedCableIds = useMemo(() => {
     return selectedCableId ? String(selectedCableId).split(',').map(x => x.trim()).filter(Boolean) : [];
@@ -160,14 +161,6 @@ export default function WorldMap() {
             </feMerge>
           </filter>
 
-          <filter id="landGlow" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="1" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-
           <style>{`
             @keyframes dash {
               to {
@@ -187,6 +180,7 @@ export default function WorldMap() {
           `}</style>
         </defs>
 
+        {/* Fondo de Océano */}
         <rect x="0" y="0" width={WIDTH} height={HEIGHT} fill="url(#oceanGlow)" />
 
         {/* Latitude/longitude grid — command-center feel */}
@@ -199,10 +193,25 @@ export default function WorldMap() {
             stroke="#1B2A40" strokeWidth="0.5" opacity="0.35" />
         ))}
 
-        {/* Continentes — Matriz de puntos de alto contraste con silueta definida */}
-        <g id="continents-matrix" filter="url(#landGlow)">
+        {/* CAPA 1: Continentes Vectoriales Definidos (México, Centroamérica, EEUU, Sudamérica, Europa, África, Asia, Oceanía) */}
+        <g id="vector-landmasses">
+          {continentPaths.map((land) => (
+            <path
+              key={land.id}
+              d={land.d}
+              fill="#16253B"
+              stroke="#2D4363"
+              strokeWidth="0.9"
+              strokeLinejoin="round"
+              opacity="0.92"
+            />
+          ))}
+        </g>
+
+        {/* CAPA 2: Matriz Táctica de Puntos sobre Masas Continentales */}
+        <g id="continents-matrix">
           {dots.map(([x, y], i) => (
-            <circle key={i} cx={x} cy={y} r="1.2" fill="#3B5478" opacity="0.95" />
+            <circle key={i} cx={x} cy={y} r="0.9" fill="#3B5882" opacity="0.8" />
           ))}
         </g>
 
