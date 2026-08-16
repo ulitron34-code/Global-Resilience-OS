@@ -241,7 +241,7 @@ export async function getModels() {
 }
 
 export async function getModelProfiles({ vertical = '', region = 'global' } = {}) {
-  try { return await fetchWithTimeout(`${BACKEND_URL}/api/models/profiles?vertical=${encodeURIComponent(vertical)}&region=${encodeURIComponent(region)}`); } catch (error) { return localFallback({ selection: { vertical, region }, dataNeeds: [], readiness: { productionReady: false }, error: error.message }, error); }
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/models/profiles?vertical=${encodeURIComponent(vertical)}&region=${encodeURIComponent(region)}`); } catch (error) { return localFallback({ selection: { vertical, region }, region: { label: region === 'global' ? 'Global' : region, operatingContext: 'Contexto local standalone sin conexión' }, vertical: { label: vertical, decisionLenses: [] }, dataNeeds: [], readiness: { productionReady: false }, error: error.message }, error); }
 }
 
 export async function buildPilotValueCase(input) {
@@ -516,6 +516,10 @@ export async function processWebhookDeliveries({ limit = 20, dryRun = true } = {
 
 export async function getWebhookDeliveries(id) {
   try { return await fetchWithTimeout(`${BACKEND_URL}/api/webhooks/${id}/deliveries`); } catch (error) { return localFallback([], error); }
+}
+
+export async function getWebhookDeliveriesAll() {
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/webhooks/deliveries`); } catch (error) { return localFallback([], error); }
 }
 
 export async function downloadBrief(format = 'json') {

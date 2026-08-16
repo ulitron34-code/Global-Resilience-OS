@@ -171,6 +171,7 @@
     "/api/notifications/read-all": { "post": { "summary": "Mark notifications read", "security": [{ "bearerAuth": [] }], "responses": { "200": { "description": "Notifications updated" } } } },
     "/api/notifications/{id}/read": { "patch": { "summary": "Mark notification read", "parameters": [{ "$ref": "#/components/parameters/Id" }], "responses": { "200": { "description": "Notification updated" } } } },
     "/api/webhooks": { "get": { "summary": "List webhooks", "security": [{ "bearerAuth": [] }], "responses": { "200": { "description": "Webhook registry" } } }, "post": { "summary": "Register webhook", "security": [{ "bearerAuth": [] }], "responses": { "201": { "description": "Webhook registered" } } } },
+    "/api/webhooks/deliveries": { "get": { "summary": "List all webhook deliveries", "security": [{ "bearerAuth": [] }], "responses": { "200": { "description": "Deliveries" } } } },
     "/api/webhooks/{id}/deliveries": { "get": { "summary": "List webhook deliveries", "security": [{ "bearerAuth": [] }], "parameters": [{ "$ref": "#/components/parameters/Id" }], "responses": { "200": { "description": "Deliveries" } } } },
     "/api/webhooks/{id}/deliveries/{deliveryId}/retry": { "post": { "summary": "Retry webhook delivery", "security": [{ "bearerAuth": [] }], "parameters": [{ "$ref": "#/components/parameters/Id" }], "responses": { "200": { "description": "Delivery queued" } } } },
     "/api/jobs": { "get": { "summary": "List job runs", "responses": { "200": { "description": "Job history" } } } },
