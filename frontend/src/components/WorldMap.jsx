@@ -134,9 +134,9 @@ export default function WorldMap() {
 
       <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="w-full h-full" preserveAspectRatio="xMidYMid meet">
         <defs>
-          <radialGradient id="oceanGlow" cx="50%" cy="45%" r="70%">
-            <stop offset="0%" stopColor="#132035" />
-            <stop offset="100%" stopColor="#090F1C" />
+          <radialGradient id="oceanGlow" cx="50%" cy="45%" r="75%">
+            <stop offset="0%" stopColor="#0B1326" />
+            <stop offset="100%" stopColor="#050814" />
           </radialGradient>
           
           <radialGradient id="radarSector" cx="0%" cy="0%" r="100%">
@@ -154,6 +154,14 @@ export default function WorldMap() {
 
           <filter id="glowStrong" x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur stdDeviation="4" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+
+          <filter id="landGlow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="1" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
@@ -184,17 +192,19 @@ export default function WorldMap() {
         {/* Latitude/longitude grid — command-center feel */}
         {Array.from({ length: 7 }).map((_, i) => (
           <line key={`lat-${i}`} x1="0" x2={WIDTH} y1={(HEIGHT / 6) * i} y2={(HEIGHT / 6) * i}
-            stroke="#1E2D45" strokeWidth="0.5" opacity="0.4" />
+            stroke="#1B2A40" strokeWidth="0.5" opacity="0.35" />
         ))}
         {Array.from({ length: 13 }).map((_, i) => (
           <line key={`lon-${i}`} y1="0" y2={HEIGHT} x1={(WIDTH / 12) * i} x2={(WIDTH / 12) * i}
-            stroke="#1E2D45" strokeWidth="0.5" opacity="0.4" />
+            stroke="#1B2A40" strokeWidth="0.5" opacity="0.35" />
         ))}
 
-        {/* Continentes — dot matrix */}
-        {dots.map(([x, y], i) => (
-          <circle key={i} cx={x} cy={y} r="0.9" fill="#283854" />
-        ))}
+        {/* Continentes — Matriz de puntos de alto contraste con silueta definida */}
+        <g id="continents-matrix" filter="url(#landGlow)">
+          {dots.map(([x, y], i) => (
+            <circle key={i} cx={x} cy={y} r="1.2" fill="#3B5478" opacity="0.95" />
+          ))}
+        </g>
 
         {/* Radar Táctico sobre Chokepoint Crítico (Suez) */}
         {showRadar && (
