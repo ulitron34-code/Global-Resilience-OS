@@ -3,9 +3,23 @@
 
 create extension if not exists pgcrypto;
 
-create type public.app_role as enum ('admin', 'risk_analyst', 'viewer');
-create type public.alert_severity as enum ('critical', 'high', 'medium', 'low');
-create type public.workflow_status as enum ('open', 'in_progress', 'closed');
+DO $$ BEGIN
+  CREATE TYPE public.app_role AS ENUM ('admin', 'risk_analyst', 'viewer');
+EXCEPTION
+  WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+  CREATE TYPE public.alert_severity AS ENUM ('critical', 'high', 'medium', 'low');
+EXCEPTION
+  WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+  CREATE TYPE public.workflow_status AS ENUM ('open', 'in_progress', 'closed');
+EXCEPTION
+  WHEN duplicate_object THEN null;
+END $$;
 
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
@@ -89,8 +103,12 @@ alter table public.cases enable row level security;
 alter table public.scenarios enable row level security;
 alter table public.audit_log enable row level security;
 
--- Base de lectura para usuarios autenticados; las mutaciones se ampliarán
--- con funciones de rol antes de conectar producción.
+drop policy if exists "authenticated can read sources" on public.sources;
+drop policy if exists "authenticated can read alerts" on public.alerts;
+drop policy if exists "authenticated can read cases" on public.cases;
+drop policy if exists "authenticated can read scenarios" on public.scenarios;
+drop policy if exists "authenticated can read audit" on public.audit_log;
+
 create policy "authenticated can read sources" on public.sources for select to authenticated using (true);
 create policy "authenticated can read alerts" on public.alerts for select to authenticated using (true);
 create policy "authenticated can read cases" on public.cases for select to authenticated using (true);

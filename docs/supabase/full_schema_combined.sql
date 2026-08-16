@@ -1,5 +1,5 @@
 -- GLOBAL RESILIENCE OS - CONSOLIDATED SUPABASE SCHEMA (001 - 005)
--- Generado automáticamente: 2026-08-16T17:37:33.265Z
+-- Generado automáticamente: 2026-08-16T17:52:33.149Z
 
 -- ==========================================
 -- SECCIÓN: 001_initial_schema.sql
@@ -10,9 +10,23 @@
 
 create extension if not exists pgcrypto;
 
-create type public.app_role as enum ('admin', 'risk_analyst', 'viewer');
-create type public.alert_severity as enum ('critical', 'high', 'medium', 'low');
-create type public.workflow_status as enum ('open', 'in_progress', 'closed');
+DO $$ BEGIN
+  CREATE TYPE public.app_role AS ENUM ('admin', 'risk_analyst', 'viewer');
+EXCEPTION
+  WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+  CREATE TYPE public.alert_severity AS ENUM ('critical', 'high', 'medium', 'low');
+EXCEPTION
+  WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+  CREATE TYPE public.workflow_status AS ENUM ('open', 'in_progress', 'closed');
+EXCEPTION
+  WHEN duplicate_object THEN null;
+END $$;
 
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
@@ -96,8 +110,12 @@ alter table public.cases enable row level security;
 alter table public.scenarios enable row level security;
 alter table public.audit_log enable row level security;
 
--- Base de lectura para usuarios autenticados; las mutaciones se ampliarán
--- con funciones de rol antes de conectar producción.
+drop policy if exists "authenticated can read sources" on public.sources;
+drop policy if exists "authenticated can read alerts" on public.alerts;
+drop policy if exists "authenticated can read cases" on public.cases;
+drop policy if exists "authenticated can read scenarios" on public.scenarios;
+drop policy if exists "authenticated can read audit" on public.audit_log;
+
 create policy "authenticated can read sources" on public.sources for select to authenticated using (true);
 create policy "authenticated can read alerts" on public.alerts for select to authenticated using (true);
 create policy "authenticated can read cases" on public.cases for select to authenticated using (true);
@@ -240,6 +258,19 @@ stable
 as $$
   select nullif((auth.jwt() -> 'app_metadata' ->> 'organization_id'), '')::uuid
 $$;
+
+drop policy if exists "members can read organization" on public.organizations;
+drop policy if exists "members can read graph nodes" on public.graph_nodes;
+drop policy if exists "members can read graph edges" on public.graph_edges;
+drop policy if exists "members can read playbooks" on public.action_playbooks;
+drop policy if exists "members can read action plans" on public.action_plans;
+drop policy if exists "members can read provenance" on public.provenance_records;
+drop policy if exists "members can read data catalog" on public.data_catalog;
+drop policy if exists "members can read sources" on public.sources;
+drop policy if exists "members can read alerts" on public.alerts;
+drop policy if exists "members can read cases" on public.cases;
+drop policy if exists "members can read scenarios" on public.scenarios;
+drop policy if exists "members can read audit" on public.audit_log;
 
 create policy "members can read organization" on public.organizations for select to authenticated using (id = public.current_organization_id());
 create policy "members can read graph nodes" on public.graph_nodes for select to authenticated using (organization_id = public.current_organization_id());
