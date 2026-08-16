@@ -130,6 +130,19 @@ as $$
   select nullif((auth.jwt() -> 'app_metadata' ->> 'organization_id'), '')::uuid
 $$;
 
+drop policy if exists "members can read organization" on public.organizations;
+drop policy if exists "members can read graph nodes" on public.graph_nodes;
+drop policy if exists "members can read graph edges" on public.graph_edges;
+drop policy if exists "members can read playbooks" on public.action_playbooks;
+drop policy if exists "members can read action plans" on public.action_plans;
+drop policy if exists "members can read provenance" on public.provenance_records;
+drop policy if exists "members can read data catalog" on public.data_catalog;
+drop policy if exists "members can read sources" on public.sources;
+drop policy if exists "members can read alerts" on public.alerts;
+drop policy if exists "members can read cases" on public.cases;
+drop policy if exists "members can read scenarios" on public.scenarios;
+drop policy if exists "members can read audit" on public.audit_log;
+
 create policy "members can read organization" on public.organizations for select to authenticated using (id = public.current_organization_id());
 create policy "members can read graph nodes" on public.graph_nodes for select to authenticated using (organization_id = public.current_organization_id());
 create policy "members can read graph edges" on public.graph_edges for select to authenticated using (organization_id = public.current_organization_id());
