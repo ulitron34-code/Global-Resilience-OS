@@ -6,22 +6,22 @@ import { CHOKEPOINTS } from '../data/cables';
 const WIDTH = 960;
 const HEIGHT = 480;
 
-// Corredores de Oleoductos / Gasoductos / Tuberías globales
+// Corredores de Oleoductos / Gasoductos / Pipelines globales
 const PIPELINES = [
   {
     id: 'sumed-pipeline',
-    name: 'Sumed Pipeline (Egipto / Mar Rojo)',
+    name: 'Sumed Pipeline (Egypt / Red Sea)',
     type: 'pipeline',
-    category: 'Petróleo crudo',
+    category: 'Oil crudo',
     waypoints: [[33.8, 27.5], [32.5, 29.9], [29.9, 31.2]],
     capacity: '2.5M bpd',
     status: 'active'
   },
   {
     id: 'druzhba-pipeline',
-    name: 'Oleoducto Druzhba (Eurasia -> Europa)',
+    name: 'Druzhba Oil Pipeline (Eurasia -> Europe)',
     type: 'pipeline',
-    category: 'Petróleo crudo',
+    category: 'Oil crudo',
     waypoints: [[53.2, 53.2], [37.6, 55.7], [21.0, 52.2], [13.4, 52.5]],
     capacity: '1.4M bpd',
     status: 'active'
@@ -30,27 +30,27 @@ const PIPELINES = [
     id: 'tanap-pipeline',
     name: 'TANAP / Gasoducto Transanatoliano',
     type: 'pipeline',
-    category: 'Gas Natural',
+    category: 'Natural Gas',
     waypoints: [[49.8, 40.4], [39.9, 39.9], [26.6, 40.8], [19.9, 40.7]],
-    capacity: '16 BCM/año',
+    capacity: '16 BCM/year',
     status: 'active'
   },
   {
     id: 'baltic-corridor',
-    name: 'Corredor Báltico / Nord Stream',
+    name: 'Baltic Corridor / Nord Stream',
     type: 'pipeline',
-    category: 'Gas Natural',
+    category: 'Natural Gas',
     waypoints: [[28.0, 59.4], [19.0, 56.5], [13.6, 54.1]],
-    capacity: '55 BCM/año',
+    capacity: '55 BCM/year',
     status: 'degraded'
   },
   {
     id: 'eastmed-corridor',
-    name: 'Corredor Energético Mediterráneo Este',
+    name: 'Eastern Mediterranean Energy Corridor',
     type: 'pipeline',
-    category: 'Gas / Petróleo',
+    category: 'Gas / Oil',
     waypoints: [[34.8, 31.8], [33.0, 34.6], [25.0, 35.0], [23.6, 37.9]],
-    capacity: '10 BCM/año',
+    capacity: '10 BCM/year',
     status: 'active'
   }
 ];
@@ -66,7 +66,7 @@ export default function WorldMap() {
   const [hoveredChokepointId, setHoveredChokepointId] = useState(null);
   const [hoveredPipelineId, setHoveredPipelineId] = useState(null);
 
-  // Controles dinámicos de capas de mapa
+  // Dynamic map-layer controls
   const [showFlowAnimation, setShowFlowAnimation] = useState(true);
   const [showPipelines, setShowPipelines] = useState(true);
   const [showRadar, setShowRadar] = useState(true);
@@ -91,9 +91,9 @@ export default function WorldMap() {
 
   const detourPathD = useMemo(() => detourPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p[0]} ${p[1]}`).join(' '), [detourPoints]);
 
-  const showAlternateRoute = result && !isSimulating && (result.cable?.id === 'suez' || result.chokepoints?.includes('Canal de Suez') || result.chokepoints?.includes('Suez / Mar Rojo'));
+  const showAlternateRoute = result && !isSimulating && (result.cable?.id === 'suez' || result.chokepoints?.includes('Suez Canal') || result.chokepoints?.includes('Suez / Red Sea'));
 
-  // Centro del radar (Canal de Suez)
+  // Centro del radar (Suez Canal)
   const radarCenter = useMemo(() => project([32.5, 29.9], WIDTH, HEIGHT), []);
 
   return (
@@ -105,28 +105,28 @@ export default function WorldMap() {
         }}
       />
 
-      {/* Controles de Capas Dinámicas (Top-Right Overlay) */}
+      {/* Dynamic Layer Controls (Top-Right Overlay) */}
       <div className="absolute top-3 right-3 z-30 flex items-center gap-2 bg-void/80 backdrop-blur px-3 py-1.5 rounded border border-line text-[10px] font-mono select-none">
         <button
           onClick={() => setShowFlowAnimation(!showFlowAnimation)}
           className={`flex items-center gap-1.5 px-2 py-1 rounded transition-colors ${showFlowAnimation ? 'bg-signal/20 text-signal border border-signal/40' : 'text-ink-muted hover:text-ink'}`}
-          title="Activar/Desactivar partículas animadas de flujo en vivo"
+          title="Enable/disable animated live-flow particles"
         >
           <span className={`w-1.5 h-1.5 rounded-full ${showFlowAnimation ? 'bg-signal animate-ping' : 'bg-ink-dim'}`} />
-          ⚡ Flujo en vivo
+          ⚡ Live flow
         </button>
         <button
           onClick={() => setShowPipelines(!showPipelines)}
           className={`flex items-center gap-1.5 px-2 py-1 rounded transition-colors ${showPipelines ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40' : 'text-ink-muted hover:text-ink'}`}
-          title="Mostrar/Ocultar Tuberías y Oleoductos de Energía"
+          title="Show/hide energy pipelines and oil pipelines"
         >
           <span className={`w-1.5 h-1.5 rounded-full ${showPipelines ? 'bg-amber-400' : 'bg-ink-dim'}`} />
-          🛢️ Tuberías
+          🛢️ Pipelines
         </button>
         <button
           onClick={() => setShowRadar(!showRadar)}
           className={`flex items-center gap-1.5 px-2 py-1 rounded transition-colors ${showRadar ? 'bg-sky-500/20 text-sky-400 border border-sky-500/40' : 'text-ink-muted hover:text-ink'}`}
-          title="Activar/Desactivar radar táctico de tráfico"
+          title="Enable/disable tactical traffic radar"
         >
           <span className={`w-1.5 h-1.5 rounded-full ${showRadar ? 'bg-sky-400' : 'bg-ink-dim'}`} />
           🛰️ Radar
@@ -180,7 +180,7 @@ export default function WorldMap() {
           `}</style>
         </defs>
 
-        {/* Fondo de Océano */}
+        {/* Ocean background */}
         <rect x="0" y="0" width={WIDTH} height={HEIGHT} fill="url(#oceanGlow)" />
 
         {/* Latitude/longitude grid — command-center feel */}
@@ -193,7 +193,7 @@ export default function WorldMap() {
             stroke="#1B2A40" strokeWidth="0.5" opacity="0.35" />
         ))}
 
-        {/* CAPA 1: Continentes Vectoriales Definidos (México, Centroamérica, EEUU, Sudamérica, Europa, África, Asia, Oceanía) */}
+        {/* LAYER 1: Defined vector continents */}
         <g id="vector-landmasses">
           {continentPaths.map((land) => (
             <path
@@ -208,14 +208,14 @@ export default function WorldMap() {
           ))}
         </g>
 
-        {/* CAPA 2: Matriz Táctica de Puntos sobre Masas Continentales */}
+        {/* LAYER 2: Tactical point matrix over land masses */}
         <g id="continents-matrix">
           {dots.map(([x, y], i) => (
             <circle key={i} cx={x} cy={y} r="0.9" fill="#3B5882" opacity="0.8" />
           ))}
         </g>
 
-        {/* Radar Táctico sobre Chokepoint Crítico (Suez) */}
+        {/* Tactical radar over critical chokepoint (Suez) */}
         {showRadar && (
           <g transform={`translate(${radarCenter[0]}, ${radarCenter[1]})`} className="pointer-events-none select-none">
             <circle r="55" fill="none" stroke="#2DD4BF" strokeWidth="0.4" strokeDasharray="3 3" opacity="0.35" />
@@ -240,7 +240,7 @@ export default function WorldMap() {
           </g>
         )}
 
-        {/* Capa de Oleoductos / Gasoductos / Tuberías */}
+        {/* Capa de Oleoductos / Gasoductos / Pipelines */}
         {showPipelines && PIPELINES.map((pipeline, idx) => {
           const points = pipeline.waypoints.map((wp) => project(wp, WIDTH, HEIGHT));
           const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p[0]} ${p[1]}`).join(' ');
@@ -258,7 +258,7 @@ export default function WorldMap() {
                 onMouseEnter={() => setHoveredPipelineId(pipeline.id)}
                 onMouseLeave={() => setHoveredPipelineId(null)}
               />
-              {/* Línea de Tubería (Amber/Gold) */}
+              {/* Pipeline line (amber/gold) */}
               <path
                 d={pathD}
                 fill="none"
@@ -270,7 +270,7 @@ export default function WorldMap() {
                 style={{ transition: 'all 0.3s' }}
               />
 
-              {/* Partícula animada de flujo de energía */}
+              {/* Animated energy-flow particle */}
               {showFlowAnimation && (
                 <circle r="2.2" fill="#FBBF24" filter="url(#glow)">
                   <animateMotion
@@ -281,7 +281,7 @@ export default function WorldMap() {
                 </circle>
               )}
 
-              {/* Tooltip de Tubería */}
+              {/* Pipeline tooltip */}
               {hovered && (
                 <g className="pointer-events-none" style={{ zIndex: 95 }}>
                   <rect
@@ -333,7 +333,7 @@ export default function WorldMap() {
 
           return (
             <g key={cable.id}>
-              {/* Click target invisible más grueso */}
+              {/* Wider invisible click target */}
               <path
                 d={pathD}
                 fill="none"
@@ -355,7 +355,7 @@ export default function WorldMap() {
                 onMouseEnter={() => setHoveredCableId(cable.id)}
                 onMouseLeave={() => setHoveredCableId(null)}
               />
-              {/* Línea visible */}
+              {/* Visible line */}
               <path
                 d={pathD}
                 fill="none"
@@ -368,7 +368,7 @@ export default function WorldMap() {
                 className="pointer-events-none"
               />
 
-              {/* Partículas animadas de paquetes de datos en flujo constante */}
+              {/* Animated data-packet particles in steady flow */}
               {showFlowAnimation && !ruptured && (
                 <g className="pointer-events-none">
                   <circle r={active ? 2.8 : 2} fill={active ? '#38BDF8' : '#2DD4BF'} filter="url(#glow)">
@@ -378,7 +378,7 @@ export default function WorldMap() {
                       path={pathD}
                     />
                   </circle>
-                  {/* Segunda partícula desfasada */}
+                  {/* Second staggered particle */}
                   <circle r="1.5" fill="#7DD3FC" opacity="0.75">
                     <animateMotion
                       dur={`${5.5 + (idx % 4)}s`}
@@ -399,7 +399,7 @@ export default function WorldMap() {
                 </g>
               )}
 
-              {/* Tooltip táctico del cable al pasar el cursor */}
+              {/* Tactical cable hover tooltip */}
               {hovered && !ruptured && (
                 <g className="pointer-events-none" style={{ zIndex: 90 }}>
                   <rect
@@ -461,7 +461,7 @@ export default function WorldMap() {
           );
         })}
 
-        {/* Chokepoints Marítimos Clave */}
+        {/* Key maritime chokepoints */}
         {Object.entries(CHOKEPOINTS).map(([id, cp]) => {
           const [x, y] = project([cp.lon, cp.lat], WIDTH, HEIGHT);
           const isSelected = isCableSelected(id);
@@ -516,7 +516,7 @@ export default function WorldMap() {
               >
                 {cp.label}
               </text>
-              {/* Tooltip táctico de exposición */}
+              {/* Tactical exposure tooltip */}
               {isHovered && (
                 <g className="pointer-events-none" style={{ zIndex: 100 }}>
                   <rect
@@ -537,7 +537,7 @@ export default function WorldMap() {
                     fontSize="7"
                     fontFamily="monospace"
                   >
-                    Exposición: {cp.globalShare}
+                    Exposure: {cp.globalShare}
                   </text>
                 </g>
               )}
@@ -545,7 +545,7 @@ export default function WorldMap() {
           );
         })}
 
-        {/* Ruta Alternativa Animada con Partículas de Flujo Marítimo */}
+        {/* Animated alternate route with maritime-flow particles */}
         {showAlternateRoute && (
           <g>
             <path
@@ -559,7 +559,7 @@ export default function WorldMap() {
               filter="url(#glow)"
             />
 
-            {/* Buques / Flujo de desvío animado */}
+            {/* Vessels / animated reroute flow */}
             {showFlowAnimation && (
               <circle r="3" fill="#34D399" filter="url(#glow)">
                 <animateMotion
@@ -592,26 +592,26 @@ export default function WorldMap() {
               textAnchor="middle"
               className="pointer-events-none select-none"
             >
-              DESVÍO CABO BUENA ESPERANZA
+              CAPE OF GOOD HOPE REROUTE
             </text>
           </g>
         )}
       </svg>
 
-      {/* Overlay de estado de simulación */}
+      {/* Simulation status overlay */}
       {isSimulating && (
         <div className="absolute inset-0 flex items-center justify-center bg-void/40 backdrop-blur-[1px]">
           <div className="font-mono text-sm text-signal tracking-widest animate-pulse">
-            CALCULANDO PROPAGACIÓN DE IMPACTO...
+            CALCULATING IMPACT PROPAGATION...
           </div>
         </div>
       )}
 
-      {/* Leyenda Dinámica */}
+      {/* Dynamic legend */}
       <div className="absolute bottom-3 left-3 flex flex-wrap items-center gap-3.5 font-mono text-[10px] text-ink-muted bg-void/70 backdrop-blur px-3 py-1.5 rounded border border-line">
         <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-signal inline-block" /> Cables de fibra</span>
         {showPipelines && (
-          <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-400 inline-block" /> Tuberías / Oleoductos</span>
+          <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-400 inline-block" /> Pipelines / Oil pipelines</span>
         )}
         <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-alert inline-block" /> Ruptura simulada</span>
         <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#FDA4AF] inline-block border border-[#4C0519]" /> Chokepoint clave</span>
@@ -622,3 +622,7 @@ export default function WorldMap() {
     </div>
   );
 }
+
+
+
+

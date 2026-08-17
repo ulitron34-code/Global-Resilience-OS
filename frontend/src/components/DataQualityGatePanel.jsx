@@ -19,9 +19,9 @@ export default function DataQualityGatePanel() {
         </div>
         <span className={gate.ready ? 'font-mono text-[10px] text-signal' : 'font-mono text-[10px] text-alert'}>{gate.ready ? 'ALLOW' : 'ABSTAIN'}</span>
       </div>
-      <p className="text-xs text-ink-muted mt-2">Una fuente sin licencia, ficha contractual, cobertura ilustrativa o frescura fuera de SLA bloquea recomendaciones materiales.</p>
+      <p className="text-xs text-ink-muted mt-2">Unlicensed feeds, missing contract metadata, illustrative-only coverage, or out-of-SLA freshness block material recommendations.</p>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-3">
-        <Metric label="Fuentes" value={gate.counts.total || 0} />
+        <Metric label="Sources" value={gate.counts.total || 0} />
         <Metric label="Pass" value={gate.counts.pass || 0} />
         <Metric label="Abstain" value={gate.counts.abstain || 0} />
       </div>
@@ -55,3 +55,5 @@ export default function DataQualityGatePanel() {
 function Metric({ label, value }) {
   return <div className="bg-void border border-line rounded p-3"><div className="font-mono text-[9px] uppercase tracking-widest text-ink-dim">{label}</div><div className="font-display text-lg text-ink mt-1">{value}</div></div>;
 }
+
+

@@ -19,7 +19,7 @@ export default function Header() {
               GLOBAL RESILIENCE OS
             </h1>
             <p className="font-mono text-[11px] text-ink-muted mt-1 tracking-wide">
-              Inteligencia de riesgo sistémico para cadenas críticas de suministro
+              Systemic risk intelligence for critical supply chains
             </p>
           </div>
         </div>
@@ -30,7 +30,7 @@ export default function Header() {
               ? 'text-signal bg-signal/10 border-signal/30' 
               : 'text-alert bg-alert/10 border-alert/30'
           }`}>
-            {backendStatus === 'online' ? 'SISTEMA ACTIVO · NUBE' : 'SISTEMA CONTINGENCIA · STANDALONE'}
+            {backendStatus === 'online' ? 'SYSTEM ACTIVE · CLOUD' : 'CONTINGENCY SYSTEM · STANDALONE'}
           </span>
           <NotificationCenter />
           <SessionControl />
@@ -43,9 +43,9 @@ export default function Header() {
 
 function StatusPill({ status }) {
   const config = {
-    online: { icon: Wifi, label: 'NÚCLEO NUBE CONECTADO', color: 'text-signal', bg: 'bg-signal/10', border: 'border-signal/30' },
-    offline: { icon: WifiOff, label: isBackendRequired() ? 'NÚCLEO EN NUBE DESCONECTADO' : 'NÚCLEO LOCAL ACTIVO', color: 'text-alert', bg: 'bg-alert/10', border: 'border-alert/30' },
-    unknown: { icon: Activity, label: 'Verificando...', color: 'text-ink-muted', bg: 'bg-raised', border: 'border-line' },
+    online: { icon: Wifi, label: 'CLOUD CORE CONNECTED', color: 'text-signal', bg: 'bg-signal/10', border: 'border-signal/30' },
+    offline: { icon: WifiOff, label: isBackendRequired() ? 'CLOUD CORE DISCONNECTED' : 'LOCAL CORE ACTIVE', color: 'text-alert', bg: 'bg-alert/10', border: 'border-alert/30' },
+    unknown: { icon: Activity, label: 'Checking...', color: 'text-ink-muted', bg: 'bg-raised', border: 'border-line' },
   }[status] || {};
 
   const Icon = config.icon;
@@ -57,3 +57,4 @@ function StatusPill({ status }) {
     </span>
   );
 }
+

@@ -5,7 +5,7 @@ import { useSessionStore } from '../store/useSessionStore';
 import { batchTemplate, parseBatchText } from '../utils/batchParser';
 
 const sample = JSON.stringify([
-  { sourceId: 'ais-demo', externalId: 'batch-demo-001', eventType: 'ais_gap', title: 'Brecha AIS batch', severity: 'high', impactUsd: 180000, location: 'Estrecho de Ormuz' },
+  { sourceId: 'ais-demo', externalId: 'batch-demo-001', eventType: 'ais_gap', title: 'Brecha AIS batch', severity: 'high', impactUsd: 180000, location: 'Strait of Hormuz' },
 ], null, 2);
 
 export default function BatchIngestionPanel() {
@@ -23,8 +23,8 @@ export default function BatchIngestionPanel() {
     setStatus('sending');
     try {
       const events = JSON.parse(payload);
-      if (!Array.isArray(events)) throw new Error('El payload debe ser un arreglo JSON de eventos');
-      if (mode === 'commit' && !window.confirm(`Confirmar commit de ${events.length} evento(s)? Esta acción modifica el estado local.`)) {
+      if (!Array.isArray(events)) throw new Error('El payload debe ser un arreglo JSON de events');
+      if (mode === 'commit' && !window.confirm(`Confirm commit of ${events.length} event(s)? This action modifies local state.`)) {
         setStatus('idle');
         return;
       }
@@ -66,11 +66,13 @@ export default function BatchIngestionPanel() {
   }
 
   return <section className="bg-panel border border-line rounded-lg overflow-hidden">
-    <div className="p-4 border-b border-line flex items-center gap-3"><Database size={16} className="text-signal" /><div><h2 className="font-display font-semibold text-ink">Ingesta batch controlada</h2><p className="text-xs text-ink-muted mt-1">Importa JSON/CSV, valida y confirma hasta 100 señales con idempotencia.</p></div></div>
+    <div className="p-4 border-b border-line flex items-center gap-3"><Database size={16} className="text-signal" /><div><h2 className="font-display font-semibold text-ink">Controlled batch ingestion</h2><p className="text-xs text-ink-muted mt-1">Import JSON/CSV, validate, and confirm up to 100 signals with idempotency.</p></div></div>
     <form onSubmit={submit} className="p-4 grid grid-cols-1 lg:grid-cols-[1fr_220px] gap-3">
       <label className="text-[10px] uppercase tracking-widest text-ink-dim">Eventos JSON<textarea disabled={!canOperate} value={payload} onChange={(event) => { setPayload(event.target.value); setFileName(''); }} className="control mt-1 min-h-40 font-mono text-xs" spellCheck="false" />{fileName && <span className="block normal-case tracking-normal text-signal mt-1">{fileName}</span>}<span className="flex flex-wrap gap-2 mt-2"><input ref={fileInput} type="file" accept=".json,.csv,application/json,text/csv" onChange={loadFile} disabled={!canOperate} className="hidden" /><button type="button" onClick={() => fileInput.current?.click()} disabled={!canOperate} className="border border-line text-ink-muted rounded px-2 py-1.5 normal-case tracking-normal disabled:opacity-60">Importar JSON/CSV</button><button type="button" onClick={() => downloadTemplate('json')} className="border border-line text-ink-muted rounded px-2 py-1.5 normal-case tracking-normal">Plantilla JSON</button><button type="button" onClick={() => downloadTemplate('csv')} className="border border-line text-ink-muted rounded px-2 py-1.5 normal-case tracking-normal">Plantilla CSV</button></span></label>
-      <div className="flex flex-col gap-3"><label className="text-[10px] uppercase tracking-widest text-ink-dim">Modo<select disabled={!canOperate} value={mode} onChange={(event) => setMode(event.target.value)} className="control mt-1"><option value="dry_run">Dry run</option><option value="commit">Commit</option></select></label><button disabled={!canOperate || status === 'sending'} className="flex items-center justify-center gap-2 bg-signal text-void rounded px-4 py-2.5 text-xs font-semibold disabled:opacity-60"><Play size={14} />{status === 'sending' ? 'Procesando...' : 'Procesar batch'}</button>{result && <div className={`text-xs ${status === 'error' ? 'text-alert' : 'text-signal'}`}>{result.error || <><ShieldCheck size={13} className="inline mr-1" />{result.mode}: {result.counts?.valid ?? result.accepted ?? 0} válidas · {result.counts?.invalid ?? 0} inválidas · {result.counts?.duplicates ?? result.duplicates ?? 0} duplicadas</>}</div>}</div>
+      <div className="flex flex-col gap-3"><label className="text-[10px] uppercase tracking-widest text-ink-dim">Mode<select disabled={!canOperate} value={mode} onChange={(event) => setMode(event.target.value)} className="control mt-1"><option value="dry_run">Dry run</option><option value="commit">Commit</option></select></label><button disabled={!canOperate || status === 'sending'} className="flex items-center justify-center gap-2 bg-signal text-void rounded px-4 py-2.5 text-xs font-semibold disabled:opacity-60"><Play size={14} />{status === 'sending' ? 'Processing...' : 'Process batch'}</button>{result && <div className={`text-xs ${status === 'error' ? 'text-alert' : 'text-signal'}`}>{result.error || <><ShieldCheck size={13} className="inline mr-1" />{result.mode}: {result.counts?.valid ?? result.accepted ?? 0} valid · {result.counts?.invalid ?? 0} invalid · {result.counts?.duplicates ?? result.duplicates ?? 0} duplicates</>}</div>}</div>
     </form>
-    {result?.items && <div className="border-t border-line p-4"><div className="font-mono text-[10px] uppercase tracking-widest text-ink-dim mb-2">Resultado por registro</div><div className="max-h-40 overflow-auto space-y-1">{result.items.map((item) => <div key={`${item.index}-${item.externalId || 'unknown'}`} className="flex justify-between gap-3 text-[11px] border-b border-line/50 py-1"><span className="text-ink-muted truncate">#{item.index + 1} · {item.externalId || 'sin externalId'}</span><span className={item.status === 'valid' ? 'text-signal' : 'text-alert'}>{item.status === 'valid' ? 'VÁLIDO' : item.error}</span></div>)}</div></div>}
+    {result?.items && <div className="border-t border-line p-4"><div className="font-mono text-[10px] uppercase tracking-widest text-ink-dim mb-2">Result by record</div><div className="max-h-40 overflow-auto space-y-1">{result.items.map((item) => <div key={`${item.index}-${item.externalId || 'unknown'}`} className="flex justify-between gap-3 text-[11px] border-b border-line/50 py-1"><span className="text-ink-muted truncate">#{item.index + 1} · {item.externalId || 'no externalId'}</span><span className={item.status === 'valid' ? 'text-signal' : 'text-alert'}>{item.status === 'valid' ? 'VALID' : item.error}</span></div>)}</div></div>}
   </section>;
 }
+
+

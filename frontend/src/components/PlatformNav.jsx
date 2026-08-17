@@ -5,7 +5,7 @@ const ROLE_ACCESS = { operations: ['admin', 'risk_analyst'] };
 export default function PlatformNav({ activeSection, onChange, user }) {
   const sections = user ? SECTIONS.filter(({ id }) => !ROLE_ACCESS[id] || ROLE_ACCESS[id].includes(user.role)) : SECTIONS;
   return (
-    <nav className="border-b border-line bg-panel/80" aria-label="Módulos de la plataforma">
+    <nav className="border-b border-line bg-panel/80" aria-label="Platform modules">
       <div className="max-w-[1600px] mx-auto px-6 flex gap-1 overflow-x-auto">
         {sections.map(({ id, label, icon: Icon }, index) => (
           <button
@@ -27,3 +27,5 @@ export default function PlatformNav({ activeSection, onChange, user }) {
     </nav>
   );
 }
+
+

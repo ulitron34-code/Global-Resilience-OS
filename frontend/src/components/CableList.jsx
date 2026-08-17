@@ -20,7 +20,7 @@ export default function CableList() {
     <div className="flex flex-col h-full bg-panel border border-line rounded-lg overflow-hidden">
       <div className="p-3 border-b border-line">
         <div className="flex items-center justify-between mb-2">
-          <h2 className="font-mono text-[11px] uppercase tracking-widest text-ink-muted">Cables monitoreados</h2>
+          <h2 className="font-mono text-[11px] uppercase tracking-widest text-ink-muted">Monitored cables</h2>
           <span className="font-mono text-[10px] text-ink-dim">{cables.length}</span>
         </div>
         <div className="relative">
@@ -67,7 +67,7 @@ export default function CableList() {
           );
         })}
         {filtered.length === 0 && (
-          <div className="p-4 text-center text-ink-dim text-xs font-mono">Sin resultados</div>
+          <div className="p-4 text-center text-ink-dim text-xs font-mono">No results</div>
         )}
       </div>
     </div>
@@ -84,3 +84,5 @@ function CriticalityBadge({ value }) {
     </span>
   );
 }
+
+
