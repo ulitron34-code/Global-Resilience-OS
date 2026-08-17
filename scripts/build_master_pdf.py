@@ -27,12 +27,12 @@ class NumberedCanvas(canvas.Canvas):
 
     def draw_page_decorations(self, page_count):
         self.saveState()
-        self.setFont("Helvetica", 9)
-        self.setFillColor(colors.HexColor("#4A5568"))
+        self.setFont("Helvetica", 8)
+        self.setFillColor(colors.HexColor("#475569"))
         
         # Header (pages 2+)
         if self._pageNumber > 1:
-            self.drawString(54, 750, "Global Resilience OS — Guía Maestra de Operación y Producción")
+            self.drawString(54, 750, "GLOBAL RESILIENCE OS — Manual Maestro de Operación, Funciones e Implementación")
             self.setStrokeColor(colors.HexColor("#CBD5E0"))
             self.setLineWidth(0.5)
             self.line(54, 742, 558, 742)
@@ -60,12 +60,14 @@ def build_pdf(filename_e, filename_downloads):
     styles = getSampleStyleSheet()
 
     # Palette
-    c_primary = colors.HexColor("#0F172A")    # Dark Slate / Navy
+    c_primary = colors.HexColor("#0F172A")    # Dark Navy
     c_accent = colors.HexColor("#2563EB")     # Electric Blue
-    c_secondary = colors.HexColor("#0284C7")  # Cyan / Blue
-    c_dark = colors.HexColor("#1E293B")       # Dark Charcoal
+    c_secondary = colors.HexColor("#0284C7")  # Cyan
+    c_emerald = colors.HexColor("#059669")    # Green Emerald
+    c_amber = colors.HexColor("#D97706")      # Amber
+    c_dark = colors.HexColor("#1E293B")       # Dark Slate
     c_body = colors.HexColor("#334155")       # Slate Body
-    c_light_bg = colors.HexColor("#F8FAFC")   # Ice White / Light Slate
+    c_light_bg = colors.HexColor("#F8FAFC")   # Light Slate
     c_card_bg = colors.HexColor("#F1F5F9")    # Card Gray
     c_border = colors.HexColor("#E2E8F0")     # Border
 
@@ -73,31 +75,31 @@ def build_pdf(filename_e, filename_downloads):
         'DocTitle',
         parent=styles['Normal'],
         fontName='Helvetica-Bold',
-        fontSize=24,
-        leading=28,
+        fontSize=22,
+        leading=26,
         textColor=c_primary,
-        spaceAfter=8
+        spaceAfter=6
     )
 
     subtitle_style = ParagraphStyle(
         'DocSubtitle',
         parent=styles['Normal'],
         fontName='Helvetica',
-        fontSize=12,
-        leading=16,
+        fontSize=11,
+        leading=15,
         textColor=c_secondary,
-        spaceAfter=15
+        spaceAfter=14
     )
 
     h1_style = ParagraphStyle(
         'Heading1_Custom',
         parent=styles['Normal'],
         fontName='Helvetica-Bold',
-        fontSize=15,
-        leading=19,
+        fontSize=14,
+        leading=18,
         textColor=c_primary,
-        spaceBefore=16,
-        spaceAfter=8,
+        spaceBefore=14,
+        spaceAfter=6,
         keepWithNext=True
     )
 
@@ -105,11 +107,11 @@ def build_pdf(filename_e, filename_downloads):
         'Heading2_Custom',
         parent=styles['Normal'],
         fontName='Helvetica-Bold',
-        fontSize=12,
+        fontSize=11,
         leading=15,
         textColor=c_accent,
-        spaceBefore=12,
-        spaceAfter=6,
+        spaceBefore=10,
+        spaceAfter=4,
         keepWithNext=True
     )
 
@@ -117,8 +119,8 @@ def build_pdf(filename_e, filename_downloads):
         'Body_Custom',
         parent=styles['Normal'],
         fontName='Helvetica',
-        fontSize=9.5,
-        leading=13.5,
+        fontSize=9,
+        leading=13,
         textColor=c_body,
         spaceAfter=6
     )
@@ -127,23 +129,22 @@ def build_pdf(filename_e, filename_downloads):
         'Bullet_Custom',
         parent=styles['Normal'],
         fontName='Helvetica',
-        fontSize=9.5,
-        leading=13.5,
+        fontSize=9,
+        leading=13,
         textColor=c_body,
-        leftIndent=15,
-        firstLineIndent=-10,
+        leftIndent=12,
         spaceAfter=4
     )
 
     code_style = ParagraphStyle(
         'Code_Custom',
         parent=styles['Normal'],
-        fontName='Courier-Bold',
-        fontSize=9,
-        leading=12,
-        textColor=colors.HexColor("#0F766E"), # Teal
-        backColor=colors.HexColor("#F0FDF4"),
-        borderPadding=4,
+        fontName='Courier',
+        fontSize=8,
+        leading=11,
+        textColor=colors.HexColor("#0F172A"),
+        backColor=colors.HexColor("#E2E8F0"),
+        borderPadding=6,
         spaceAfter=6
     )
 
@@ -151,169 +152,163 @@ def build_pdf(filename_e, filename_downloads):
         'Callout_Custom',
         parent=styles['Normal'],
         fontName='Helvetica-Oblique',
-        fontSize=9.5,
-        leading=13.5,
-        textColor=colors.HexColor("#1E293B"),
-        backColor=colors.HexColor("#EFF6FF"),
-        borderColor=colors.HexColor("#3B82F6"),
-        borderWidth=1,
-        borderPadding=8,
-        spaceBefore=8,
-        spaceAfter=8
+        fontSize=8.5,
+        leading=12,
+        textColor=colors.HexColor("#1E3A8A"),
+        spaceAfter=6
     )
 
     story = []
 
-    # Title Block
+    # Title Banner
     story.append(Paragraph("GLOBAL RESILIENCE OS", title_style))
-    story.append(Paragraph("Guía Maestra de Operación, Servicios y Puesta en Producción (v1.0 - 2026)", subtitle_style))
-    story.append(HRFlowable(width="100%", thickness=2, color=c_accent, spaceAfter=15))
+    story.append(Paragraph("Guía Maestra Extensiva: Manual de Funciones, Operación y Hoja de Ruta de Implementación", subtitle_style))
+    story.append(HRFlowable(width="100%", thickness=1.5, color=c_accent, spaceBefore=0, spaceAfter=12))
 
-    # Resumen Ejecutivo Box
-    resumen_text = (
-        "<b>RESUMEN EJECUTIVO:</b> Este documento constituye el manual operativo y la guía técnica oficial para "
-        "la plataforma <b>Global Resilience OS</b>. Detalla la arquitectura desplegada, la guía de uso paso a paso, "
-        "el catálogo de servicios cuantitativos de resiliencia, los enlaces de acceso en vivo, las instrucciones exactas "
-        "para configurar la API de Anthropic (Claude 3.5 Sonnet) mañana y el protocolo de prueba completo."
-    )
-    story.append(Paragraph(resumen_text, callout_style))
+    # Meta Table
+    meta_data = [
+        [Paragraph("<b>Plataforma:</b> Global Resilience OS", body_style), Paragraph("<b>Versión:</b> 1.0.0 Enterprise", body_style)],
+        [Paragraph("<b>Estado del Sistema:</b> Producción (Render + Vercel + Supabase)", body_style), Paragraph("<b>Fecha de Actualización:</b> Agosto 2026", body_style)],
+        [Paragraph("<b>Frontend Live:</b> global-resilience-os.vercel.app", body_style), Paragraph("<b>Backend Live:</b> global-resilience-os.onrender.com", body_style)]
+    ]
+    t_meta = Table(meta_data, colWidths=[250, 254])
+    t_meta.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,-1), c_card_bg),
+        ('BOX', (0,0), (-1,-1), 0.5, c_border),
+        ('INNERGRID', (0,0), (-1,-1), 0.5, c_border),
+        ('PADDING', (0,0), (-1,-1), 5),
+    ]))
+    story.append(t_meta)
     story.append(Spacer(1, 10))
 
-    # Sección 1: Enlaces Oficiales de Acceso
-    story.append(Paragraph("1. Enlaces Oficiales de Acceso y Diagnóstico", h1_style))
-    story.append(Paragraph("La plataforma se encuentra activa en producción. A continuación se presentan los accesos directos:", body_style))
-
-    links_data = [
-        [Paragraph("<b>Componente</b>", body_style), Paragraph("<b>URL / Enlace</b>", body_style), Paragraph("<b>Descripción</b>", body_style)],
-        [Paragraph("<b>Frontend (Demo Web)</b>", body_style), Paragraph("<font color='#2563EB'><u>https://global-resilience-os.vercel.app</u></font>", body_style), Paragraph("Interfaz de usuario desplegada en Vercel con las 12 verticales y simulaciones en vivo.", body_style)],
-        [Paragraph("<b>Backend API (Render)</b>", body_style), Paragraph("<font color='#2563EB'><u>https://global-resilience-os.onrender.com</u></font>", body_style), Paragraph("Microservicio backend en Node.js/Express respondiendo en producción.", body_style)],
-        [Paragraph("<b>API Healthcheck</b>", body_style), Paragraph("<font color='#2563EB'><u>/api/health</u></font>", body_style), Paragraph("Endpoint de diagnóstico que confirma el estado `status: ok` y la versión de la API.", body_style)],
-        [Paragraph("<b>Persistencia Supabase</b>", body_style), Paragraph("<font color='#2563EB'><u>/api/runtime/supabase/persistence</u></font>", body_style), Paragraph("Confirma la persistencia remota `enabled: true, state: ready` en PostgreSQL/Supabase.", body_style)],
-        [Paragraph("<b>Repositorio GitHub</b>", body_style), Paragraph("<font color='#2563EB'><u>ulitron34-code/Global-Resilience-OS</u></font>", body_style), Paragraph("Código fuente oficial con CI/CD automatizado en GitHub Actions.", body_style)],
-        [Paragraph("<b>Supabase Dashboard</b>", body_style), Paragraph("<font color='#2563EB'><u>https://supabase.com/dashboard</u></font>", body_style), Paragraph("Consola de administración de PostgreSQL, migraciones SQL y políticas RLS.", body_style)]
-    ]
-
-    t_links = Table(links_data, colWidths=[120, 180, 204])
-    t_links.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), c_card_bg),
-        ('GRID', (0, 0), (-1, -1), 0.5, c_border),
-        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ('TOPPADDING', (0, 0), (-1, -1), 5),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
-    ]))
-    story.append(t_links)
-    story.append(Spacer(1, 15))
-
-    # Sección 2: ¿Qué es Global Resilience OS y Qué Servicios Ofrece?
-    story.append(Paragraph("2. ¿Qué es Global Resilience OS y Qué Servicios Ofrece?", h1_style))
+    # SECTION 1: VISIÓN Y ARQUITECTURA
+    story.append(Paragraph("1. Visión General y Arquitectura de la Plataforma", h1_style))
     story.append(Paragraph(
-        "<b>Global Resilience OS</b> es una plataforma enterprise de inteligencia de resiliencia diseñada para cuantificar, "
-        "simular y mitigar los riesgos sistémicos en infraestructuras críticas globales (cables submarinos de fibra óptica "
-        "y chokepoints marítimos clave como Suez, Bab-el-Mandeb y Ormuz).", body_style
+        "<b>Global Resilience OS</b> es una plataforma enterprise de inteligencia de riesgo sistémico diseñada para multinacionales y cadenas críticas de suministro. Monitorea $600B USD en volumen anual de commodities distribuidas en 12 verticales industriales, identificando puntos de falla únicos (Single Points of Failure), cuellos de botella marítimos (Chokepoints) y rutas críticas de datos e hidrocarburos.",
+        body_style
     ))
+    story.append(Paragraph("<b>Arquitectura Tecnológica Híbrida:</b>", h2_style))
+    story.append(Paragraph("• <b>Frontend (Vercel):</b> React SPA responsivo con mapas vectoriales SVG nativos a 60 FPS, aceleración por hardware y simulación gráfica sin dependencias de mapas pesados.", bullet_style))
+    story.append(Paragraph("• <b>Backend (Render):</b> API REST distribuida en Node.js/Express con motores de cascada determinista de impacto, modelo de calibración cuantitativa (MAE/MAPE) y hooks para copilotos de IA.", bullet_style))
+    story.append(Paragraph("• <b>Base de Datos (Supabase PostgreSQL):</b> Persistencia multi-tenant aislada mediante RLS (Row Level Security), control plane de auditoría y snapshots inmutables.", bullet_style))
+    story.append(Spacer(1, 10))
 
-    story.append(Paragraph("Catálogo Principal de Servicios de la Plataforma:", h2_style))
-    
-    servicios = [
-        ("Simulación Counterfactual de Pérdidas ($USD)", "Permite modelar rupturas de cables y cierres de estrechos marítimos calculando en tiempo real la <i>Pérdida por Esperar</i>, el <i>Costo de Mitigación</i> y el <i>Valor Protegido</i> en dólares."),
-        ("Modelo de Precios por ROI (Suscripción del 2%)", "Demuestra el autofinanciamiento del software al sugerir una tarifa anual equivalente al 2% del Valor Protegido anualizado (ofreciendo un ROI proyectado de ~50x al cliente)."),
-        ("Visualización Geográfica Cuantitativa", "Mapa mundial interactivo con nodos de cables submarinos, chokepoints de alto riesgo y visualización animada de rutas alternativas por el Cabo de Buena Esperanza."),
-        ("Motor de Impacto en Cascada (12 Verticales)", "Inferencia de propagación de impacto a lo largo de 12 verticales de industria (Semiconductores, Oil & Gas, Telecomunicaciones, Fármacos, Automotriz, Electricidad, etc.)."),
-        ("Copiloto Estratégico de IA", "Asistente inteligente integrado para consultar recomendaciones de mitigación, análisis de riesgos y generación de resúmenes ejecutivos."),
-        ("Ledger de Auditoría Sellado (Hash-Sealed)", "Registro inmutable de todas las decisiones, simulaciones y aprobaciones humanas selladas criptográficamente con SHA-256."),
-        ("Arquitectura Multi-Tenant con RLS", "Aislamiento estricto por organización respaldado por Row Level Security en PostgreSQL / Supabase.")
-    ]
+    # SECTION 2: EXPLICACIÓN DETALLADA PANTALLA POR PANTALLA
+    story.append(Paragraph("2. Guía Detallada de Funciones Pantalla por Pantalla", h1_style))
+    story.append(Paragraph("A continuación se describe de manera explícita cada módulo, botón, filtro, gráfico e indicador dentro de la plataforma:", body_style))
 
-    for nombre, desc in servicios:
-        story.append(Paragraph(f"• <b>{nombre}:</b> {desc}", bullet_style))
+    # 01 Command Center
+    story.append(Paragraph("01. Command Center (Núcleo de Monitoreo Sintético)", h2_style))
+    story.append(Paragraph("• <b>Barra de Contexto Superior:</b> Permite filtrar toda la analítica de la suite por <i>Vertical Industrial</i> (12 opciones disponibles: Semiconductores, Energía, Farma, Automotriz, Aeroespacial, Defensivo, Alimentos/Agro, Minería/Litio, Telecomunicaciones, Logística Marítima, Consumo Masivo, Datos/IA), <i>Región Geográfica</i> (Global, América del Norte, Asia-Pacífico, Europa, Medio Oriente, América Latina) y <i>Ventana Temporal</i> (24h, 48h, 72h, 7 días).", bullet_style))
+    story.append(Paragraph("• <b>Tarjetas KPI Principales:</b><br/>"
+                           "- <b>TAM ($600B):</b> Muestra el volumen anual acumulado de bienes en riesgo.<br/>"
+                           "- <b>VERTICALES (12):</b> Contador de cadenas de suministro bajo monitoreo continuo.<br/>"
+                           "- <b>CHOKEPOINTS (4):</b> Estado en tiempo real de Suez, Ormuz, Malaca y Bab-el-Mandeb.<br/>"
+                           "- <b>EXPOSICIÓN ABIERTA ($USD):</b> Suma de pérdidas financieras potenciales de incidentes no mitigados.<br/>"
+                           "- <b>ALERTAS ABIERTAS:</b> Contador de disrupciones priorizadas por nivel de severidad.<br/>"
+                           "- <b>CABLES MONITOREADOS (16):</b> Rutas de fibra óptica submarina de telecomunicaciones.", bullet_style))
+    story.append(Paragraph("• <b>Mapa Mundial Interactivo (Cartografía HD):</b><br/>"
+                           "- <b>Silueta Continental Definida:</b> Masas terrestres sólidas en vectores SVG que dibujan con precisión a México (Baja California, Golfo, Yucatán), Norteamérica, Sudamérica, Europa, África, Asia y Oceanía.<br/>"
+                           "- <b>Controles de Capas Flotantes (Top-Right):</b> Botón <code>⚡ Flujo en vivo</code> (activa partículas animadas de datos), <code>🛢️ Tuberías</code> (superpone oleoductos/gasoductos Sumed, Druzhba, TANAP, Báltico, EastMed) y <code>🛰️ Radar</code> (activa barrido giratorio 360° en Suez).<br/>"
+                           "- <b>Interacción con Cables y Chokepoints:</b> Hacer clic en cualquier cable o punto rojo abre tooltips tácticos con criticidad, capacidad y puertos de amarra. Al hacer Shift+Clic se pueden seleccionar múltiples cables.", bullet_style))
 
-    story.append(Spacer(1, 15))
+    # 02 Red & Exposición
+    story.append(Paragraph("02. Red & Exposición (Graph & Exposure Matrix)", h2_style))
+    story.append(Paragraph("• <b>Grafo de Dependencias Multinivel:</b> Visualiza la topología interconectada entre Proveedores Tier-1, Tier-2, Nodos de Transbordo y Puertos Clave.", bullet_style))
+    story.append(Paragraph("• <b>Detector de Puntos Únicos de Falla (SPOF):</b> Resalta automáticamente en color rojo brillante aquellos nodos cuya falla paralizaría a más de 3 verticales simultáneamente.", bullet_style))
+    story.append(Paragraph("• <b>Matriz de Concentración Geográfica:</b> Identifica la dependencia crítica de un solo país o región en insumos clave (ej. obleas de silicio en Taiwán o gas natural en el Báltico).", bullet_style))
 
-    # Sección 3: Guía de Uso Paso a Paso
-    story.append(Paragraph("3. Guía de Uso Paso a Paso (Cómo Operar la Plataforma)", h1_style))
-    story.append(Paragraph("Sigue esta guía paso a paso para realizar una demostración completa o inspeccionar el sistema:", body_style))
+    # 03 Scenario Lab
+    story.append(Paragraph("03. Scenario Lab (Laboratorio de Simulación Stress-Test)", h2_style))
+    story.append(Paragraph("• <b>Simulaciones Preconfiguradas:</b> Botones de acceso rápido para evaluar crisis reales: <i>Bloqueo del Canal de Suez</i>, <i>Cierre del Estrecho de Ormuz</i>, <i>Sabotaje en Bab-el-Mandeb</i> y <i>Ruptura de Cables Transatlánticos</i>.", bullet_style))
+    story.append(Paragraph("• <b>Panel de Parámetros Personalizados:</b> Permite ajustar manualmente la duración del evento (6h a 7 días), el porcentaje de capacidad bloqueada y el incremento en tarifas de flete.", bullet_style))
+    story.append(Paragraph("• <b>Calculadora Financiera Dinámica:</b> Muestra la <b>Pérdida por Esperar</b> vs el <b>Costo de Mitigación</b> y el <b>Valor Protegido Neto</b>.", bullet_style))
+    story.append(Paragraph("• <b>Evaluador de Playbooks:</b> Compare alternativas en tiempo real, tales como el <i>Desvío Marítimo por el Cabo de Buena Esperanza</i> (con visualización en mapa de la ruta verde alternativa) o la <i>Reactivación de Proveedores Secundarios en México/LATAM</i>.", bullet_style))
 
-    pasos = [
-        ("Paso 1: Acceso a la Plataforma", "Abre la URL <font color='#2563EB'><u>https://global-resilience-os.vercel.app</u></font> en cualquier navegador moderno. Verás el encabezado de consola de producción con el badge <i>'DEMO — DATOS ILUSTRATIVOS'</i> y el indicador visual de estado en línea (<i>Online</i>)."),
-        ("Paso 2: Exploración del Brief Ejecutivo", "En la vista principal (<b>Brief</b>), observa las métricas consolidadas: Pérdida Potencial Acumulada, Costo de Mitigación y Valor Protegido. El sistema desglosa automáticamente la propuesta de valor basada en el 2% de suscripción."),
-        ("Paso 3: Selector de Verticales (12 Industrias)", "Utiliza el dropdown de la barra de contexto para seleccionar una industria específica (ej. <i>Semiconductores</i> o <i>Oil & Gas</i>) o haz clic en <b>'Ver todas (12)'</b> para analizar el impacto sistémico transversal."),
-        ("Paso 4: Simulación de Escenarios Geopolíticos Rápidos", "Haz clic en el botón de escenario predefinido <b>'Bloqueo del Canal de Suez'</b>. El motor recalcula instantáneamente la exposición financiera en USD/día por vertical, despliega los tooltips informativos y activa la animación de ruta alternativa rodeando el Cabo de Buena Esperanza."),
-        ("Paso 5: Interacción con el Mapa Mundial", "Navega sobre los puntos rojos (chokepoints) y líneas de red (cables submarinos). Haz clic sobre un cable o nodo para inspeccionar su capacidad, latencia estimada y porcentaje de exposición de portafolio."),
-        ("Paso 6: Vista Resumen Ejecutivo de Operaciones", "Accede a la pestaña <b>Operaciones</b>. Revisa el resumen condensado de alertas activas, casos en gestión, consola de logs de webhooks y métricas de error de calibración (MAE/MAPE)."),
-        ("Paso 7: Consulta con el Copiloto de IA", "Abre el panel del <b>Copiloto IA</b> en el margen inferior derecho. Escribe preguntas como <i>'¿Qué acciones tomar ante la disrupción en Suez?'</i> para recibir una recomendación estructurada y el registro sellado en el ledger.")
-    ]
+    # 04 Casos
+    story.append(Paragraph("04. Casos (Gestión de Incidentes y Planes de Acción)", h2_style))
+    story.append(Paragraph("• <b>Tabla de Gestión de Incidentes:</b> Listado de tickets activos con severidad, impacto económico estimado, asignado y tiempo transcurrido.", bullet_style))
+    story.append(Paragraph("• <b>Creador de Action Plans:</b> Genera planes de mitigación paso a paso con asignación de responsables y fechas límite de ejecución.", bullet_style))
+    story.append(Paragraph("• <b>Ledger Criptográfico de Auditoría:</b> Registro inmutable que sella digitalmente con hash SHA-256 cada decisión tomada, ideal para auditorías de cumplimiento o seguros.", bullet_style))
 
-    for num, desc in pasos:
-        story.append(Paragraph(f"<b>{num}:</b>", h2_style))
-        story.append(Paragraph(desc, body_style))
+    # 05 Executive Brief
+    story.append(Paragraph("05. Executive Brief (Reportes Automatizados para Alta Dirección)", h2_style))
+    story.append(Paragraph("• <b>Generador de Informes C-Level:</b> Compila en 1 solo clic un informe ejecutivo de 3 párrafos listo para ser presentado ante el Comité de Administración o Inversionistas.", bullet_style))
+    story.append(Paragraph("• <b>Exportador Multiformato:</b> Botones directos para descargar el reporte en Markdown, JSON estructurado o formato impreso PDF.", bullet_style))
 
-    story.append(Spacer(1, 15))
+    # 06 Operaciones
+    story.append(Paragraph("06. Operaciones & Calibración (Configuración e IA)", h2_style))
+    story.append(Paragraph("• <b>Monitoreo de Salud del Sistema:</b> Badge dinámico que confirma la conexión activa entre Render, Supabase y el almacenamiento de persistencia.", bullet_style))
+    story.append(Paragraph("• <b>Métricas de Calibración Predictiva (MAE / MAPE):</b> Muestra la desviación absoluta media y el porcentaje de error del modelo frente a eventos históricos reales.", bullet_style))
+    story.append(Paragraph("• <b>Console de Logs de Entrega de Webhooks:</b> Registro en vivo de notificaciones salientes entregadas a sistemas ERP corporativos (SAP, Oracle, Salesforce).", bullet_style))
+    story.append(Paragraph("• <b>Modelo de Pricing Comercial (Suscripción del 2%):</b> Demuestra el retorno de inversión del sistema, donde la suscripción anual equivale al 2% del valor protegido en crisis (~50x ROI).", bullet_style))
+    story.append(Paragraph("• <b>Conector de Copiloto IA:</b> Estado de integración con modelos de IA generativa (Claude 3.5 Sonnet / OpenAI).", bullet_style))
 
-    # Sección 4: Configuración de la API de Anthropic (Mañana)
-    story.append(Paragraph("4. Instrucciones para Configurar la API de Anthropic (Mañana)", h1_style))
-    story.append(Paragraph(
-        "Hoy el Copiloto de IA funciona con el motor de respuesta estratégica local. Mañana, al obtener tu clave "
-        "de API de Anthropic, sigue estos pasos exactos para activar **Claude 3.5 Sonnet** en producción:", body_style
-    ))
+    story.append(Spacer(1, 10))
 
-    pasos_api = [
-        "1. Obtén tu API Key en la consola de Anthropic (<font color='#2563EB'><u>https://console.anthropic.com</u></font>). La clave empieza con `sk-ant-api...`.",
-        "2. Entra al Dashboard de Render (<font color='#2563EB'><u>https://dashboard.render.com</u></font>).",
-        "3. Selecciona tu servicio Backend (<b>global-resilience-os</b>).",
-        "4. En el menú lateral izquierdo, haz clic en <b>Environment</b>.",
-        "5. En la sección <i>Environment Variables</i>, haz clic en <b>Add Environment Variable</b>.",
-        "6. Define el nombre exacto: `ANTHROPIC_API_KEY` y pega tu clave `sk-ant-api...` en el valor.",
-        "7. Haz clic en <b>Save Changes</b>.",
-        "8. Render iniciará automáticamente un re-despliegue (redeploy). En 1 o 2 minutos, el backend estará usando Claude 3.5 Sonnet directamente para todas las respuestas del Copiloto."
-    ]
+    # SECTION 3: GUÍA PASO A PASO LO QUE FALTA Y CÓMO HACERLO
+    story.append(Paragraph("3. Hoja de Ruta: Lo Que Falta y Cómo Hacerlo Paso a Paso", h1_style))
+    story.append(Paragraph("Para llevar la plataforma a un nivel comercial de escala masiva, se identifican 4 pilares fundamentales con sus instrucciones detalladas:", body_style))
 
-    for p in pasos_api:
-        story.append(Paragraph(p, bullet_style))
+    # Pilar A
+    story.append(Paragraph("Pilar A: Conexión de la API de Anthropic (Claude 3.5 Sonnet)", h2_style))
+    story.append(Paragraph("<b>Objetivo:</b> Activar las respuestas inteligentes en lenguaje natural para el Copiloto de Inteligencia en la pestaña de Operaciones.", body_style))
+    story.append(Paragraph("<b>Instrucciones Paso a Paso:</b>", callout_style))
+    story.append(Paragraph("1. Ingresa a la consola de Anthropic (<code>console.anthropic.com</code>) y genera una API Key comercial.", bullet_style))
+    story.append(Paragraph("2. Inicia sesión en tu panel de control de Render (<code>dashboard.render.com</code>).", bullet_style))
+    story.append(Paragraph("3. Selecciona el servicio backend llamado <b>global-resilience-os</b>.", bullet_style))
+    story.append(Paragraph("4. En el menú lateral izquierdo, haz clic en <b>Environment</b>.", bullet_style))
+    story.append(Paragraph("5. Haz clic en <b>Add Environment Variable</b> y agrega:<br/>"
+                           "   - Key: <code>ANTHROPIC_API_KEY</code><br/>"
+                           "   - Value: <code>sk-ant-api03-...</code> (tu clave de Anthropic).", bullet_style))
+    story.append(Paragraph("6. Presiona <b>Save Changes</b>. Render reiniciará automáticamente el servidor en ~30 segundos.", bullet_style))
+    story.append(Paragraph("7. <b>Prueba de Validación:</b> Ejecuta en terminal o Postman:<br/>"
+                           "<code>curl -X POST https://global-resilience-os.onrender.com/api/copilot/chat -H \"Content-Type: application/json\" -d '{\"message\":\"Resumen de Suez\"}'</code>", code_style))
 
-    story.append(Spacer(1, 15))
+    # Pilar B
+    story.append(Paragraph("Pilar B: Conexión de Feeds Marítimos y Satelitales en Tiempo Real (AIS / MarineTraffic)", h2_style))
+    story.append(Paragraph("<b>Objetivo:</b> Sustituir los seeds estáticos por posiciones en vivo de buques portacontenedores y tanqueros.", body_style))
+    story.append(Paragraph("<b>Instrucciones Paso a Paso:</b>", callout_style))
+    story.append(Paragraph("1. Contrata un plan de datos en MarineTraffic API o Spire Maritime AIS Data API.", bullet_style))
+    story.append(Paragraph("2. Agrega las credenciales <code>AIS_FEED_API_KEY</code> y <code>AIS_FEED_URL</code> en las variables de entorno de Render.", bullet_style))
+    story.append(Paragraph("3. En el backend, edita el archivo <code>backend/services/feedIngestion.js</code> para mapear la latitud y longitud de los buques hacia las coordenadas del mapa.", bullet_style))
+    story.append(Paragraph("4. Configura un Cron Job en Supabase mediante <code>pg_cron</code> o Render Cron para ejecutar la ingesta cada 15 minutos:<br/>"
+                           "<code>node scripts/ingest-live-feeds.js</code>", code_style))
 
-    # Sección 5: Lo que falta para la Puesta en Producción Total
-    story.append(Paragraph("5. Requisitos Pendientes para Producción Comercial Total", h1_style))
-    story.append(Paragraph("El código y la arquitectura están 100% completos. Para pasar a ventas enterprise reales se requieren 3 elementos externos:", body_style))
+    # Pilar C
+    story.append(Paragraph("Pilar C: Autenticación Multi-tenant & Pruebas RLS en Supabase Staging/Prod", h2_style))
+    story.append(Paragraph("<b>Objetivo:</b> Garantizar que 2 organizaciones distintas en la plataforma nunca puedan ver los datos de la otra.", body_style))
+    story.append(Paragraph("<b>Instrucciones Paso a Paso:</b>", callout_style))
+    story.append(Paragraph("1. Abre el editor SQL de Supabase (<code>supabase.com/dashboard</code>).", bullet_style))
+    story.append(Paragraph("2. Verifica que las 5 migraciones en <code>docs/supabase/full_schema_combined.sql</code> estén aplicadas.", bullet_style))
+    story.append(Paragraph("3. Crea dos usuarios de prueba en Supabase Auth pertenecientes a dos organizaciones distintas:<br/>"
+                           "   - Org A: <code>Empresa Logística Global</code> (Tenant ID: <code>fe72065f-...</code>)<br/>"
+                           "   - Org B: <code>Manufactura Automotriz</code> (Tenant ID: <code>a1b2c3d4-...</code>).", bullet_style))
+    story.append(Paragraph("4. Ejecuta el test de aislamiento RLS ejecutando:<br/>"
+                           "<code>node scripts/test-supabase-rls-isolation.js</code>", code_style))
+    story.append(Paragraph("5. Confirma que las consultas de la Org B retornen 0 filas sobre los incidentes de la Org A.", bullet_style))
 
-    reqs_data = [
-        [Paragraph("<b>Elemento Pendiente</b>", body_style), Paragraph("<b>Proveedor / Recurso</b>", body_style), Paragraph("<b>Acción Requerida</b>", body_style)],
-        [Paragraph("<b>Feeds de Cables Submarinos</b>", body_style), Paragraph("TeleGeography API", body_style), Paragraph("Reemplazar `data/cables.js` con el feed licenciado oficial de la red global de cables.", body_style)],
-        [Paragraph("<b>Feeds de Tráfico Marítimo (AIS)</b>", body_style), Paragraph("MarineTraffic / Kpler API", body_style), Paragraph("Conectar la API de rastreo marítimo en tiempo real para detección automática de buques y congestión.", body_style)],
-        [Paragraph("<b>Validación Commercial</b>", body_style), Paragraph("5 a 10 Prospects Reales", body_style), Paragraph("Presentar la demo a clientes potenciales y registrar retroalimentación en `/api/pilots/feedback`.", body_style)]
-    ]
+    # Pilar D
+    story.append(Paragraph("Pilar D: Calibración Fina con Datos Históricos del Cliente Piloto", h2_style))
+    story.append(Paragraph("<b>Objetivo:</b> Adaptar las curvas de impacto predictivo a la estructura de costos real de un cliente corporativo.", body_style))
+    story.append(Paragraph("<b>Instrucciones Paso a Paso:</b>", callout_style))
+    story.append(Paragraph("1. Solicita al cliente un CSV con los datos históricos de órdenes de compra, tiempos de demora y penalizaciones de los últimos 24 meses.", bullet_style))
+    story.append(Paragraph("2. Ingiere los datos usando el endpoint de calibración:<br/>"
+                           "<code>POST /api/models/calibration/ingest</code>", code_style))
+    story.append(Paragraph("3. Ejecuta el script de ajuste determinista: <code>node scripts/calibrate-model.js</code>.", bullet_style))
+    story.append(Paragraph("4. Confirma en el panel de Operaciones que la métrica $MAPE$ descienda por debajo del 5% y la precisión supere el 95%.", bullet_style))
 
-    t_reqs = Table(reqs_data, colWidths=[130, 140, 234])
-    t_reqs.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), c_card_bg),
-        ('GRID', (0, 0), (-1, -1), 0.5, c_border),
-        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ('TOPPADDING', (0, 0), (-1, -1), 5),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
-    ]))
-    story.append(t_reqs)
-    story.append(Spacer(1, 15))
+    story.append(Spacer(1, 10))
 
-    # Sección 6: Protocolo de Prueba del Sistema
-    story.append(Paragraph("6. Protocolo de Prueba del Sistema", h1_style))
-    
-    story.append(Paragraph("<b>A) Prueba del Estado Actual (Demo Activa):</b>", h2_style))
-    story.append(Paragraph("1. Visita `/api/health` en Render para verificar `status: ok` y la versión de la API.", bullet_style))
-    story.append(Paragraph("2. Visita `/api/runtime/supabase/persistence` para confirmar `enabled: true, state: ready`.", bullet_style))
-    story.append(Paragraph("3. En el frontend de Vercel, ejecuta la simulación de Suez y confirma que se recalculan los valores en USD.", bullet_style))
-
-    story.append(Paragraph("<b>B) Prueba de Verificación Mañana (Con Anthropic API configurada):</b>", h2_style))
-    story.append(Paragraph("1. Realiza una pregunta compleja al Copiloto de IA en el frontend.", bullet_style))
-    story.append(Paragraph("2. Verifica que las respuestas incorpore lenguaje natural avanzado de Claude 3.5 Sonnet con números cuantificados de resiliencia.", bullet_style))
-    story.append(Paragraph("3. Abre el devtools (F12) o consulta la consola de auditoría para verificar el hash SHA-256 generado por cada interacción.", bullet_style))
-
-    # Sign-off Box
-    story.append(Spacer(1, 15))
-    sign_text = (
-        "<b>CONFIRMACIÓN DE PLATAFORMA:</b> Código verificado con 18/18 gates locales pasando en verde (`PASS`). "
-        "Infraestructura en Vercel, Render y Supabase sincronizada y activa. Documento generado automáticamente."
-    )
-    story.append(Paragraph(sign_text, callout_style))
+    # SECTION 4: MANUAL DE PRUEBA Y GUÍA DE DEMO
+    story.append(Paragraph("4. Guía Paso a Paso para Probar la Plataforma (Demo Flow)", h1_style))
+    story.append(Paragraph("Sigue esta secuencia recomendada para realizar una demostración ante inversionistas o clientes:", body_style))
+    story.append(Paragraph("1. **Navegación Inicial:** Abre <code>https://global-resilience-os.vercel.app</code>. Muestra el estado del sistema en verde (<code>SISTEMA ACTIVO · NUBE</code>).", bullet_style))
+    story.append(Paragraph("2. **Exploración Cartográfica:** Interactúa con los botones flotantes <code>⚡ Flujo en vivo</code>, <code>🛢️ Tuberías</code> y <code>🛰️ Radar</code>. Pasa el cursor por el mapa para mostrar las siluetas vectoriales de México, Norteamérica y Europa.", bullet_style))
+    story.append(Paragraph("3. **Simulación en Tiempo Real:** En <code>Scenario Lab</code>, haz clic en <b>Bloqueo del Canal de Suez</b>. Muestra cómo la pérdida financiera asciende a $5.22B/día y cómo al cambiar el tiempo a 48h el impacto sube a $10.44B.", bullet_style))
+    story.append(Paragraph("4. **Evaluación de Playbooks:** Selecciona la alternativa <i>Desvío por Cabo de Buena Esperanza</i>. Muestra la línea verde de desvío animada en el mapa y la reducción del riesgo neto.", bullet_style))
+    story.append(Paragraph("5. **Generación del Reporte:** Ve a <code>Executive Brief</code> y haz clic en exportar para obtener un informe sintético para el CEO.", bullet_style))
+    story.append(Paragraph("6. **Cierre Comercial:** En <code>Operaciones</code>, destaca el modelo de pricing donde el costo del software es solo el 2% del valor que protege en una sola crisis.", bullet_style))
 
     # Build PDF
     doc.build(story, canvasmaker=NumberedCanvas)
@@ -323,13 +318,11 @@ def build_pdf(filename_e, filename_downloads):
     try:
         import shutil
         shutil.copyfile(filename_e, filename_downloads)
-        print(f"PDF copiado exitosamente a Descargas: {filename_downloads}")
+        print(f"Copia del PDF guardada en: {filename_downloads}")
     except Exception as e:
-        print(f"No se pudo copiar a Descargas: {e}")
+        print(f"No se pudo copiar a Downloads: {e}")
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     file_e = r"E:\globalresilience\GUIA_MAESTRA_GLOBAL_RESILIENCE_OS.pdf"
-    downloads_folder = os.path.join(os.path.expanduser("~"), "Downloads")
-    file_down = os.path.join(downloads_folder, "GUIA_MAESTRA_GLOBAL_RESILIENCE_OS.pdf")
-    
+    file_down = r"C:\Users\ulitr\Downloads\GUIA_MAESTRA_GLOBAL_RESILIENCE_OS.pdf"
     build_pdf(file_e, file_down)
