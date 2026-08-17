@@ -13,13 +13,20 @@ import { CasesView, ExecutiveBriefView, NetworkExposureView, OperationsView, Sce
 import DecisionRoom from './components/DecisionRoom';
 import { useAppStore } from './store/useAppStore';
 import { useSessionStore } from './store/useSessionStore';
+import { getStoredLanguage, installSpanishTranslator } from './i18n/domTranslator';
 
 export default function App() {
   const shareToken = window.location.pathname.match(/^\/share\/([^/]+)$/)?.[1];
   const [activeSection, setActiveSection] = useState('command-center');
-  const [context, setContext] = useState({ vertical: 'Todas', region: 'global', horizon: '72' });
+  const [context, setContext] = useState({ vertical: 'All', region: 'global', horizon: '72' });
   const initBackendCheck = useAppStore((s) => s.initBackendCheck);
   const user = useSessionStore((s) => s.user);
+
+  useEffect(() => {
+    document.documentElement.lang = getStoredLanguage();
+    if (getStoredLanguage() === 'es') return installSpanishTranslator();
+    return undefined;
+  }, []);
 
   useEffect(() => {
     if (!shareToken) initBackendCheck();
@@ -58,4 +65,6 @@ function CommandCenter({ onScenario, region, vertical }) {
   const openCases = () => window.dispatchEvent(new CustomEvent('open-cases'));
   return <div className="flex flex-col gap-4"><div className="flex items-end justify-between gap-4"><div><div className="font-mono text-[10px] uppercase tracking-widest text-signal mb-1">{vertical} · {region === 'global' ? 'Global' : region} · SYSTEMIC MONITORING CORE</div><h1 className="font-display text-2xl md:text-3xl font-bold tracking-tight text-ink">Command Center</h1></div><button onClick={onScenario} className="hidden sm:flex items-center gap-2 border border-signal/40 text-signal rounded px-3 py-2 text-xs hover:bg-signal/10">Open Scenario Lab</button></div><KpiBar vertical={vertical} /><div className="grid grid-cols-1 lg:grid-cols-[280px_1fr_360px] gap-4 flex-1 min-h-[560px]"><div className="order-2 lg:order-1 h-[400px] lg:h-auto"><CableList /></div><div className="order-1 lg:order-2 h-[420px] lg:h-auto"><WorldMap /></div><div className="order-3 flex flex-col gap-4"><ScenarioBuilder /><ImpactPanel /><ReportExport /></div></div><AlertQueue onOpenCases={openCases} region={region} vertical={vertical} /></div>;
 }
+
+
 

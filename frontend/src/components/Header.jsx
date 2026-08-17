@@ -3,6 +3,7 @@ import { useAppStore } from '../store/useAppStore';
 import SessionControl from './SessionControl';
 import NotificationCenter from './NotificationCenter';
 import { isBackendRequired } from '../api/client';
+import LanguageToggle from '../i18n/LanguageToggle';
 
 export default function Header() {
   const backendStatus = useAppStore((s) => s.backendStatus);
@@ -32,6 +33,7 @@ export default function Header() {
           }`}>
             {backendStatus === 'online' ? 'SYSTEM ACTIVE · CLOUD' : 'CONTINGENCY SYSTEM · STANDALONE'}
           </span>
+          <LanguageToggle />
           <NotificationCenter />
           <SessionControl />
           <StatusPill status={backendStatus} />
@@ -57,4 +59,5 @@ function StatusPill({ status }) {
     </span>
   );
 }
+
 
