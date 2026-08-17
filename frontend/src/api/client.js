@@ -3,10 +3,10 @@ import { CABLES } from '../data/cables';
 import { VERTICALS } from '../data/verticals';
 
 // URL del mini-backend. Si no responde en BACKEND_TIMEOUT_MS, el cliente
-// cae automáticamente al motor de cálculo local (misma lógica, corre en
-// el navegador) — así la demo funciona igual de bien standalone (sin
-// backend corriendo, ej. abierta desde un build estático en una laptop
-// sin internet) que conectada a un backend real.
+// automatically falls back to the local calculation engine (same logic, running in
+// el navegador) — ayes la demo funciona igual de bien standalone (sin
+// a running backend, for example from a static build on a laptop
+// without internet, as well as when connected to a real backend.
 const CONFIGURED_BACKEND_URL = String(import.meta.env.VITE_BACKEND_URL || '').trim();
 const BACKEND_URL = CONFIGURED_BACKEND_URL || 'http://localhost:4000';
 const BACKEND_REQUIRED = String(import.meta.env.VITE_BACKEND_REQUIRED || 'false').toLowerCase() === 'true';
@@ -130,7 +130,7 @@ export async function simulateRupture(cableId, severity, durationHours) {
     return { ...data, source: 'backend' };
   } catch (error) {
     setBackendStatus('offline');
-    // Fallback: mismo cálculo, ejecutado localmente en el navegador
+    // Fallback: same calculation, executed locally in the browser
     const data = computeImpact(cableId, severity, durationHours);
     return { ...localFallback(data, error), source: 'local' };
   }
@@ -241,7 +241,7 @@ export async function getModels() {
 }
 
 export async function getModelProfiles({ vertical = '', region = 'global' } = {}) {
-  try { return await fetchWithTimeout(`${BACKEND_URL}/api/models/profiles?vertical=${encodeURIComponent(vertical)}&region=${encodeURIComponent(region)}`); } catch (error) { return localFallback({ selection: { vertical, region }, region: { label: region === 'global' ? 'Global' : region, operatingContext: 'Contexto local standalone sin conexión' }, vertical: { label: vertical, decisionLenses: [] }, dataNeeds: [], readiness: { productionReady: false }, error: error.message }, error); }
+  try { return await fetchWithTimeout(`${BACKEND_URL}/api/models/profiles?vertical=${encodeURIComponent(vertical)}&region=${encodeURIComponent(region)}`); } catch (error) { return localFallback({ selection: { vertical, region }, region: { label: region === 'global' ? 'Global' : region, operatingContext: 'Local standalone context without connectivity' }, vertical: { label: vertical, decisionLenses: [] }, dataNeeds: [], readiness: { productionReady: false }, error: error.message }, error); }
 }
 
 export async function buildPilotValueCase(input) {
@@ -682,7 +682,7 @@ export async function getImpactGraph(filters = {}) {
     const query = new URLSearchParams(Object.entries(filters).filter(([, value]) => value));
     return await fetchWithTimeout(`${BACKEND_URL}/api/graph${query.toString() ? `?${query}` : ''}`);
   } catch (error) {
-    return localFallback({ nodes: [], edges: [], counts: {}, error: error.message, disclaimer: 'Grafo no disponible sin backend.' }, error);
+    return localFallback({ nodes: [], edges: [], counts: {}, error: error.message, disclaimer: 'Grafo unavailable sin backend.' }, error);
   }
 }
 
@@ -710,3 +710,6 @@ export async function updateActionPlan(id, patch) {
 export async function recordActionPlanOutcome(id, input) {
   return fetchWithTimeout(`${BACKEND_URL}/api/action-plans/${encodeURIComponent(id)}/outcome`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(input) });
 }
+
+
+

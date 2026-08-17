@@ -1,19 +1,19 @@
 // Base de datos de cables submarinos de internet — rutas simplificadas
-// (waypoints aproximados para visualización, no coordenadas de cable exactas).
-// Fuente conceptual: TeleGeography Submarine Cable Map (rutas públicas conocidas).
-// Los pesos de correlación de impacto son heurísticas ilustrativas del modelo,
+// Simplified waypoints for visualization, not exact cable coordinates.
+// Conceptual source: TeleGeography Submarine Cable Map and known public routes.
+// Impact-correlation weights are illustrative model heuristics,
 // no mediciones certificadas.
 
 export const CHOKEPOINTS = {
-  ormuz: { label: 'Estrecho de Ormuz', lon: 56.3, lat: 26.6, globalShare: '21% petróleo marítimo' },
-  suez: { label: 'Canal de Suez', lon: 32.5, lat: 30.6, globalShare: '12% comercio marítimo global' },
-  malaca: { label: 'Estrecho de Malaca', lon: 100.5, lat: 2.8, globalShare: '25% comercio marítimo global' },
-  bab: { label: 'Bab-el-Mandeb', lon: 43.3, lat: 12.6, globalShare: '9% petróleo marítimo' },
+  ormuz: { label: 'Strait of Hormuz', lon: 56.3, lat: 26.6, globalShare: '21% seaborne oil' },
+  suez: { label: 'Suez Canal', lon: 32.5, lat: 30.6, globalShare: '12% global seaborne trade' },
+  malaca: { label: 'Strait of Malacca', lon: 100.5, lat: 2.8, globalShare: '25% global seaborne trade' },
+  bab: { label: 'Bab-el-Mandeb', lon: 43.3, lat: 12.6, globalShare: '9% seaborne oil' },
 };
 
-// Pesos de correlación directa (0–1) por vertical, cuando un cable pasa por
-// una zona de alta exposición a esa industria. El resto de las verticales
-// reciben un "impacto sistémico base" definido en impactEngine.js
+// Direct correlation weights (0-1) by vertical when a cable crosses
+// a high-exposure zone for that industry. Remaining verticals
+// receive the baseline systemic impact defined in impactEngine.js
 const HEAVY_ENERGY = { petroleo: 0.85, lng: 0.8, gas: 0.7, petroquimica: 0.6 };
 const HEAVY_TECH = { semiconductores: 0.75, electricidad: 0.3 };
 const HEAVY_METALS = { cobre: 0.7, litio: 0.55, niquel: 0.5, cobalto: 0.4, acero: 0.4 };
@@ -23,7 +23,7 @@ export const CABLES = [
   {
     id: 'seamewe3',
     name: 'SEA-ME-WE 3',
-    route: 'Sudeste Asiático → Medio Oriente → Europa Occidental',
+    route: 'Southeast Asia → Middle East → Western Europe',
     chokepoints: ['malaca', 'ormuz', 'suez'],
     waypoints: [
       [103.8, 1.3], [100.5, 2.8], [80.0, 6.0], [56.3, 26.6],
@@ -36,7 +36,7 @@ export const CABLES = [
   {
     id: '2africa',
     name: '2Africa',
-    route: 'Circunvala África → Mar Rojo → Europa',
+    route: 'Africa circumnavigation → Red Sea → Europe',
     chokepoints: ['bab', 'suez'],
     waypoints: [
       [18.4, -33.9], [39.2, -6.8], [43.3, 12.6], [32.5, 30.6], [23.7, 37.9], [-9.1, 38.7],
@@ -48,7 +48,7 @@ export const CABLES = [
   {
     id: 'fea',
     name: 'FLAG Europe-Asia',
-    route: 'Reino Unido → Medio Oriente → Asia',
+    route: 'United Kingdom → Middle East → Asia',
     chokepoints: ['suez', 'ormuz'],
     waypoints: [
       [-3.5, 50.7], [9.1, 45.4], [23.7, 37.9], [32.5, 30.6], [43.3, 12.6], [56.3, 26.6], [72.8, 18.9], [103.8, 1.3],
@@ -60,7 +60,7 @@ export const CABLES = [
   {
     id: 'aae1',
     name: 'AAE-1',
-    route: 'Asia → África → Europa (vía Egipto)',
+    route: 'Asia → Africa → Europe (via Egypt)',
     chokepoints: ['suez', 'malaca'],
     waypoints: [
       [103.8, 1.3], [80.0, 6.0], [43.3, 12.6], [32.5, 30.6], [23.7, 37.9], [2.3, 41.4],
@@ -72,7 +72,7 @@ export const CABLES = [
   {
     id: 'ajc',
     name: 'Australia-Japan Cable',
-    route: 'Australia → Japón',
+    route: 'Australia → Japan',
     chokepoints: [],
     waypoints: [
       [151.2, -33.9], [153.0, -10.0], [140.0, 15.0], [139.7, 35.7],
@@ -84,7 +84,7 @@ export const CABLES = [
   {
     id: 'aag',
     name: 'Asia-America Gateway',
-    route: 'Sudeste Asiático → Estados Unidos',
+    route: 'Southeast Asia → United States',
     chokepoints: ['malaca'],
     waypoints: [
       [100.5, 2.8], [113.9, 22.3], [121.5, 25.0], [145.0, 20.0], [-157.8, 21.3], [-122.4, 37.7],
@@ -96,7 +96,7 @@ export const CABLES = [
   {
     id: 'marea',
     name: 'MAREA',
-    route: 'Estados Unidos → España',
+    route: 'United States → Spain',
     chokepoints: [],
     waypoints: [
       [-73.9, 40.7], [-45.0, 45.0], [-9.1, 38.7],
@@ -108,7 +108,7 @@ export const CABLES = [
   {
     id: 'tat14',
     name: 'TAT-14',
-    route: 'Estados Unidos → Europa (Atlántico Norte)',
+    route: 'United States → Europe (North Atlantic)',
     chokepoints: [],
     waypoints: [
       [-70.0, 41.5], [-30.0, 48.0], [-1.5, 50.0], [8.5, 53.5],
@@ -120,7 +120,7 @@ export const CABLES = [
   {
     id: 'hawaiki',
     name: 'Hawaiki',
-    route: 'Australia/Nueva Zelanda → Estados Unidos',
+    route: 'Australia/New Zealand → United States',
     chokepoints: [],
     waypoints: [
       [174.8, -36.9], [-150.0, -5.0], [-122.4, 37.7],
@@ -132,7 +132,7 @@ export const CABLES = [
   {
     id: 'eig',
     name: 'Europe India Gateway',
-    route: 'Reino Unido → Egipto → India',
+    route: 'United Kingdom → Egypt → India',
     chokepoints: ['suez'],
     waypoints: [
       [-3.5, 50.7], [-9.1, 38.7], [23.7, 37.9], [32.5, 30.6], [43.3, 12.6], [72.8, 18.9],
@@ -144,7 +144,7 @@ export const CABLES = [
   {
     id: 'curie',
     name: 'Curie',
-    route: 'Chile → Estados Unidos (Pacífico)',
+    route: 'Chile → United States (Pacific)',
     chokepoints: [],
     waypoints: [
       [-70.6, -33.4], [-90.0, -10.0], [-122.4, 37.7],
@@ -156,7 +156,7 @@ export const CABLES = [
   {
     id: 'sjc2',
     name: 'SJC2',
-    route: 'Japón → Sudeste Asiático',
+    route: 'Japan → Southeast Asia',
     chokepoints: ['malaca'],
     waypoints: [
       [139.7, 35.7], [121.5, 25.0], [113.9, 22.3], [103.8, 1.3],
@@ -167,8 +167,8 @@ export const CABLES = [
   },
   {
     id: 'suez',
-    name: 'Canal de Suez (Bloqueo Completo)',
-    route: 'Canal de Suez (Tránsito Marítimo Bloqueado)',
+    name: 'Suez Canal (Full Blockade)',
+    route: 'Suez Canal (Maritime Transit Blocked)',
     chokepoints: ['suez'],
     waypoints: [
       [32.2, 29.5], [32.5, 30.6], [32.3, 31.5]
@@ -179,8 +179,8 @@ export const CABLES = [
   },
   {
     id: 'ormuz',
-    name: 'Estrecho de Ormuz (Bloqueo Completo)',
-    route: 'Estrecho de Ormuz (Tránsito Marítimo Bloqueado)',
+    name: 'Strait of Hormuz (Full Blockade)',
+    route: 'Strait of Hormuz (Maritime Transit Blocked)',
     chokepoints: ['ormuz'],
     waypoints: [
       [55.8, 25.8], [56.3, 26.6], [56.8, 27.2]
@@ -191,8 +191,8 @@ export const CABLES = [
   },
   {
     id: 'malaca',
-    name: 'Estrecho de Malaca (Bloqueo Completo)',
-    route: 'Estrecho de Malaca (Tránsito Marítimo Bloqueado)',
+    name: 'Strait of Malacca (Full Blockade)',
+    route: 'Strait of Malacca (Maritime Transit Blocked)',
     chokepoints: ['malaca'],
     waypoints: [
       [99.8, 2.0], [100.5, 2.8], [101.2, 3.5]
@@ -203,8 +203,8 @@ export const CABLES = [
   },
   {
     id: 'bab',
-    name: 'Bab-el-Mandeb (Bloqueo Completo)',
-    route: 'Estrecho de Bab-el-Mandeb (Tránsito Marítimo Bloqueado)',
+    name: 'Bab-el-Mandeb (Full Blockade)',
+    route: 'Bab-el-Mandeb Strait (Maritime Transit Blocked)',
     chokepoints: ['bab'],
     waypoints: [
       [42.8, 12.0], [43.3, 12.6], [43.8, 13.2]
@@ -216,3 +216,6 @@ export const CABLES = [
 ];
 
 export const CABLE_MAP = Object.fromEntries(CABLES.map(c => [c.id, c]));
+
+
+

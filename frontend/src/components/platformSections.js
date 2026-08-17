@@ -2,9 +2,11 @@ import { Activity, ClipboardList, FileText, FlaskConical, LayoutDashboard, Netwo
 
 export const SECTIONS = [
   { id: 'command-center', label: 'Command Center', icon: LayoutDashboard },
-  { id: 'network', label: 'Red & Exposición', icon: Network },
+  { id: 'network', label: 'Red & Exposure', icon: Network },
   { id: 'scenario-lab', label: 'Scenario Lab', icon: FlaskConical },
-  { id: 'cases', label: 'Casos', icon: ClipboardList },
+  { id: 'cases', label: 'Cases', icon: ClipboardList },
   { id: 'brief', label: 'Executive Brief', icon: FileText },
   { id: 'operations', label: 'Operaciones', icon: Activity },
 ];
+
+

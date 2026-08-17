@@ -4,10 +4,10 @@ import { useAppStore } from '../store/useAppStore';
 const DURATIONS = [6, 12, 24, 48, 72];
 
 const GEOPOLITICAL_SCENARIOS = [
-  { id: 'suez', name: 'Bloqueo del Canal de Suez', desc: 'Disrupción total de comercio y logística intercontinental.', duration: 72, severity: 'total' },
-  { id: 'ormuz', name: 'Bloqueo del Estrecho de Ormuz', desc: 'Crisis de suministro energético físico global.', duration: 48, severity: 'total' },
-  { id: 'malaca', name: 'Cierre del Estrecho de Malaca', desc: 'Cuello de botella digital y físico para tecnología.', duration: 24, severity: 'total' },
-  { id: 'bab', name: 'Disrupción en Bab-el-Mandeb', desc: 'Inestabilidad que impacta rutas de metales y crudo.', duration: 72, severity: 'parcial' },
+  { id: 'suez', name: 'Suez Canal blockade', desc: 'Total disruption of intercontinental trade and logistics.', duration: 72, severity: 'total' },
+  { id: 'ormuz', name: 'Strait of Hormuz blockade', desc: 'Global physical energy supply crisis.', duration: 48, severity: 'total' },
+  { id: 'malaca', name: 'Strait of Malacca closure', desc: 'Digital and physical bottleneck for technology.', duration: 24, severity: 'total' },
+  { id: 'bab', name: 'Bab-el-Mandeb disruption', desc: 'Instability affecting metals and crude routes.', duration: 72, severity: 'parcial' },
 ];
 
 export default function ScenarioBuilder() {
@@ -30,9 +30,9 @@ export default function ScenarioBuilder() {
     return (
       <div className="bg-panel border border-line rounded-lg p-4 flex flex-col gap-3 h-full justify-between">
         <div>
-          <div className="font-mono text-[10px] uppercase tracking-widest text-ink-dim mb-1">Escenarios Rápidos</div>
-          <h3 className="font-display font-semibold text-ink text-sm">Biblioteca de Estrés Geopolítico</h3>
-          <p className="text-[11px] text-ink-muted mt-1">Selecciona una plantilla o haz clic en el mapa para simular:</p>
+          <div className="font-mono text-[10px] uppercase tracking-widest text-ink-dim mb-1">Quick Scenarios</div>
+          <h3 className="font-display font-semibold text-ink text-sm">Geopolitical Stress Library</h3>
+          <p className="text-[11px] text-ink-muted mt-1">Select a template or click the map to simulate:</p>
         </div>
         <div className="flex flex-col gap-2 overflow-y-auto max-h-[220px]">
           {GEOPOLITICAL_SCENARIOS.map((sc) => (
@@ -55,7 +55,7 @@ export default function ScenarioBuilder() {
           ))}
         </div>
         <div className="border-t border-line/60 pt-2 text-center">
-          <p className="text-[9px] text-ink-dim font-mono">Monitoreo activo de 4 chokepoints marítimos.</p>
+          <p className="text-[9px] text-ink-dim font-mono">Active monitoring of 4 maritime chokepoints.</p>
         </div>
       </div>
     );
@@ -65,7 +65,7 @@ export default function ScenarioBuilder() {
     <div className="bg-panel border border-line rounded-lg p-4 flex flex-col gap-4">
       <div className="flex justify-between items-start gap-2">
         <div>
-          <div className="font-mono text-[10px] uppercase tracking-widest text-ink-dim mb-1">Escenario</div>
+          <div className="font-mono text-[10px] uppercase tracking-widest text-ink-dim mb-1">Scenario</div>
           <div className="font-display font-semibold text-ink text-lg leading-tight">{cable.name}</div>
           <div className="text-xs text-ink-muted mt-0.5">{cable.route}</div>
         </div>
@@ -78,7 +78,7 @@ export default function ScenarioBuilder() {
       </div>
 
       <div>
-        <div className="font-mono text-[10px] uppercase tracking-widest text-ink-dim mb-1.5">Severidad</div>
+        <div className="font-mono text-[10px] uppercase tracking-widest text-ink-dim mb-1.5">Severity</div>
         <div className="grid grid-cols-2 gap-1.5">
           {['parcial', 'total'].map((s) => (
             <button
@@ -90,7 +90,7 @@ export default function ScenarioBuilder() {
                   : 'bg-void border-line text-ink-muted hover:border-ink-dim'
               }`}
             >
-              {s === 'parcial' ? 'Corte parcial' : 'Corte total'}
+              {s === 'parcial' ? 'Partial outage' : 'Total outage'}
             </button>
           ))}
         </div>
@@ -98,7 +98,7 @@ export default function ScenarioBuilder() {
 
       <div>
         <div className="font-mono text-[10px] uppercase tracking-widest text-ink-dim mb-1.5">
-          Duración: <span className="text-ink">{durationHours}h</span>
+          Duration: <span className="text-ink">{durationHours}h</span>
         </div>
         <div className="grid grid-cols-5 gap-1.5">
           {DURATIONS.map((d) => (
@@ -120,12 +120,12 @@ export default function ScenarioBuilder() {
       <button
         onClick={runSimulation}
         disabled={isSimulating || !canOperate}
-        title={!canOperate ? 'No tienes permisos para simular rupturas' : ''}
+        title={!canOperate ? 'You do not have permission to simulate disruptions' : ''}
         className="mt-1 flex items-center justify-center gap-2 bg-alert text-void font-semibold text-sm py-2.5 rounded hover:bg-alert-glow transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {isSimulating ? (
           <>
-            <Loader2 size={15} className="animate-spin" /> Calculando...
+            <Loader2 size={15} className="animate-spin" /> Calculating...
           </>
         ) : (
           <>
@@ -141,3 +141,6 @@ export default function ScenarioBuilder() {
     </div>
   );
 }
+
+
+

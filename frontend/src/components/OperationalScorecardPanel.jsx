@@ -15,18 +15,23 @@ export default function OperationalScorecardPanel() {
   const sourceReadiness = product.sources?.readinessRate;
   const timing = scorecard.timing || {};
   return <div className="bg-panel border border-line rounded-lg p-4">
-    <div className="flex items-start justify-between gap-3"><div><div className="font-mono text-[10px] uppercase tracking-widest text-signal">Operational scorecard</div><h2 className="font-display text-lg font-semibold text-ink mt-1">Métricas del plan maestro</h2></div><span className="font-mono text-[10px] text-ink-dim">LOCAL</span></div>
-    <p className="text-xs text-ink-muted mt-2">Muestra qué métricas tienen evidencia local y cuáles permanecen pendientes del piloto.</p>
-    <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-2 mt-3"><Metric label="Alertas" value={product.alerts?.total || 0} /><Metric label="Cobertura" value={coverage === null ? '—' : `${Math.round((coverage || 0) * 100)}%`} /><Metric label="Casos" value={product.cases?.total || 0} /><Metric label="Cierre" value={closure === null ? '—' : `${Math.round((closure || 0) * 100)}%`} /><Metric label="Acciones" value={product.actions?.completed || 0} /><Metric label="Fuentes OK" value={sourceReadiness === null ? '—' : `${Math.round((sourceReadiness || 0) * 100)}%`} /><Metric label="DLQ" value={product.deadLetters?.unresolved || 0} /><Metric label="Incidentes" value={product.incidents?.open || 0} /></div>
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-3 text-xs"><div className="border border-line rounded p-3 text-ink-muted">Error modelo local: <span className="text-ink">{scorecard.models?.meanAbsoluteErrorUsd === null ? 'sin fixtures suficientes' : formatUsd(scorecard.models.meanAbsoluteErrorUsd)}</span></div><div className="border border-line rounded p-3 text-ink-muted">Pérdida evitada documentada: <span className="text-ink">{formatUsd(scorecard.business?.avoidedLossDocumentedUsd || 0)}</span></div><div className="border border-line rounded p-3 text-ink-muted">Tiempo a decisión: <span className="text-ink">{formatMinutes(timing.timeToDecisionMinutes)}</span><span className="block text-[10px] text-ink-dim mt-1">{timing.decisionsObserved || 0} aprobaciones observadas; detección y explicación requieren timestamps externos.</span></div></div>
+    <div className="flex items-start justify-between gap-3"><div><div className="font-mono text-[10px] uppercase tracking-widest text-signal">Operational scorecard</div><h2 className="font-display text-lg font-semibold text-ink mt-1">Master Plan Metrics</h2></div><span className="font-mono text-[10px] text-ink-dim">LOCAL</span></div>
+    <p className="text-xs text-ink-muted mt-2">Shows which metrics have local evidence and which remain pending for the pilot.</p>
+    <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-2 mt-3"><Metric label="Alertas" value={product.alerts?.total || 0} /><Metric label="Cobertura" value={coverage === null ? '—' : `${Math.round((coverage || 0) * 100)}%`} /><Metric label="Cases" value={product.cases?.total || 0} /><Metric label="Cierre" value={closure === null ? '—' : `${Math.round((closure || 0) * 100)}%`} /><Metric label="Actions" value={product.actions?.completed || 0} /><Metric label="Sources OK" value={sourceReadiness === null ? '—' : `${Math.round((sourceReadiness || 0) * 100)}%`} /><Metric label="DLQ" value={product.deadLetters?.unresolved || 0} /><Metric label="Incidentes" value={product.incidents?.open || 0} /></div>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-3 text-xs"><div className="border border-line rounded p-3 text-ink-muted">Local model error: <span className="text-ink">{scorecard.models?.meanAbsoluteErrorUsd === null ? 'insufficient fixtures' : formatUsd(scorecard.models.meanAbsoluteErrorUsd)}</span></div><div className="border border-line rounded p-3 text-ink-muted">Documented avoided loss: <span className="text-ink">{formatUsd(scorecard.business?.avoidedLossDocumentedUsd || 0)}</span></div><div className="border border-line rounded p-3 text-ink-muted">Time to decision: <span className="text-ink">{formatMinutes(timing.timeToDecisionMinutes)}</span><span className="block text-[10px] text-ink-dim mt-1">{timing.decisionsObserved || 0} observed approvals; detection and explanation require external timestamps.</span></div></div>
     <div className="mt-3 border border-line rounded p-3">
-      <div className="font-mono text-[9px] uppercase tracking-widest text-ink-dim">Latencia con evidencia</div>
+      <div className="font-mono text-[9px] uppercase tracking-widest text-ink-dim">Latencia con evidence</div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2">
-        <Metric label="Tiempo a detección" value={formatMinutes(timing.timeToDetectionMinutes)} />
-        <Metric label="Tiempo a explicación" value={formatMinutes(timing.timeToExplanationMinutes)} />
-        <Metric label="Tiempo a decisión" value={formatMinutes(timing.timeToDecisionMinutes)} />
+        <Metric label="Time to detection" value={formatMinutes(timing.timeToDetectionMinutes)} />
+        <Metric label="Time to explanation" value={formatMinutes(timing.timeToExplanationMinutes)} />
+        <Metric label="Time to decision" value={formatMinutes(timing.timeToDecisionMinutes)} />
       </div>
-      <p className="text-[10px] text-ink-dim mt-2">{timing.note || 'Sólo se muestran intervalos con timestamps comparables.'}</p>
+      <p className="text-[10px] text-ink-dim mt-2">{timing.note || 'Only intervals with comparable timestamps are shown.'}</p>
     </div>
   </div>;
 }
+
+
+
+
+
