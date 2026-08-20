@@ -383,6 +383,7 @@ const PARTIAL_ES = [
 ];
 
 const ATTRIBUTES = ['placeholder', 'aria-label', 'title'];
+const SKIP_TAGS = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'SVG', 'CANVAS', 'PATH', 'G', 'LINE', 'POLYLINE', 'POLYGON', 'CIRCLE', 'RECT', 'ELLIPSE', 'DEFS', 'CLIPPATH', 'MASK', 'FILTER', 'PATTERN', 'TEXT']);
 
 function translateText(value) {
   if (!value || !value.trim()) return value;
@@ -394,50 +395,97 @@ function translateText(value) {
   if (!translated) {
     translated = core;
     const entries = Object.entries(EXACT_ES).sort((a, b) => b[0].length - a[0].length);
-    for (const [source, target] of entries) translated = translated.split(source).join(target);
-    for (const [source, target] of PARTIAL_ES) translated = translated.split(source).join(target);
+    for (const [source, target] of entries) {
+      if (translated.includes(source)) translated = translated.split(source).join(target);
+    }
+    for (const [source, target] of PARTIAL_ES) {
+      if (translated.includes(source)) translated = translated.split(source).join(target);
+    }
   }
 
   return `${leading}${translated}${trailing}`;
 }
 
-function translateNode(node) {
-  if (node.nodeType === Node.TEXT_NODE) {
-    const next = translateText(node.nodeValue);
-    if (next !== node.nodeValue) node.nodeValue = next;
+function shouldSkipElement(element) {
+  return SKIP_TAGS.has(element.tagName) || Boolean(element.closest('[data-i18n-skip], svg, canvas'));
+}
+
+function translateTextNode(node) {
+  const parent = node.parentElement;
+  if (!parent || shouldSkipElement(parent)) return;
+  const next = translateText(node.nodeValue);
+  if (next !== node.nodeValue) node.nodeValue = next;
+}
+
+function translateElementAttributes(element) {
+  if (shouldSkipElement(element)) return;
+  for (const attr of ATTRIBUTES) {
+    if (!element.hasAttribute(attr)) continue;
+    const current = element.getAttribute(attr);
+    const next = translateText(current);
+    if (next !== current) element.setAttribute(attr, next);
+  }
+}
+
+function translateTree(root) {
+  if (!root) return;
+
+  if (root.nodeType === Node.TEXT_NODE) {
+    translateTextNode(root);
     return;
   }
 
-  if (node.nodeType !== Node.ELEMENT_NODE) return;
-  if (node.closest('[data-i18n-skip]')) return;
+  if (root.nodeType !== Node.ELEMENT_NODE || shouldSkipElement(root)) return;
 
-  for (const attr of ATTRIBUTES) {
-    if (node.hasAttribute(attr)) {
-      const current = node.getAttribute(attr);
-      const next = translateText(current);
-      if (next !== current) node.setAttribute(attr, next);
-    }
+  translateElementAttributes(root);
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      if (node.nodeType === Node.ELEMENT_NODE && shouldSkipElement(node)) return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    },
+  });
+
+  while (walker.nextNode()) {
+    const node = walker.currentNode;
+    if (node.nodeType === Node.TEXT_NODE) translateTextNode(node);
+    else translateElementAttributes(node);
   }
-
-  for (const child of node.childNodes) translateNode(child);
 }
 
 export function applySpanishTranslation(root = document.body) {
-  translateNode(root);
+  translateTree(root);
 }
 
 export function installSpanishTranslator() {
   document.documentElement.lang = 'es';
   applySpanishTranslation();
-  const observer = new MutationObserver((mutations) => {
+
+  const pending = new Set();
+  let frame = 0;
+  let observer;
+
+  const flush = () => {
+    frame = 0;
+    observer.disconnect();
+    for (const node of pending) translateTree(node);
+    pending.clear();
+    observer.observe(document.body, { childList: true, subtree: true });
+  };
+
+  observer = new MutationObserver((mutations) => {
     for (const mutation of mutations) {
-      if (mutation.type === 'characterData') translateNode(mutation.target);
-      for (const node of mutation.addedNodes) translateNode(node);
-      if (mutation.type === 'attributes') translateNode(mutation.target);
+      for (const node of mutation.addedNodes) {
+        if (node.nodeType === Node.ELEMENT_NODE && shouldSkipElement(node)) continue;
+        pending.add(node);
+      }
     }
+    if (pending.size && !frame) frame = requestAnimationFrame(flush);
   });
-  observer.observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ATTRIBUTES });
-  return () => observer.disconnect();
+
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  return () => {
+    if (frame) cancelAnimationFrame(frame);
+    observer.disconnect();
+  };
 }
-
-
