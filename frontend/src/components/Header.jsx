@@ -26,6 +26,12 @@ export default function Header() {
               Systemic Risk Intelligence & Critical Infrastructure
             </p>
           </div>
+          <span
+            className="hidden sm:inline-flex items-center font-mono text-[9px] uppercase tracking-widest border border-alert/40 text-alert bg-alert/10 rounded-full px-2.5 py-1"
+            title="Los flujos, correlaciones y rutas mostradas son datos ilustrativos de orden de magnitud, no un feed de mercado en vivo. Ver docs/LIMITACIONES.md."
+          >
+            Demo · Datos ilustrativos
+          </span>
         </div>
 
         <div className="flex items-center gap-3">

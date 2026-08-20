@@ -2,6 +2,8 @@ import { useMemo, useState } from 'react';
 import { generateWorldDots, getContinentPaths, project } from '../utils/worldDots';
 import { useAppStore } from '../store/useAppStore';
 import { CHOKEPOINTS } from '../data/cables';
+import { MARITIME_ROUTES } from '../data/maritimeRoutes';
+import { AIR_CARGO_ROUTES, RAIL_FREIGHT_ROUTES } from '../data/cargoRoutes';
 
 const WIDTH = 960;
 const HEIGHT = 480;
@@ -65,11 +67,15 @@ export default function WorldMap() {
   const [hoveredCableId, setHoveredCableId] = useState(null);
   const [hoveredChokepointId, setHoveredChokepointId] = useState(null);
   const [hoveredPipelineId, setHoveredPipelineId] = useState(null);
+  const [hoveredRouteId, setHoveredRouteId] = useState(null);
+  const [hoveredCargoRouteId, setHoveredCargoRouteId] = useState(null);
 
   // Dynamic map-layer controls
   const [showFlowAnimation, setShowFlowAnimation] = useState(true);
   const [showPipelines, setShowPipelines] = useState(true);
   const [showRadar, setShowRadar] = useState(true);
+  const [showMaritimeRoutes, setShowMaritimeRoutes] = useState(true);
+  const [showCargoRoutes, setShowCargoRoutes] = useState(false);
 
   const dots = useMemo(() => generateWorldDots(1.8).map((d) => project(d, WIDTH, HEIGHT)), []);
   const continentPaths = useMemo(() => getContinentPaths(WIDTH, HEIGHT), []);
@@ -130,6 +136,22 @@ export default function WorldMap() {
         >
           <span className={`w-1.5 h-1.5 rounded-full ${showRadar ? 'bg-sky-400' : 'bg-ink-dim'}`} />
           🛰️ Radar
+        </button>
+        <button
+          onClick={() => setShowMaritimeRoutes(!showMaritimeRoutes)}
+          className={`flex items-center gap-1.5 px-2 py-1 rounded transition-colors ${showMaritimeRoutes ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40' : 'text-ink-muted hover:text-ink'}`}
+          title="Show/hide real maritime trade routes and simulated vessel traffic"
+        >
+          <span className={`w-1.5 h-1.5 rounded-full ${showMaritimeRoutes ? 'bg-cyan-300' : 'bg-ink-dim'}`} />
+          🚢 Rutas marítimas
+        </button>
+        <button
+          onClick={() => setShowCargoRoutes(!showCargoRoutes)}
+          className={`flex items-center gap-1.5 px-2 py-1 rounded transition-colors ${showCargoRoutes ? 'bg-violet-500/20 text-violet-300 border border-violet-500/40' : 'text-ink-muted hover:text-ink'}`}
+          title="Show/hide air cargo and rail freight corridors (simulated, real-world lanes)"
+        >
+          <span className={`w-1.5 h-1.5 rounded-full ${showCargoRoutes ? 'bg-violet-300' : 'bg-ink-dim'}`} />
+          ✈️🚆 Aire / Ferrocarril
         </button>
       </div>
 
@@ -315,6 +337,183 @@ export default function WorldMap() {
                     textAnchor="middle"
                   >
                     {pipeline.category} · Capacidad: {pipeline.capacity}
+                  </text>
+                </g>
+              )}
+            </g>
+          );
+        })}
+
+        {/* Rutas marítimas comerciales reales + tráfico de buques simulado */}
+        {showMaritimeRoutes && MARITIME_ROUTES.map((route) => {
+          const points = route.waypoints.map((wp) => project(wp, WIDTH, HEIGHT));
+          const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p[0]} ${p[1]}`).join(' ');
+          const hovered = hoveredRouteId === route.id;
+          const mid = points[Math.floor(points.length / 2)];
+
+          return (
+            <g key={route.id}>
+              <path
+                d={pathD}
+                fill="none"
+                stroke="transparent"
+                strokeWidth="9"
+                className="cursor-pointer"
+                onMouseEnter={() => setHoveredRouteId(route.id)}
+                onMouseLeave={() => setHoveredRouteId(null)}
+              />
+              <path
+                d={pathD}
+                fill="none"
+                stroke={route.color}
+                strokeWidth={hovered ? 1.8 : 1}
+                strokeOpacity={hovered ? 0.9 : 0.35}
+                strokeDasharray="1 3"
+                strokeLinecap="round"
+                filter={hovered ? 'url(#glow)' : undefined}
+                style={{ transition: 'all 0.3s' }}
+              />
+
+              {/* Buques simulados navegando la ruta (no es tracking en vivo) */}
+              {showFlowAnimation && Array.from({ length: route.shipCount }).map((_, shipIdx) => (
+                <path
+                  key={shipIdx}
+                  d="M -3 -2 L 3 0 L -3 2 Z"
+                  fill={route.color}
+                  opacity={hovered ? 1 : 0.85}
+                  filter={hovered ? 'url(#glow)' : undefined}
+                >
+                  <animateMotion
+                    dur={`${18 + shipIdx * 5}s`}
+                    begin={`${shipIdx * (18 / route.shipCount)}s`}
+                    repeatCount="indefinite"
+                    rotate="auto"
+                    path={pathD}
+                  />
+                </path>
+              ))}
+
+              {hovered && (
+                <g className="pointer-events-none" style={{ zIndex: 90 }}>
+                  <rect
+                    x={mid[0] - 75}
+                    y={mid[1] - 30}
+                    width="150"
+                    height="26"
+                    fill="#0A1120"
+                    stroke={route.color}
+                    strokeWidth="0.5"
+                    rx="3"
+                    opacity="0.95"
+                  />
+                  <text
+                    x={mid[0]}
+                    y={mid[1] - 19}
+                    fill="#E7ECF5"
+                    fontSize="7.5"
+                    fontWeight="bold"
+                    fontFamily="monospace"
+                    textAnchor="middle"
+                  >
+                    🚢 {route.name}
+                  </text>
+                  <text
+                    x={mid[0]}
+                    y={mid[1] - 10}
+                    fill={route.color}
+                    fontSize="6.5"
+                    fontFamily="monospace"
+                    textAnchor="middle"
+                  >
+                    {route.origin} → {route.destination} · {route.cargoType}
+                  </text>
+                </g>
+              )}
+            </g>
+          );
+        })}
+
+        {/* Corredores de carga aérea y ferroviaria — simulado, geometría de ruta real */}
+        {showCargoRoutes && [...AIR_CARGO_ROUTES, ...RAIL_FREIGHT_ROUTES].map((route) => {
+          const points = route.waypoints.map((wp) => project(wp, WIDTH, HEIGHT));
+          const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p[0]} ${p[1]}`).join(' ');
+          const hovered = hoveredCargoRouteId === route.id;
+          const mid = points[Math.floor(points.length / 2)];
+          const isAir = route.mode === 'air';
+
+          return (
+            <g key={route.id}>
+              <path
+                d={pathD}
+                fill="none"
+                stroke="transparent"
+                strokeWidth="9"
+                className="cursor-pointer"
+                onMouseEnter={() => setHoveredCargoRouteId(route.id)}
+                onMouseLeave={() => setHoveredCargoRouteId(null)}
+              />
+              <path
+                d={pathD}
+                fill="none"
+                stroke={route.color}
+                strokeWidth={hovered ? 1.8 : 1}
+                strokeOpacity={hovered ? 0.9 : 0.35}
+                strokeDasharray={isAir ? '0.5 5' : '5 2'}
+                strokeLinecap="round"
+                filter={hovered ? 'url(#glow)' : undefined}
+                style={{ transition: 'all 0.3s' }}
+              />
+
+              {/* Avión / tren simulado recorriendo la ruta (no es tracking en vivo) */}
+              {showFlowAnimation && (
+                <path
+                  d={isAir ? 'M -4 0 L 3 -2.5 L 1 0 L 3 2.5 Z' : 'M -3 -2.2 L 3 -2.2 L 3 2.2 L -3 2.2 Z'}
+                  fill={route.color}
+                  opacity={hovered ? 1 : 0.85}
+                  filter={hovered ? 'url(#glow)' : undefined}
+                >
+                  <animateMotion
+                    dur={isAir ? '9s' : '22s'}
+                    repeatCount="indefinite"
+                    rotate={isAir ? 'auto' : undefined}
+                    path={pathD}
+                  />
+                </path>
+              )}
+
+              {hovered && (
+                <g className="pointer-events-none" style={{ zIndex: 90 }}>
+                  <rect
+                    x={mid[0] - 78}
+                    y={mid[1] - 30}
+                    width="156"
+                    height="26"
+                    fill="#0A1120"
+                    stroke={route.color}
+                    strokeWidth="0.5"
+                    rx="3"
+                    opacity="0.95"
+                  />
+                  <text
+                    x={mid[0]}
+                    y={mid[1] - 19}
+                    fill="#E7ECF5"
+                    fontSize="7.5"
+                    fontWeight="bold"
+                    fontFamily="monospace"
+                    textAnchor="middle"
+                  >
+                    {isAir ? '✈️' : '🚆'} {route.name}
+                  </text>
+                  <text
+                    x={mid[0]}
+                    y={mid[1] - 10}
+                    fill={route.color}
+                    fontSize="6.5"
+                    fontFamily="monospace"
+                    textAnchor="middle"
+                  >
+                    {route.cargo}
                   </text>
                 </g>
               )}
@@ -610,6 +809,12 @@ export default function WorldMap() {
       {/* Dynamic legend */}
       <div className="absolute bottom-3 left-3 flex flex-wrap items-center gap-3.5 font-mono text-[10px] text-ink-muted bg-void/70 backdrop-blur px-3 py-1.5 rounded border border-line">
         <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-signal inline-block" /> Cables de fibra</span>
+        {showMaritimeRoutes && (
+          <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-cyan-300 inline-block" /> Rutas marítimas (buques simulados)</span>
+        )}
+        {showCargoRoutes && (
+          <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-violet-300 inline-block" /> Carga aérea / ferrocarril (simulado)</span>
+        )}
         {showPipelines && (
           <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-400 inline-block" /> Pipelines / Oil pipelines</span>
         )}

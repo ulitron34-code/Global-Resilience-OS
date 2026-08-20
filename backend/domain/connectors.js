@@ -3,6 +3,8 @@ const CONNECTORS = [
   { id: 'cables', name: 'Subsea cable status', sourceId: 'cables-demo', domain: 'subsea_infrastructure', status: 'adapter_placeholder', mode: 'dry_run_only', expectedEventTypes: ['cable_degradation'], requiredFields: ['externalId', 'observedAt', 'confidence', 'provenance'] },
   { id: 'ports', name: 'Port congestion', sourceId: 'ports-demo', domain: 'maritime', status: 'adapter_placeholder', mode: 'dry_run_only', expectedEventTypes: ['port_delay'], requiredFields: ['externalId', 'observedAt', 'location', 'confidence', 'provenance'] },
   { id: 'markets', name: 'Commodity and market signals', sourceId: 'prices-demo', domain: 'markets', status: 'adapter_placeholder', mode: 'dry_run_only', expectedEventTypes: ['market_move'], requiredFields: ['externalId', 'observedAt', 'confidence', 'provenance'] },
+  { id: 'air-cargo', name: 'Air cargo tracking', sourceId: 'air-cargo-demo', domain: 'aviation', status: 'adapter_placeholder', mode: 'dry_run_only', expectedEventTypes: ['air_cargo_delay', 'air_cargo_diversion'], requiredFields: ['externalId', 'observedAt', 'location', 'confidence', 'provenance'] },
+  { id: 'rail-freight', name: 'Rail freight tracking', sourceId: 'rail-freight-demo', domain: 'rail', status: 'adapter_placeholder', mode: 'dry_run_only', expectedEventTypes: ['rail_freight_delay', 'rail_border_crossing_gap'], requiredFields: ['externalId', 'observedAt', 'location', 'confidence', 'provenance'] },
 ];
 export function listConnectors() { return structuredClone(CONNECTORS); }
 export function getConnector(id) { return structuredClone(CONNECTORS.find((item) => item.id === id) || null); }
