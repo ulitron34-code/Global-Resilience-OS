@@ -1,10 +1,10 @@
-// Generador y proyectador geográfico para Global Resilience OS
-// Proporciona tanto siluetas vectoriales detalladas (continentes, México, penínsulas, islas)
-// como la matriz táctica de puntos command-center.
+// Geographic generator and projector for Global Resilience OS
+// Provides detailed vector silhouettes for continents, Mexico, peninsulas, and islands
+// plus the command-center tactical point matrix.
 
 export const DETAILED_CONTINENTS = {
-  // México y Centroamérica (detallado con Baja California y Yucatán)
-  mexicoBaja: [
+  // Mexico and Central America (detailed with Baja California and Yucatan)
+  mexicoLow: [
     [-117.0, 32.5], [-115.0, 31.0], [-112.0, 28.0], [-109.8, 23.0],
     [-110.8, 24.3], [-113.5, 29.5], [-115.8, 31.8], [-117.0, 32.5]
   ],
@@ -20,7 +20,7 @@ export const DETAILED_CONTINENTS = {
     [-78.5, 7.5], [-83.0, 8.2], [-85.5, 10.8], [-89.5, 13.2], [-92.5, 14.5]
   ],
 
-  // Norteamérica (EEUU, Canadá, Alaska)
+  // North America (US, Canada, Alaska)
   northAmericaMain: [
     [-168.0, 65.5], [-160.0, 70.5], [-140.0, 69.5], [-120.0, 69.0],
     [-95.0, 70.0], [-80.0, 62.0], [-64.0, 60.0], [-55.0, 52.0],
@@ -36,7 +36,7 @@ export const DETAILED_CONTINENTS = {
     [-84.0, 22.5], [-75.0, 20.0], [-74.0, 23.0], [-84.0, 23.0], [-84.0, 22.5]
   ],
 
-  // Sudamérica
+  // South America
   southAmerica: [
     [-77.5, 8.5], [-72.0, 12.0], [-60.0, 9.0], [-50.0, 1.5],
     [-35.0, -5.0], [-35.0, -9.0], [-41.0, -22.0], [-48.0, -28.0],
@@ -44,7 +44,7 @@ export const DETAILED_CONTINENTS = {
     [-70.0, -18.0], [-81.0, -4.0], [-79.0, 2.0], [-77.5, 8.5]
   ],
 
-  // Europa y Escandinavia
+  // Europe y Escandinavia
   europeMain: [
     [-9.5, 37.0], [-9.5, 43.5], [-1.5, 43.5], [-4.5, 48.5],
     [2.5, 51.0], [7.0, 53.5], [10.0, 57.5], [20.0, 55.0],
@@ -71,7 +71,7 @@ export const DETAILED_CONTINENTS = {
     [16.0, 38.0], [14.0, 37.0], [12.0, 42.0], [8.0, 45.5]
   ],
 
-  // África
+  // Africa
   africaMain: [
     [-17.5, 14.5], [-17.0, 21.0], [-13.0, 28.0], [-5.5, 36.0],
     [11.0, 37.5], [25.0, 32.0], [34.0, 28.0], [43.0, 12.5],
@@ -111,7 +111,7 @@ export const DETAILED_CONTINENTS = {
     [106.0, -2.0], [95.0, 5.5]
   ],
 
-  // Oceanía y Australia
+  // Oceania and Australia
   australia: [
     [113.0, -26.0], [115.0, -34.5], [130.0, -32.0], [148.0, -38.0],
     [153.5, -28.0], [142.0, -10.5], [130.0, -12.0], [122.0, -17.0],
@@ -139,7 +139,7 @@ function pointInPolygon(point, polygon) {
 }
 
 /**
- * Genera matriz de puntos tácticos que caen dentro de las geometrías de continentes.
+ * Generates a tactical point matrix constrained to continental geometries.
  */
 export function generateWorldDots(step = 2.0) {
   const dots = [];
@@ -159,7 +159,7 @@ export function generateWorldDots(step = 2.0) {
   return dots;
 }
 
-/** Proyección equirectangular simple: lon/lat -> x/y en un viewBox dado */
+/** Simple equirectangular projection: lon/lat -> x/y in a given viewBox. */
 export function project([lon, lat], width, height) {
   const x = ((lon + 180) / 360) * width;
   const y = ((90 - lat) / 180) * height;
@@ -167,7 +167,7 @@ export function project([lon, lat], width, height) {
 }
 
 /**
- * Genera strings SVG path ("M x y L x y Z") proyectados para todos los polígonos continentales.
+ * Generates projected SVG path strings ("M x y L x y Z") for every continental polygon.
  */
 export function getContinentPaths(width, height) {
   return Object.entries(DETAILED_CONTINENTS).map(([key, points]) => {
@@ -176,3 +176,6 @@ export function getContinentPaths(width, height) {
     return { id: key, d };
   });
 }
+
+
+

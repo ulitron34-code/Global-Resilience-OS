@@ -12,5 +12,6 @@ export default function ReportExport() {
     try { createScenarioPdf(result).save(`resilience-os-${result.cable.id}-${Date.now()}.pdf`); }
     catch (exportError) { setError(exportError.message); }
   };
-  return <div className="flex flex-col gap-2"><button onClick={handleExport} className="flex items-center justify-center gap-2 border border-signal/40 text-signal text-xs font-medium py-2 rounded hover:bg-signal/10 transition-colors"><FileDown size={14} />Exportar reporte PDF</button>{error && <div role="alert" className="text-[11px] text-alert">No se pudo exportar: {error}</div>}</div>;
+  return <div className="flex flex-col gap-2"><button onClick={handleExport} className="flex items-center justify-center gap-2 border border-signal/40 text-signal text-xs font-medium py-2 rounded hover:bg-signal/10 transition-colors"><FileDown size={14} />Export PDF report</button>{error && <div role="alert" className="text-[11px] text-alert">Could not export: {error}</div>}</div>;
 }
+

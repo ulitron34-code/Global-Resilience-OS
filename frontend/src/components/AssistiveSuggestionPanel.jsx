@@ -44,7 +44,7 @@ export default function AssistiveSuggestionPanel() {
       </div>
 
       <p className="text-[11px] text-ink-muted mt-2">
-        Analiza el impacto del escenario activo y propone playbooks optimizados, desvíos y mitigación logística.
+        Analyze the active scenario impact and propose optimized playbooks, reroutes, and logistics mitigation.
       </p>
 
       {!suggestion ? (
@@ -65,7 +65,7 @@ export default function AssistiveSuggestionPanel() {
       ) : (
         <div className="mt-3 border border-line rounded p-3 bg-void/40 flex flex-col gap-2.5">
           <div className="flex justify-between items-center text-[10px] font-mono border-b border-line/60 pb-1.5">
-            <span className="text-ink-muted">RECOMENDACIÓN IA</span>
+            <span className="text-ink-muted">AI RECOMMENDATION</span>
             <span className="text-signal uppercase font-bold">{suggestion.decision}</span>
           </div>
 
@@ -93,12 +93,12 @@ export default function AssistiveSuggestionPanel() {
           </div>
 
           <div className="flex justify-between items-center mt-1 pt-2 border-t border-line/60">
-            <span className="text-[9px] font-mono text-ink-dim">Integración de APIs: Deshabilitada</span>
+            <span className="text-[9px] font-mono text-ink-dim">API integration: Disabled</span>
             <button
               onClick={() => setSuggestion(null)}
               className="text-[9px] font-mono text-signal hover:underline"
             >
-              Nuevo análisis
+              New analysis
             </button>
           </div>
         </div>
@@ -112,3 +112,4 @@ export default function AssistiveSuggestionPanel() {
     </div>
   );
 }
+

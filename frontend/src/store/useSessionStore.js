@@ -14,13 +14,14 @@ export const useSessionStore = create((set) => ({
       return session.user;
     } catch (error) {
       const message = error?.code === 'BACKEND_REQUIRED'
-        ? 'Backend no disponible; no se puede iniciar sesión.'
+        ? 'Backend unavailable; sign-in is not available.'
         : error?.status === 401
-          ? 'Credenciales inválidas.'
-          : 'No se pudo validar la sesión con el backend.';
+          ? 'Credenciales invalid.'
+          : 'Could not validate the session with the backend.';
       set({ error: message, isLoading: false });
       return null;
     }
   },
   signOut: async () => { await logout().catch(() => {}); set({ user: null, error: null }); },
 }));
+
